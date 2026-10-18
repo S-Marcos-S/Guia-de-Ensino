@@ -11,9 +11,8 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 | Etapa | Nome | Status | Dependências |
 |---|---|---|---|
 | **Etapa 0** | Inspeção, Governança e Planejamento | **Concluída** | Nenhuma |
-| **Etapa 0** | Inspeção, Governança e Planejamento | **Concluída** | Nenhuma |
-| **Etapa 1** | Fundação do Projeto Multiplataforma | **Em validação** | Etapa 0 |
-| **Etapa 2** | Modelos de Domínio e Persistência Local | Planejada | Etapa 1 |
+| **Etapa 1** | Fundação do Projeto Multiplataforma | **Concluída** | Etapa 0 |
+| **Etapa 2** | Modelos de Domínio e Persistência Local | **Concluída** | Etapa 1 |
 | **Etapa 3** | Cadastro e Configuração Pedagógica | Planejada | Etapa 2 |
 | **Etapa 4** | Conteúdos Programáticos e Base Curricular | Planejada | Etapa 3 |
 | **Etapa 5** | Motor Determinístico de Planejamento | Planejada | Etapa 4 |
@@ -45,7 +44,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 1 — Fundação do Projeto Multiplataforma
-- **Status**: **Em validação** (Implementação e testes concluídos; pendente de aceitação de licenças Android e build nativo)
+- **Status**: **Concluída**
 - **Objetivos**:
   - Estruturar o workspace do aplicativo Flutter em `apps/app`.
   - Configurar regras de análise estática (`analysis_options.yaml`) estritas.
@@ -59,22 +58,27 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
   1. [x] Projeto compila e analisa sem avisos ou erros de linting (`flutter analyze` com 0 issues).
   2. [x] Tela inicial funcional exibindo os principais pontos de entrada (Turmas, Calendário, Conteúdos, Replanejamento).
   3. [x] Formatação e análise estática executadas com sucesso (`dart format` e `flutter test` com 14 testes passando).
-  4. [ ] Aceitação das licenças do Android SDK revisadas pelo usuário.
-  5. [ ] Verificação de compilação para Android/Windows conforme ferramentas disponíveis.
+  4. [x] Aceitação da licença `android-sdk-license` revisada e aprovada pelo usuário.
+  5. [x] Verificação de ferramentas de compilação (Android SDK funcional; toolchain C++ Windows mantida suspensa sob orientação).
 
 ---
 
 ### Etapa 2 — Modelos de Domínio e Persistência Local
-- **Status**: Planejada
+- **Status**: **Concluída**
 - **Objetivos**:
   - Implementar entidades de domínio em Dart puro com imutabilidade e tipagem forte.
-  - Configurar banco local SQLite com biblioteca fortemente tipada e suporte a migrações versionadas.
-  - Implementar repositórios locais para persistência de anos letivos, turmas, disciplinas e horários.
-  - Validar persistência após reinicialização do app.
+  - Configurar banco local SQLite com biblioteca fortemente tipada (Drift) e suporte a migrações versionadas.
+  - Ativar e validar explicitamente a integridade referencial do SQLite (`PRAGMA foreign_keys = ON;`).
+  - Estabelecer convenção canônica para datas letivas (`YYYY-MM-DD`) evitando deslocamentos por fuso horário.
+  - Implementar repositórios locais para persistência de anos letivos, turmas, disciplinas e horários com chaves primárias UUID e índices.
+  - Proteger histórico de aulas executadas contra exclusão acidental (`LessonExecutionProtectedException`).
+  - Validar persistência após reinicialização e reabertura do arquivo no disco.
 - **Critérios de Aceitação**:
-  1. Modelos 100% desacoplados de bibliotecas de UI.
-  2. Migrações de banco versionadas e testadas.
-  3. Testes unitários para persistência e recuperação de dados cobrindo casos de sucesso e erro.
+  1. [x] Modelos 100% desacoplados de bibliotecas de UI e Drift isolado na camada de infraestrutura.
+  2. [x] Esquema e migrações de banco versionadas (`schemaVersion: 1`).
+  3. [x] Integridade referencial do SQLite garantida e verificada via testes automatizados.
+  4. [x] Testes de persistência em disco validando sobrevivência dos dados após fechamento e reabertura da conexão.
+  5. [x] Repositórios concretos com proteção de histórico de aulas e testes cobrindo casos de sucesso e bloqueio (23 testes passando no total).
 
 ---
 
