@@ -1,0 +1,68 @@
+name: CI - Guia de Ensino
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Permissoes minimas de seguranca conforme boas praticas
+permissions:
+  contents: read
+
+jobs:
+  validate-and-build:
+    name: Validar Codigo e Compilar Android
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/app
+
+    steps:
+      - name: Checkout do Repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17 (JDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Configurar Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+
+      - name: Exibir Versao do Flutter e Diagnostico
+        run: |
+          flutter --version
+          flutter doctor -v
+
+      - name: Instalar Dependencias do Projeto
+        run: flutter pub get
+
+      - name: Verificar Formatacao de Codigo (dart format)
+        run: dart format --set-exit-if-changed .
+
+      - name: Executar Analise Estatica Estrita (flutter analyze)
+        run: flutter analyze
+
+      - name: Executar Testes Automatizados (flutter test)
+        run: flutter test
+
+      - name: Compilar APK Android em Modo Release
+        run: flutter build apk --release
+
+      - name: Salvar APK de CI como Artefato de Teste
+        uses: actions/upload-artifact@v4
+        with:
+          name: guia-de-ensino-ci-apk
+          path: apps/app/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7
+          if-no-files-found: error

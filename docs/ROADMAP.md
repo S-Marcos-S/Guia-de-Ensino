@@ -14,7 +14,8 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 | **Etapa 1** | Fundação do Projeto Multiplataforma | **Concluída** | Etapa 0 |
 | **Etapa 2** | Modelos de Domínio e Persistência Local | **Concluída** | Etapa 1 |
 | **Etapa 3** | Cadastro e Configuração Pedagógica | **Concluída** | Etapa 2 |
-| **Etapa 4** | Conteúdos Programáticos e Base Curricular | Planejada | Etapa 3 |
+| **Etapa 3.1** | Automação de Git, CI/CD e Releases | **Concluída** | Etapa 3 |
+| **Etapa 4** | Conteúdos Programáticos e Base Curricular | Planejada | Etapa 3.1 |
 | **Etapa 5** | Motor Determinístico de Planejamento | Planejada | Etapa 4 |
 | **Etapa 6** | Acompanhamento e Registro de Aulas | Planejada | Etapa 5 |
 | **Etapa 7** | Replanejamento Automático Determinístico | Planejada | Etapa 6 |
@@ -98,6 +99,23 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
   5. [x] Migração versionada do SQLite testada preservando dados pré-existentes.
   6. [x] Persistência em disco validada após fechar e reabrir o banco.
   7. [x] Testes automatizados unitários de domínio, infraestrutura e interface (41 testes passando com 0 avisos em `flutter analyze`).
+
+---
+
+### Etapa 3.1 — Automação de Git, CI/CD e Releases
+- **Status**: **Concluída**
+- **Objetivos**:
+  - Formalizar a política de Git com Conventional Commits e validações pré-commit no `GEMINI.md` e em `docs/CI_CD.md`.
+  - Criar workflow de Integração Contínua (`.github/workflows/ci.yml`) para pull requests e pushes na branch `main`.
+  - Criar workflow de Releases (`.github/workflows/release.yml`) acionado por tags `v*`.
+  - Definir arquitetura de compilação de artefatos Android (APK e AAB).
+  - Tratar de forma transparente e segura o estado da assinatura de release (limitação de keystore documentada, geração de builds de teste no CI sem vazar segredos).
+- **Critérios de Aceitação**:
+  1. [x] Regras de Git formalizadas na Seção 16 do `GEMINI.md` e detalhadas em `docs/CI_CD.md`.
+  2. [x] Workflow de CI implementado com permissões mínimas (`contents: read`), cache e validação estrita (`dart format`, `flutter analyze`, `flutter test`, `flutter build apk --release`).
+  3. [x] Workflow de Release implementado para tags `v*` com validação de formato de versão, geração de APK/AAB e publicação de release com changelog.
+  4. [x] Limitação de assinatura documentada com guia para inclusão segura de segredos via GitHub Secrets.
+  5. [x] Formatação, análise e testes executados localmente com 100% de aprovação.
 
 ---
 

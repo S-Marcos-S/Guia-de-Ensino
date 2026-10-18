@@ -1,0 +1,112 @@
+name: Release - Guia de Ensino
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Permissoes minimas necessarias para publicacao de release
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Validar, Compilar e Publicar Release
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/app
+
+    steps:
+      - name: Checkout do Repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validar Formato da Tag Semantica
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          echo "Validando tag: $TAG_NAME"
+          if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "ERRO: A tag '$TAG_NAME' nao segue o padrao semantico esperado (ex: v1.0.0 ou v0.3.1-beta.1)."
+            exit 1
+          fi
+
+      - name: Configurar Java 17 (JDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Configurar Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+
+      - name: Instalar Dependencias do Projeto
+        run: flutter pub get
+
+      - name: Verificar Formatacao de Codigo (dart format)
+        run: dart format --set-exit-if-changed .
+
+      - name: Executar Analise Estatica Estrita (flutter analyze)
+        run: flutter analyze
+
+      - name: Executar Testes Automatizados (flutter test)
+        run: flutter test
+
+      - name: Configurar Keystore de Producao (se configurada nos Secrets)
+        id: keystore_setup
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Keystore oficial detectada nos GitHub Secrets. Decodificando..."
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+            echo "is_signed=true" >> $GITHUB_OUTPUT
+          else
+            echo "AVISO: Segredos de assinatura de producao nao configurados no repositorio."
+            echo "Os artefatos serao compilados com a assinatura de teste/debug de CI."
+            echo "is_signed=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
+      - name: Compilar APK Android em Modo Release
+        run: flutter build apk --release
+
+      - name: Compilar Android App Bundle (AAB) em Modo Release
+        run: flutter build appbundle --release
+
+      - name: Preparar Artefatos Nomeados com a Versao
+        run: |
+          mkdir -p release-artifacts
+          TAG="${GITHUB_REF_NAME}"
+          cp build/app/outputs/flutter-apk/app-release.apk release-artifacts/guia-de-ensino-${TAG}.apk
+          cp build/app/outputs/bundle/release/app-release.aab release-artifacts/guia-de-ensino-${TAG}.aab
+
+      - name: Criar Release no GitHub e Anexar Artefatos
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Release ${{ github.ref_name }}"
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            apps/app/release-artifacts/guia-de-ensino-*.apk
+            apps/app/release-artifacts/guia-de-ensino-*.aab
+          body: |
+            ### Informacoes da Compilacao
+            - **Tag da Versao**: `${{ github.ref_name }}`
+            - **Commit de Origem**: `${{ github.sha }}`
+            - **Flutter SDK**: `3.47.7 (stable)`
+            - **Java**: `17 (Temurin)`
+            - **Status da Assinatura**: ${{ steps.keystore_setup.outputs.is_signed == 'true' && 'Assinado com chave oficial de producao' || 'Build de Teste / Compilado com chave de CI (nao distribuivel em producao sem assinatura oficial)' }}
+            
+            Consulte a documentacao em [docs/CI_CD.md](https://github.com/S-Marcos-S/Guia-de-Ensino/blob/main/docs/CI_CD.md) para detalhes sobre configuracao de segredos de assinatura oficial.
+
+      - name: Limpeza Segura de Arquivos Temporarios
+        if: always()
+        run: |
+          rm -f android/app/release.keystore
