@@ -11,7 +11,8 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 | Etapa | Nome | Status | Dependências |
 |---|---|---|---|
 | **Etapa 0** | Inspeção, Governança e Planejamento | **Concluída** | Nenhuma |
-| **Etapa 1** | Fundação do Projeto Multiplataforma | Planejada | Etapa 0 |
+| **Etapa 0** | Inspeção, Governança e Planejamento | **Concluída** | Nenhuma |
+| **Etapa 1** | Fundação do Projeto Multiplataforma | **Em validação** | Etapa 0 |
 | **Etapa 2** | Modelos de Domínio e Persistência Local | Planejada | Etapa 1 |
 | **Etapa 3** | Cadastro e Configuração Pedagógica | Planejada | Etapa 2 |
 | **Etapa 4** | Conteúdos Programáticos e Base Curricular | Planejada | Etapa 3 |
@@ -44,17 +45,22 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 1 — Fundação do Projeto Multiplataforma
-- **Status**: Planejada
+- **Status**: **Em validação** (Implementação e testes concluídos; pendente de aceitação de licenças Android e build nativo)
 - **Objetivos**:
-  - Estruturar o workspace do aplicativo Flutter (`/app`) e testes.
+  - Estruturar o workspace do aplicativo Flutter em `apps/app`.
   - Configurar regras de análise estática (`analysis_options.yaml`) estritas.
   - Configurar sistema de design/tema com suporte a Material 3, modo claro/escuro e acessibilidade.
-  - Implementar estrutura de navegação base (rotas, tela inicial funcional, layout adaptável desktop/mobile).
+  - Implementar estrutura de navegação base adaptável (BottomNavigationBar para mobile, NavigationRail para desktop).
+  - Implementar componentes reutilizáveis (botões grandes, cartões, cabeçalhos, estados vazios e badges).
+  - Isolar entidades de domínio puras sem dependência de widgets de UI.
+  - Implementar e validar testes automatizados de domínio e apresentação.
   - Validar compilação na plataforma disponível.
 - **Critérios de Aceitação**:
-  1. Projeto compila sem avisos ou erros de linting.
-  2. Tela inicial funcional exibindo os principais pontos de entrada (Turmas, Calendário, Planejamento, Replanejamento).
-  3. Formatação e análise estática executadas com sucesso.
+  1. [x] Projeto compila e analisa sem avisos ou erros de linting (`flutter analyze` com 0 issues).
+  2. [x] Tela inicial funcional exibindo os principais pontos de entrada (Turmas, Calendário, Conteúdos, Replanejamento).
+  3. [x] Formatação e análise estática executadas com sucesso (`dart format` e `flutter test` com 14 testes passando).
+  4. [ ] Aceitação das licenças do Android SDK revisadas pelo usuário.
+  5. [ ] Verificação de compilação para Android/Windows conforme ferramentas disponíveis.
 
 ---
 

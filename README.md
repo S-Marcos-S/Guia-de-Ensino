@@ -57,16 +57,34 @@ guia-de-ensino/
 │       ├── 0002-estrategia-local-first-e-persistencia.md
 │       ├── 0003-motor-deterministico-e-replanejamento.md
 │       └── 0004-padroes-de-seguranca-privacidade-lgpd.md
-├── app/                      # Código do aplicativo cliente (Flutter) [Etapa 1]
+├── apps/
+│   └── app/                  # Aplicativo cliente multiplataforma (Flutter) [Etapa 1]
 └── server/                   # Código do backend de sincronização (NestJS) [Etapa 9]
 ```
 
 ---
 
-## 4. Estado Atual e Próximos Passos
+## 4. Como Executar os Testes e Análise Estática
 
-O projeto encontra-se na **Etapa 0 (Inspeção, Governança e Planejamento)** concluída.
-Consulte o arquivo [docs/ROADMAP.md](docs/ROADMAP.md) para verificar o progresso das etapas e os critérios de aceitação.
+No diretório `apps/app`:
+
+```bash
+# Análise estática do código
+flutter analyze
+
+# Execução dos testes automatizados (14 testes)
+flutter test
+
+# Verificação de formatação
+dart format --set-exit-if-changed .
+```
+
+---
+
+## 5. Estado Atual e Próximos Passos
+
+O projeto encontra-se na **Etapa 1 (Fundação do Projeto Multiplataforma)** em fase de validação (código, temas, componentes e 14 testes concluídos com 0 issues; pendente validação de builds nativos).
+Consulte o arquivo [docs/ROADMAP.md](docs/ROADMAP.md) para verificar o detalhamento dos critérios de aceitação.
 
 ---
 
