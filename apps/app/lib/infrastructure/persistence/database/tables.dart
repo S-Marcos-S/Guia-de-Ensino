@@ -101,3 +101,43 @@ class PlannedLessonsTable extends Table {
     {classroomSubjectId, lessonDate, orderInDay},
   ];
 }
+
+/// Tabela de Eventos, Feriados e Recessos do Calendário Escolar.
+class SchoolCalendarEventsTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get academicYearId =>
+      text().references(AcademicYearsTable, #id, onDelete: KeyAction.cascade)();
+  TextColumn get title => text()();
+  TextColumn get startDate => text().map(const CalendarDateConverter())();
+  TextColumn get endDate => text().map(const CalendarDateConverter())();
+  TextColumn get type => text()();
+  BoolColumn get affectsClasses =>
+      boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Tabela de Grade Semanal de Aulas (Slots de Horários por Turma-Disciplina).
+class ScheduleSlotsTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get classroomSubjectId => text().references(
+    ClassroomSubjectsTable,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
+  IntColumn get weekday => integer()();
+  IntColumn get orderIndex => integer()();
+  TextColumn get startTime => text().nullable()();
+  TextColumn get endTime => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {classroomSubjectId, weekday, orderIndex},
+  ];
+}

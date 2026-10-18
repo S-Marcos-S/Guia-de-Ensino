@@ -1,9 +1,24 @@
+import 'package:app/core/di/app_dependencies.dart';
 import 'package:app/core/localization/app_strings.dart';
+import 'package:app/infrastructure/persistence/database/app_database.dart';
 import 'package:app/main.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  late AppDatabase db;
+  late AppDependencies dependencies;
+
+  setUp(() {
+    db = AppDatabase.forTesting(NativeDatabase.memory());
+    dependencies = AppDependencies(database: db);
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
   group('Navigation & App Integration Tests (Mobile Layout)', () {
     testWidgets(
       'deve iniciar na tela inicial exibindo cabeçalho e cartões de acesso',
@@ -12,7 +27,7 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.resetPhysicalSize);
 
-        await tester.pumpWidget(const GuiaDeEnsinoApp());
+        await tester.pumpWidget(GuiaDeEnsinoApp(dependencies: dependencies));
         await tester.pumpAndSettle();
 
         expect(find.text(AppStrings.welcomeTitle), findsOneWidget);
@@ -28,7 +43,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(const GuiaDeEnsinoApp());
+      await tester.pumpWidget(GuiaDeEnsinoApp(dependencies: dependencies));
       await tester.pumpAndSettle();
 
       // Encontra a aba Turmas na barra de navegação inferior
@@ -41,7 +56,7 @@ void main() {
       await tester.tap(classroomsTab);
       await tester.pumpAndSettle();
 
-      expect(find.text(AppStrings.emptyClassroomsTitle), findsOneWidget);
+      expect(find.text('Ano Letivo Necessário'), findsOneWidget);
     });
 
     testWidgets(
@@ -51,7 +66,7 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.resetPhysicalSize);
 
-        await tester.pumpWidget(const GuiaDeEnsinoApp());
+        await tester.pumpWidget(GuiaDeEnsinoApp(dependencies: dependencies));
         await tester.pumpAndSettle();
 
         // Encontra a aba Calendário na barra de navegação inferior
@@ -64,7 +79,7 @@ void main() {
         await tester.tap(calendarTab);
         await tester.pumpAndSettle();
 
-        expect(find.text(AppStrings.emptyCalendarTitle), findsOneWidget);
+        expect(find.text('Nenhum ano letivo configurado'), findsOneWidget);
       },
     );
 
@@ -75,7 +90,7 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.resetPhysicalSize);
 
-        await tester.pumpWidget(const GuiaDeEnsinoApp());
+        await tester.pumpWidget(GuiaDeEnsinoApp(dependencies: dependencies));
         await tester.pumpAndSettle();
 
         final replanningCard = find.text(AppStrings.cardReplanningDesc);
@@ -102,7 +117,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(const GuiaDeEnsinoApp());
+      await tester.pumpWidget(GuiaDeEnsinoApp(dependencies: dependencies));
       await tester.pumpAndSettle();
 
       expect(find.byType(NavigationRail), findsOneWidget);

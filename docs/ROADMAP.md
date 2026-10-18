@@ -13,7 +13,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 | **Etapa 0** | Inspeção, Governança e Planejamento | **Concluída** | Nenhuma |
 | **Etapa 1** | Fundação do Projeto Multiplataforma | **Concluída** | Etapa 0 |
 | **Etapa 2** | Modelos de Domínio e Persistência Local | **Concluída** | Etapa 1 |
-| **Etapa 3** | Cadastro e Configuração Pedagógica | Planejada | Etapa 2 |
+| **Etapa 3** | Cadastro e Configuração Pedagógica | **Concluída** | Etapa 2 |
 | **Etapa 4** | Conteúdos Programáticos e Base Curricular | Planejada | Etapa 3 |
 | **Etapa 5** | Motor Determinístico de Planejamento | Planejada | Etapa 4 |
 | **Etapa 6** | Acompanhamento e Registro de Aulas | Planejada | Etapa 5 |
@@ -83,16 +83,21 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 3 — Cadastro e Configuração Pedagógica
-- **Status**: Planejada
+- **Status**: **Concluída**
 - **Objetivos**:
   - Fluxo guiado para criação de ano letivo e calendário escolar (início, término, recessos, feriados).
-  - Cadastro de turmas e vínculo com disciplinas.
-  - Configuração de horários semanais por turma (quantidade de aulas por dia da semana).
-  - Validação de consistência do calendário (dias letivos suficientes, disciplinas sem horários).
+  - Cadastro de turmas e vínculo com disciplinas com cargas horárias individualizadas.
+  - Configuração de grade semanal por turma e disciplina (`ScheduleSlot`).
+  - Validação determinística de consistência do calendário e cálculo exato de dias letivos e aulas previstas.
+  - Migração versionada do banco SQLite de `schemaVersion: 1` para `schemaVersion: 2` com novas tabelas (`school_calendar_events_table` e `schedule_slots_table`) sem perda de dados.
 - **Critérios de Aceitação**:
-  1. Cálculo determinístico da quantidade real de aulas no período letivo (não apenas semanas × aulas).
-  2. Bloqueio de cadastros inconsistentes com mensagens claras em português.
-  3. Testes unitários de regras de negócio de calendário e carga horária.
+  1. [x] Cálculo determinístico da quantidade real de aulas no período letivo com base na grade semanal e dias letivos efetivos (`CalendarCalculationService`).
+  2. [x] Desconto de feriados e recessos (inclusive múltiplos eventos sobrepostos/coincidentes sem dupla dedução).
+  3. [x] Bloqueio e validação de cadastros inconsistentes com feedback acessível em português brasileiro.
+  4. [x] Diálogos de confirmação (`AppConfirmDialog`) para operações destrutivas de exclusão.
+  5. [x] Migração versionada do SQLite testada preservando dados pré-existentes.
+  6. [x] Persistência em disco validada após fechar e reabrir o banco.
+  7. [x] Testes automatizados unitários de domínio, infraestrutura e interface (41 testes passando com 0 avisos em `flutter analyze`).
 
 ---
 

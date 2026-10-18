@@ -2135,6 +2135,1031 @@ class PlannedLessonsTableCompanion
   }
 }
 
+class $SchoolCalendarEventsTableTable extends SchoolCalendarEventsTable
+    with
+        TableInfo<
+          $SchoolCalendarEventsTableTable,
+          SchoolCalendarEventsTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SchoolCalendarEventsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _academicYearIdMeta = const VerificationMeta(
+    'academicYearId',
+  );
+  @override
+  late final GeneratedColumn<String> academicYearId = GeneratedColumn<String>(
+    'academic_year_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES academic_years_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<DateTime, String> startDate =
+      GeneratedColumn<String>(
+        'start_date',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<DateTime>(
+        $SchoolCalendarEventsTableTable.$converterstartDate,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<DateTime, String> endDate =
+      GeneratedColumn<String>(
+        'end_date',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<DateTime>(
+        $SchoolCalendarEventsTableTable.$converterendDate,
+      );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _affectsClassesMeta = const VerificationMeta(
+    'affectsClasses',
+  );
+  @override
+  late final GeneratedColumn<bool> affectsClasses = GeneratedColumn<bool>(
+    'affects_classes',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("affects_classes" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    academicYearId,
+    title,
+    startDate,
+    endDate,
+    type,
+    affectsClasses,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'school_calendar_events_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SchoolCalendarEventsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('academic_year_id')) {
+      context.handle(
+        _academicYearIdMeta,
+        academicYearId.isAcceptableOrUnknown(
+          data['academic_year_id']!,
+          _academicYearIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_academicYearIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('affects_classes')) {
+      context.handle(
+        _affectsClassesMeta,
+        affectsClasses.isAcceptableOrUnknown(
+          data['affects_classes']!,
+          _affectsClassesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SchoolCalendarEventsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SchoolCalendarEventsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      academicYearId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}academic_year_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      startDate: $SchoolCalendarEventsTableTable.$converterstartDate.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}start_date'],
+        )!,
+      ),
+      endDate: $SchoolCalendarEventsTableTable.$converterendDate.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}end_date'],
+        )!,
+      ),
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      affectsClasses: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}affects_classes'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SchoolCalendarEventsTableTable createAlias(String alias) {
+    return $SchoolCalendarEventsTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, String> $converterstartDate =
+      const CalendarDateConverter();
+  static TypeConverter<DateTime, String> $converterendDate =
+      const CalendarDateConverter();
+}
+
+class SchoolCalendarEventsTableData extends DataClass
+    implements Insertable<SchoolCalendarEventsTableData> {
+  final String id;
+  final String academicYearId;
+  final String title;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String type;
+  final bool affectsClasses;
+  final DateTime createdAt;
+  const SchoolCalendarEventsTableData({
+    required this.id,
+    required this.academicYearId,
+    required this.title,
+    required this.startDate,
+    required this.endDate,
+    required this.type,
+    required this.affectsClasses,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['academic_year_id'] = Variable<String>(academicYearId);
+    map['title'] = Variable<String>(title);
+    {
+      map['start_date'] = Variable<String>(
+        $SchoolCalendarEventsTableTable.$converterstartDate.toSql(startDate),
+      );
+    }
+    {
+      map['end_date'] = Variable<String>(
+        $SchoolCalendarEventsTableTable.$converterendDate.toSql(endDate),
+      );
+    }
+    map['type'] = Variable<String>(type);
+    map['affects_classes'] = Variable<bool>(affectsClasses);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  SchoolCalendarEventsTableCompanion toCompanion(bool nullToAbsent) {
+    return SchoolCalendarEventsTableCompanion(
+      id: Value(id),
+      academicYearId: Value(academicYearId),
+      title: Value(title),
+      startDate: Value(startDate),
+      endDate: Value(endDate),
+      type: Value(type),
+      affectsClasses: Value(affectsClasses),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SchoolCalendarEventsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SchoolCalendarEventsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      academicYearId: serializer.fromJson<String>(json['academicYearId']),
+      title: serializer.fromJson<String>(json['title']),
+      startDate: serializer.fromJson<DateTime>(json['startDate']),
+      endDate: serializer.fromJson<DateTime>(json['endDate']),
+      type: serializer.fromJson<String>(json['type']),
+      affectsClasses: serializer.fromJson<bool>(json['affectsClasses']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'academicYearId': serializer.toJson<String>(academicYearId),
+      'title': serializer.toJson<String>(title),
+      'startDate': serializer.toJson<DateTime>(startDate),
+      'endDate': serializer.toJson<DateTime>(endDate),
+      'type': serializer.toJson<String>(type),
+      'affectsClasses': serializer.toJson<bool>(affectsClasses),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  SchoolCalendarEventsTableData copyWith({
+    String? id,
+    String? academicYearId,
+    String? title,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? type,
+    bool? affectsClasses,
+    DateTime? createdAt,
+  }) => SchoolCalendarEventsTableData(
+    id: id ?? this.id,
+    academicYearId: academicYearId ?? this.academicYearId,
+    title: title ?? this.title,
+    startDate: startDate ?? this.startDate,
+    endDate: endDate ?? this.endDate,
+    type: type ?? this.type,
+    affectsClasses: affectsClasses ?? this.affectsClasses,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  SchoolCalendarEventsTableData copyWithCompanion(
+    SchoolCalendarEventsTableCompanion data,
+  ) {
+    return SchoolCalendarEventsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      academicYearId: data.academicYearId.present
+          ? data.academicYearId.value
+          : this.academicYearId,
+      title: data.title.present ? data.title.value : this.title,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
+      type: data.type.present ? data.type.value : this.type,
+      affectsClasses: data.affectsClasses.present
+          ? data.affectsClasses.value
+          : this.affectsClasses,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SchoolCalendarEventsTableData(')
+          ..write('id: $id, ')
+          ..write('academicYearId: $academicYearId, ')
+          ..write('title: $title, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('type: $type, ')
+          ..write('affectsClasses: $affectsClasses, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    academicYearId,
+    title,
+    startDate,
+    endDate,
+    type,
+    affectsClasses,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SchoolCalendarEventsTableData &&
+          other.id == this.id &&
+          other.academicYearId == this.academicYearId &&
+          other.title == this.title &&
+          other.startDate == this.startDate &&
+          other.endDate == this.endDate &&
+          other.type == this.type &&
+          other.affectsClasses == this.affectsClasses &&
+          other.createdAt == this.createdAt);
+}
+
+class SchoolCalendarEventsTableCompanion
+    extends UpdateCompanion<SchoolCalendarEventsTableData> {
+  final Value<String> id;
+  final Value<String> academicYearId;
+  final Value<String> title;
+  final Value<DateTime> startDate;
+  final Value<DateTime> endDate;
+  final Value<String> type;
+  final Value<bool> affectsClasses;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const SchoolCalendarEventsTableCompanion({
+    this.id = const Value.absent(),
+    this.academicYearId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.type = const Value.absent(),
+    this.affectsClasses = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SchoolCalendarEventsTableCompanion.insert({
+    required String id,
+    required String academicYearId,
+    required String title,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String type,
+    this.affectsClasses = const Value.absent(),
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       academicYearId = Value(academicYearId),
+       title = Value(title),
+       startDate = Value(startDate),
+       endDate = Value(endDate),
+       type = Value(type),
+       createdAt = Value(createdAt);
+  static Insertable<SchoolCalendarEventsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? academicYearId,
+    Expression<String>? title,
+    Expression<String>? startDate,
+    Expression<String>? endDate,
+    Expression<String>? type,
+    Expression<bool>? affectsClasses,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (academicYearId != null) 'academic_year_id': academicYearId,
+      if (title != null) 'title': title,
+      if (startDate != null) 'start_date': startDate,
+      if (endDate != null) 'end_date': endDate,
+      if (type != null) 'type': type,
+      if (affectsClasses != null) 'affects_classes': affectsClasses,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SchoolCalendarEventsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? academicYearId,
+    Value<String>? title,
+    Value<DateTime>? startDate,
+    Value<DateTime>? endDate,
+    Value<String>? type,
+    Value<bool>? affectsClasses,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return SchoolCalendarEventsTableCompanion(
+      id: id ?? this.id,
+      academicYearId: academicYearId ?? this.academicYearId,
+      title: title ?? this.title,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      type: type ?? this.type,
+      affectsClasses: affectsClasses ?? this.affectsClasses,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (academicYearId.present) {
+      map['academic_year_id'] = Variable<String>(academicYearId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<String>(
+        $SchoolCalendarEventsTableTable.$converterstartDate.toSql(
+          startDate.value,
+        ),
+      );
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<String>(
+        $SchoolCalendarEventsTableTable.$converterendDate.toSql(endDate.value),
+      );
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (affectsClasses.present) {
+      map['affects_classes'] = Variable<bool>(affectsClasses.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SchoolCalendarEventsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('academicYearId: $academicYearId, ')
+          ..write('title: $title, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('type: $type, ')
+          ..write('affectsClasses: $affectsClasses, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ScheduleSlotsTableTable extends ScheduleSlotsTable
+    with TableInfo<$ScheduleSlotsTableTable, ScheduleSlotsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ScheduleSlotsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _classroomSubjectIdMeta =
+      const VerificationMeta('classroomSubjectId');
+  @override
+  late final GeneratedColumn<String> classroomSubjectId =
+      GeneratedColumn<String>(
+        'classroom_subject_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES classroom_subjects_table (id) ON DELETE CASCADE',
+        ),
+      );
+  static const VerificationMeta _weekdayMeta = const VerificationMeta(
+    'weekday',
+  );
+  @override
+  late final GeneratedColumn<int> weekday = GeneratedColumn<int>(
+    'weekday',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orderIndexMeta = const VerificationMeta(
+    'orderIndex',
+  );
+  @override
+  late final GeneratedColumn<int> orderIndex = GeneratedColumn<int>(
+    'order_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startTimeMeta = const VerificationMeta(
+    'startTime',
+  );
+  @override
+  late final GeneratedColumn<String> startTime = GeneratedColumn<String>(
+    'start_time',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _endTimeMeta = const VerificationMeta(
+    'endTime',
+  );
+  @override
+  late final GeneratedColumn<String> endTime = GeneratedColumn<String>(
+    'end_time',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    classroomSubjectId,
+    weekday,
+    orderIndex,
+    startTime,
+    endTime,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'schedule_slots_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ScheduleSlotsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('classroom_subject_id')) {
+      context.handle(
+        _classroomSubjectIdMeta,
+        classroomSubjectId.isAcceptableOrUnknown(
+          data['classroom_subject_id']!,
+          _classroomSubjectIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_classroomSubjectIdMeta);
+    }
+    if (data.containsKey('weekday')) {
+      context.handle(
+        _weekdayMeta,
+        weekday.isAcceptableOrUnknown(data['weekday']!, _weekdayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_weekdayMeta);
+    }
+    if (data.containsKey('order_index')) {
+      context.handle(
+        _orderIndexMeta,
+        orderIndex.isAcceptableOrUnknown(data['order_index']!, _orderIndexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orderIndexMeta);
+    }
+    if (data.containsKey('start_time')) {
+      context.handle(
+        _startTimeMeta,
+        startTime.isAcceptableOrUnknown(data['start_time']!, _startTimeMeta),
+      );
+    }
+    if (data.containsKey('end_time')) {
+      context.handle(
+        _endTimeMeta,
+        endTime.isAcceptableOrUnknown(data['end_time']!, _endTimeMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {classroomSubjectId, weekday, orderIndex},
+  ];
+  @override
+  ScheduleSlotsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ScheduleSlotsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      classroomSubjectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}classroom_subject_id'],
+      )!,
+      weekday: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}weekday'],
+      )!,
+      orderIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order_index'],
+      )!,
+      startTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_time'],
+      ),
+      endTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}end_time'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ScheduleSlotsTableTable createAlias(String alias) {
+    return $ScheduleSlotsTableTable(attachedDatabase, alias);
+  }
+}
+
+class ScheduleSlotsTableData extends DataClass
+    implements Insertable<ScheduleSlotsTableData> {
+  final String id;
+  final String classroomSubjectId;
+  final int weekday;
+  final int orderIndex;
+  final String? startTime;
+  final String? endTime;
+  final DateTime createdAt;
+  const ScheduleSlotsTableData({
+    required this.id,
+    required this.classroomSubjectId,
+    required this.weekday,
+    required this.orderIndex,
+    this.startTime,
+    this.endTime,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['classroom_subject_id'] = Variable<String>(classroomSubjectId);
+    map['weekday'] = Variable<int>(weekday);
+    map['order_index'] = Variable<int>(orderIndex);
+    if (!nullToAbsent || startTime != null) {
+      map['start_time'] = Variable<String>(startTime);
+    }
+    if (!nullToAbsent || endTime != null) {
+      map['end_time'] = Variable<String>(endTime);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ScheduleSlotsTableCompanion toCompanion(bool nullToAbsent) {
+    return ScheduleSlotsTableCompanion(
+      id: Value(id),
+      classroomSubjectId: Value(classroomSubjectId),
+      weekday: Value(weekday),
+      orderIndex: Value(orderIndex),
+      startTime: startTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startTime),
+      endTime: endTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endTime),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ScheduleSlotsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ScheduleSlotsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      classroomSubjectId: serializer.fromJson<String>(
+        json['classroomSubjectId'],
+      ),
+      weekday: serializer.fromJson<int>(json['weekday']),
+      orderIndex: serializer.fromJson<int>(json['orderIndex']),
+      startTime: serializer.fromJson<String?>(json['startTime']),
+      endTime: serializer.fromJson<String?>(json['endTime']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'classroomSubjectId': serializer.toJson<String>(classroomSubjectId),
+      'weekday': serializer.toJson<int>(weekday),
+      'orderIndex': serializer.toJson<int>(orderIndex),
+      'startTime': serializer.toJson<String?>(startTime),
+      'endTime': serializer.toJson<String?>(endTime),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ScheduleSlotsTableData copyWith({
+    String? id,
+    String? classroomSubjectId,
+    int? weekday,
+    int? orderIndex,
+    Value<String?> startTime = const Value.absent(),
+    Value<String?> endTime = const Value.absent(),
+    DateTime? createdAt,
+  }) => ScheduleSlotsTableData(
+    id: id ?? this.id,
+    classroomSubjectId: classroomSubjectId ?? this.classroomSubjectId,
+    weekday: weekday ?? this.weekday,
+    orderIndex: orderIndex ?? this.orderIndex,
+    startTime: startTime.present ? startTime.value : this.startTime,
+    endTime: endTime.present ? endTime.value : this.endTime,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ScheduleSlotsTableData copyWithCompanion(ScheduleSlotsTableCompanion data) {
+    return ScheduleSlotsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      classroomSubjectId: data.classroomSubjectId.present
+          ? data.classroomSubjectId.value
+          : this.classroomSubjectId,
+      weekday: data.weekday.present ? data.weekday.value : this.weekday,
+      orderIndex: data.orderIndex.present
+          ? data.orderIndex.value
+          : this.orderIndex,
+      startTime: data.startTime.present ? data.startTime.value : this.startTime,
+      endTime: data.endTime.present ? data.endTime.value : this.endTime,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ScheduleSlotsTableData(')
+          ..write('id: $id, ')
+          ..write('classroomSubjectId: $classroomSubjectId, ')
+          ..write('weekday: $weekday, ')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('startTime: $startTime, ')
+          ..write('endTime: $endTime, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    classroomSubjectId,
+    weekday,
+    orderIndex,
+    startTime,
+    endTime,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ScheduleSlotsTableData &&
+          other.id == this.id &&
+          other.classroomSubjectId == this.classroomSubjectId &&
+          other.weekday == this.weekday &&
+          other.orderIndex == this.orderIndex &&
+          other.startTime == this.startTime &&
+          other.endTime == this.endTime &&
+          other.createdAt == this.createdAt);
+}
+
+class ScheduleSlotsTableCompanion
+    extends UpdateCompanion<ScheduleSlotsTableData> {
+  final Value<String> id;
+  final Value<String> classroomSubjectId;
+  final Value<int> weekday;
+  final Value<int> orderIndex;
+  final Value<String?> startTime;
+  final Value<String?> endTime;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const ScheduleSlotsTableCompanion({
+    this.id = const Value.absent(),
+    this.classroomSubjectId = const Value.absent(),
+    this.weekday = const Value.absent(),
+    this.orderIndex = const Value.absent(),
+    this.startTime = const Value.absent(),
+    this.endTime = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ScheduleSlotsTableCompanion.insert({
+    required String id,
+    required String classroomSubjectId,
+    required int weekday,
+    required int orderIndex,
+    this.startTime = const Value.absent(),
+    this.endTime = const Value.absent(),
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       classroomSubjectId = Value(classroomSubjectId),
+       weekday = Value(weekday),
+       orderIndex = Value(orderIndex),
+       createdAt = Value(createdAt);
+  static Insertable<ScheduleSlotsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? classroomSubjectId,
+    Expression<int>? weekday,
+    Expression<int>? orderIndex,
+    Expression<String>? startTime,
+    Expression<String>? endTime,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (classroomSubjectId != null)
+        'classroom_subject_id': classroomSubjectId,
+      if (weekday != null) 'weekday': weekday,
+      if (orderIndex != null) 'order_index': orderIndex,
+      if (startTime != null) 'start_time': startTime,
+      if (endTime != null) 'end_time': endTime,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ScheduleSlotsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? classroomSubjectId,
+    Value<int>? weekday,
+    Value<int>? orderIndex,
+    Value<String?>? startTime,
+    Value<String?>? endTime,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return ScheduleSlotsTableCompanion(
+      id: id ?? this.id,
+      classroomSubjectId: classroomSubjectId ?? this.classroomSubjectId,
+      weekday: weekday ?? this.weekday,
+      orderIndex: orderIndex ?? this.orderIndex,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (classroomSubjectId.present) {
+      map['classroom_subject_id'] = Variable<String>(classroomSubjectId.value);
+    }
+    if (weekday.present) {
+      map['weekday'] = Variable<int>(weekday.value);
+    }
+    if (orderIndex.present) {
+      map['order_index'] = Variable<int>(orderIndex.value);
+    }
+    if (startTime.present) {
+      map['start_time'] = Variable<String>(startTime.value);
+    }
+    if (endTime.present) {
+      map['end_time'] = Variable<String>(endTime.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ScheduleSlotsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('classroomSubjectId: $classroomSubjectId, ')
+          ..write('weekday: $weekday, ')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('startTime: $startTime, ')
+          ..write('endTime: $endTime, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2148,6 +3173,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ClassroomSubjectsTableTable(this);
   late final $PlannedLessonsTableTable plannedLessonsTable =
       $PlannedLessonsTableTable(this);
+  late final $SchoolCalendarEventsTableTable schoolCalendarEventsTable =
+      $SchoolCalendarEventsTableTable(this);
+  late final $ScheduleSlotsTableTable scheduleSlotsTable =
+      $ScheduleSlotsTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2158,6 +3187,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     subjectsTable,
     classroomSubjectsTable,
     plannedLessonsTable,
+    schoolCalendarEventsTable,
+    scheduleSlotsTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2169,6 +3200,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       result: [
         TableUpdate('classroom_subjects_table', kind: UpdateKind.delete),
       ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'academic_years_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('school_calendar_events_table', kind: UpdateKind.delete),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'classroom_subjects_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('schedule_slots_table', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -2223,6 +3270,31 @@ final class $$AcademicYearsTableTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _classroomsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $SchoolCalendarEventsTableTable,
+    List<SchoolCalendarEventsTableData>
+  >
+  _schoolCalendarEventsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.schoolCalendarEventsTable,
+        aliasName: 'academic_years_table__id__school_calendar_events_table__academic_year_id',
+      );
+
+  $$SchoolCalendarEventsTableTableProcessedTableManager
+  get schoolCalendarEventsTableRefs {
+    final manager = $$SchoolCalendarEventsTableTableTableManager(
+      $_db,
+      $_db.schoolCalendarEventsTable,
+    ).filter((f) => f.academicYearId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _schoolCalendarEventsTableRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -2298,6 +3370,33 @@ class $$AcademicYearsTableTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> schoolCalendarEventsTableRefs(
+    Expression<bool> Function($$SchoolCalendarEventsTableTableFilterComposer f)
+    f,
+  ) {
+    final $$SchoolCalendarEventsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.schoolCalendarEventsTable,
+          getReferencedColumn: (t) => t.academicYearId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SchoolCalendarEventsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.schoolCalendarEventsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -2403,6 +3502,33 @@ class $$AcademicYearsTableTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> schoolCalendarEventsTableRefs<T extends Object>(
+    Expression<T> Function($$SchoolCalendarEventsTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$SchoolCalendarEventsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.schoolCalendarEventsTable,
+          getReferencedColumn: (t) => t.academicYearId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SchoolCalendarEventsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.schoolCalendarEventsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$AcademicYearsTableTableTableManager
@@ -2418,7 +3544,10 @@ class $$AcademicYearsTableTableTableManager
           $$AcademicYearsTableTableUpdateCompanionBuilder,
           (AcademicYearsTableData, $$AcademicYearsTableTableReferences),
           AcademicYearsTableData,
-          PrefetchHooks Function({bool classroomsTableRefs})
+          PrefetchHooks Function({
+            bool classroomsTableRefs,
+            bool schoolCalendarEventsTableRefs,
+          })
         > {
   $$AcademicYearsTableTableTableManager(
     _$AppDatabase db,
@@ -2486,40 +3615,67 @@ class $$AcademicYearsTableTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({classroomsTableRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (classroomsTableRefs) db.classroomsTable,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (classroomsTableRefs)
-                    await $_getPrefetchedData<
-                      AcademicYearsTableData,
-                      $AcademicYearsTableTable,
-                      ClassroomsTableData
-                    >(
-                      currentTable: table,
-                      referencedTable: $$AcademicYearsTableTableReferences
-                          ._classroomsTableRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$AcademicYearsTableTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).classroomsTableRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.academicYearId == item.id,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({
+                classroomsTableRefs = false,
+                schoolCalendarEventsTableRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (classroomsTableRefs) db.classroomsTable,
+                    if (schoolCalendarEventsTableRefs)
+                      db.schoolCalendarEventsTable,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (classroomsTableRefs)
+                        await $_getPrefetchedData<
+                          AcademicYearsTableData,
+                          $AcademicYearsTableTable,
+                          ClassroomsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AcademicYearsTableTableReferences
+                              ._classroomsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AcademicYearsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).classroomsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.academicYearId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (schoolCalendarEventsTableRefs)
+                        await $_getPrefetchedData<
+                          AcademicYearsTableData,
+                          $AcademicYearsTableTable,
+                          SchoolCalendarEventsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AcademicYearsTableTableReferences
+                              ._schoolCalendarEventsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AcademicYearsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).schoolCalendarEventsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.academicYearId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2536,7 +3692,10 @@ typedef $$AcademicYearsTableTableProcessedTableManager =
       $$AcademicYearsTableTableUpdateCompanionBuilder,
       (AcademicYearsTableData, $$AcademicYearsTableTableReferences),
       AcademicYearsTableData,
-      PrefetchHooks Function({bool classroomsTableRefs})
+      PrefetchHooks Function({
+        bool classroomsTableRefs,
+        bool schoolCalendarEventsTableRefs,
+      })
     >;
 typedef $$ClassroomsTableTableCreateCompanionBuilder =
     ClassroomsTableCompanion Function({
@@ -3392,6 +4551,33 @@ final class $$ClassroomSubjectsTableTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $ScheduleSlotsTableTable,
+    List<ScheduleSlotsTableData>
+  >
+  _scheduleSlotsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.scheduleSlotsTable,
+        aliasName: 'classroom_subjects_table__id__schedule_slots_table__classroom_subject_id',
+      );
+
+  $$ScheduleSlotsTableTableProcessedTableManager get scheduleSlotsTableRefs {
+    final manager =
+        $$ScheduleSlotsTableTableTableManager(
+          $_db,
+          $_db.scheduleSlotsTable,
+        ).filter(
+          (f) => f.classroomSubjectId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _scheduleSlotsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ClassroomSubjectsTableTableFilterComposer
@@ -3480,6 +4666,31 @@ class $$ClassroomSubjectsTableTableFilterComposer
           }) => $$PlannedLessonsTableTableFilterComposer(
             $db: $db,
             $table: $db.plannedLessonsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> scheduleSlotsTableRefs(
+    Expression<bool> Function($$ScheduleSlotsTableTableFilterComposer f) f,
+  ) {
+    final $$ScheduleSlotsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.scheduleSlotsTable,
+      getReferencedColumn: (t) => t.classroomSubjectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScheduleSlotsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.scheduleSlotsTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3652,6 +4863,32 @@ class $$ClassroomSubjectsTableTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> scheduleSlotsTableRefs<T extends Object>(
+    Expression<T> Function($$ScheduleSlotsTableTableAnnotationComposer a) f,
+  ) {
+    final $$ScheduleSlotsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.scheduleSlotsTable,
+          getReferencedColumn: (t) => t.classroomSubjectId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ScheduleSlotsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.scheduleSlotsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$ClassroomSubjectsTableTableTableManager
@@ -3671,6 +4908,7 @@ class $$ClassroomSubjectsTableTableTableManager
             bool classroomId,
             bool subjectId,
             bool plannedLessonsTableRefs,
+            bool scheduleSlotsTableRefs,
           })
         > {
   $$ClassroomSubjectsTableTableTableManager(
@@ -3743,11 +4981,13 @@ class $$ClassroomSubjectsTableTableTableManager
                 classroomId = false,
                 subjectId = false,
                 plannedLessonsTableRefs = false,
+                scheduleSlotsTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (plannedLessonsTableRefs) db.plannedLessonsTable,
+                    if (scheduleSlotsTableRefs) db.scheduleSlotsTable,
                   ],
                   addJoins:
                       <
@@ -3818,6 +5058,28 @@ class $$ClassroomSubjectsTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (scheduleSlotsTableRefs)
+                        await $_getPrefetchedData<
+                          ClassroomSubjectsTableData,
+                          $ClassroomSubjectsTableTable,
+                          ScheduleSlotsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ClassroomSubjectsTableTableReferences
+                                  ._scheduleSlotsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ClassroomSubjectsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).scheduleSlotsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.classroomSubjectId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -3842,6 +5104,7 @@ typedef $$ClassroomSubjectsTableTableProcessedTableManager =
         bool classroomId,
         bool subjectId,
         bool plannedLessonsTableRefs,
+        bool scheduleSlotsTableRefs,
       })
     >;
 typedef $$PlannedLessonsTableTableCreateCompanionBuilder =
@@ -4248,6 +5511,794 @@ typedef $$PlannedLessonsTableTableProcessedTableManager =
       PlannedLessonsTableData,
       PrefetchHooks Function({bool classroomSubjectId})
     >;
+typedef $$SchoolCalendarEventsTableTableCreateCompanionBuilder =
+    SchoolCalendarEventsTableCompanion Function({
+      required String id,
+      required String academicYearId,
+      required String title,
+      required DateTime startDate,
+      required DateTime endDate,
+      required String type,
+      Value<bool> affectsClasses,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$SchoolCalendarEventsTableTableUpdateCompanionBuilder =
+    SchoolCalendarEventsTableCompanion Function({
+      Value<String> id,
+      Value<String> academicYearId,
+      Value<String> title,
+      Value<DateTime> startDate,
+      Value<DateTime> endDate,
+      Value<String> type,
+      Value<bool> affectsClasses,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$SchoolCalendarEventsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $SchoolCalendarEventsTableTable,
+          SchoolCalendarEventsTableData
+        > {
+  $$SchoolCalendarEventsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AcademicYearsTableTable _academicYearIdTable(
+    _$AppDatabase db,
+  ) => db.academicYearsTable.createAlias(
+    'school_calendar_events_table__academic_year_id__academic_years_table__id',
+  );
+
+  $$AcademicYearsTableTableProcessedTableManager get academicYearId {
+    final $_column = $_itemColumn<String>('academic_year_id')!;
+
+    final manager = $$AcademicYearsTableTableTableManager(
+      $_db,
+      $_db.academicYearsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_academicYearIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$SchoolCalendarEventsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SchoolCalendarEventsTableTable> {
+  $$SchoolCalendarEventsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, String> get startDate =>
+      $composableBuilder(
+        column: $table.startDate,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, String> get endDate =>
+      $composableBuilder(
+        column: $table.endDate,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get affectsClasses => $composableBuilder(
+    column: $table.affectsClasses,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AcademicYearsTableTableFilterComposer get academicYearId {
+    final $$AcademicYearsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.academicYearId,
+      referencedTable: $db.academicYearsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AcademicYearsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.academicYearsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SchoolCalendarEventsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SchoolCalendarEventsTableTable> {
+  $$SchoolCalendarEventsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get affectsClasses => $composableBuilder(
+    column: $table.affectsClasses,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AcademicYearsTableTableOrderingComposer get academicYearId {
+    final $$AcademicYearsTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.academicYearId,
+      referencedTable: $db.academicYearsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AcademicYearsTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.academicYearsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SchoolCalendarEventsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SchoolCalendarEventsTableTable> {
+  $$SchoolCalendarEventsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime, String> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime, String> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<bool> get affectsClasses => $composableBuilder(
+    column: $table.affectsClasses,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$AcademicYearsTableTableAnnotationComposer get academicYearId {
+    final $$AcademicYearsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.academicYearId,
+          referencedTable: $db.academicYearsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AcademicYearsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.academicYearsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$SchoolCalendarEventsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SchoolCalendarEventsTableTable,
+          SchoolCalendarEventsTableData,
+          $$SchoolCalendarEventsTableTableFilterComposer,
+          $$SchoolCalendarEventsTableTableOrderingComposer,
+          $$SchoolCalendarEventsTableTableAnnotationComposer,
+          $$SchoolCalendarEventsTableTableCreateCompanionBuilder,
+          $$SchoolCalendarEventsTableTableUpdateCompanionBuilder,
+          (
+            SchoolCalendarEventsTableData,
+            $$SchoolCalendarEventsTableTableReferences,
+          ),
+          SchoolCalendarEventsTableData,
+          PrefetchHooks Function({bool academicYearId})
+        > {
+  $$SchoolCalendarEventsTableTableTableManager(
+    _$AppDatabase db,
+    $SchoolCalendarEventsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SchoolCalendarEventsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$SchoolCalendarEventsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$SchoolCalendarEventsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> academicYearId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<DateTime> startDate = const Value.absent(),
+                Value<DateTime> endDate = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<bool> affectsClasses = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SchoolCalendarEventsTableCompanion(
+                id: id,
+                academicYearId: academicYearId,
+                title: title,
+                startDate: startDate,
+                endDate: endDate,
+                type: type,
+                affectsClasses: affectsClasses,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String academicYearId,
+                required String title,
+                required DateTime startDate,
+                required DateTime endDate,
+                required String type,
+                Value<bool> affectsClasses = const Value.absent(),
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SchoolCalendarEventsTableCompanion.insert(
+                id: id,
+                academicYearId: academicYearId,
+                title: title,
+                startDate: startDate,
+                endDate: endDate,
+                type: type,
+                affectsClasses: affectsClasses,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $SchoolCalendarEventsTableTable,
+                    SchoolCalendarEventsTableData
+                  >(table),
+                  $$SchoolCalendarEventsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({academicYearId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (academicYearId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.academicYearId,
+                        referencedTable:
+                            $$SchoolCalendarEventsTableTableReferences
+                                ._academicYearIdTable(db),
+                        referencedColumn:
+                            $$SchoolCalendarEventsTableTableReferences
+                                ._academicYearIdTable(db)
+                                .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$SchoolCalendarEventsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SchoolCalendarEventsTableTable,
+      SchoolCalendarEventsTableData,
+      $$SchoolCalendarEventsTableTableFilterComposer,
+      $$SchoolCalendarEventsTableTableOrderingComposer,
+      $$SchoolCalendarEventsTableTableAnnotationComposer,
+      $$SchoolCalendarEventsTableTableCreateCompanionBuilder,
+      $$SchoolCalendarEventsTableTableUpdateCompanionBuilder,
+      (
+        SchoolCalendarEventsTableData,
+        $$SchoolCalendarEventsTableTableReferences,
+      ),
+      SchoolCalendarEventsTableData,
+      PrefetchHooks Function({bool academicYearId})
+    >;
+typedef $$ScheduleSlotsTableTableCreateCompanionBuilder =
+    ScheduleSlotsTableCompanion Function({
+      required String id,
+      required String classroomSubjectId,
+      required int weekday,
+      required int orderIndex,
+      Value<String?> startTime,
+      Value<String?> endTime,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$ScheduleSlotsTableTableUpdateCompanionBuilder =
+    ScheduleSlotsTableCompanion Function({
+      Value<String> id,
+      Value<String> classroomSubjectId,
+      Value<int> weekday,
+      Value<int> orderIndex,
+      Value<String?> startTime,
+      Value<String?> endTime,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$ScheduleSlotsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ScheduleSlotsTableTable,
+          ScheduleSlotsTableData
+        > {
+  $$ScheduleSlotsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ClassroomSubjectsTableTable _classroomSubjectIdTable(
+    _$AppDatabase db,
+  ) => db.classroomSubjectsTable.createAlias(
+    'schedule_slots_table__classroom_subject_id__classroom_subjects_table__id',
+  );
+
+  $$ClassroomSubjectsTableTableProcessedTableManager get classroomSubjectId {
+    final $_column = $_itemColumn<String>('classroom_subject_id')!;
+
+    final manager = $$ClassroomSubjectsTableTableTableManager(
+      $_db,
+      $_db.classroomSubjectsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_classroomSubjectIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ScheduleSlotsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ScheduleSlotsTableTable> {
+  $$ScheduleSlotsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get weekday => $composableBuilder(
+    column: $table.weekday,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startTime => $composableBuilder(
+    column: $table.startTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endTime => $composableBuilder(
+    column: $table.endTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ClassroomSubjectsTableTableFilterComposer get classroomSubjectId {
+    final $$ClassroomSubjectsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.classroomSubjectId,
+          referencedTable: $db.classroomSubjectsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ClassroomSubjectsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.classroomSubjectsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ScheduleSlotsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ScheduleSlotsTableTable> {
+  $$ScheduleSlotsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get weekday => $composableBuilder(
+    column: $table.weekday,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startTime => $composableBuilder(
+    column: $table.startTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endTime => $composableBuilder(
+    column: $table.endTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ClassroomSubjectsTableTableOrderingComposer get classroomSubjectId {
+    final $$ClassroomSubjectsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.classroomSubjectId,
+          referencedTable: $db.classroomSubjectsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ClassroomSubjectsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.classroomSubjectsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ScheduleSlotsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ScheduleSlotsTableTable> {
+  $$ScheduleSlotsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get weekday =>
+      $composableBuilder(column: $table.weekday, builder: (column) => column);
+
+  GeneratedColumn<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get startTime =>
+      $composableBuilder(column: $table.startTime, builder: (column) => column);
+
+  GeneratedColumn<String> get endTime =>
+      $composableBuilder(column: $table.endTime, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$ClassroomSubjectsTableTableAnnotationComposer get classroomSubjectId {
+    final $$ClassroomSubjectsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.classroomSubjectId,
+          referencedTable: $db.classroomSubjectsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ClassroomSubjectsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.classroomSubjectsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ScheduleSlotsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ScheduleSlotsTableTable,
+          ScheduleSlotsTableData,
+          $$ScheduleSlotsTableTableFilterComposer,
+          $$ScheduleSlotsTableTableOrderingComposer,
+          $$ScheduleSlotsTableTableAnnotationComposer,
+          $$ScheduleSlotsTableTableCreateCompanionBuilder,
+          $$ScheduleSlotsTableTableUpdateCompanionBuilder,
+          (ScheduleSlotsTableData, $$ScheduleSlotsTableTableReferences),
+          ScheduleSlotsTableData,
+          PrefetchHooks Function({bool classroomSubjectId})
+        > {
+  $$ScheduleSlotsTableTableTableManager(
+    _$AppDatabase db,
+    $ScheduleSlotsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ScheduleSlotsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ScheduleSlotsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ScheduleSlotsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> classroomSubjectId = const Value.absent(),
+                Value<int> weekday = const Value.absent(),
+                Value<int> orderIndex = const Value.absent(),
+                Value<String?> startTime = const Value.absent(),
+                Value<String?> endTime = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ScheduleSlotsTableCompanion(
+                id: id,
+                classroomSubjectId: classroomSubjectId,
+                weekday: weekday,
+                orderIndex: orderIndex,
+                startTime: startTime,
+                endTime: endTime,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String classroomSubjectId,
+                required int weekday,
+                required int orderIndex,
+                Value<String?> startTime = const Value.absent(),
+                Value<String?> endTime = const Value.absent(),
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ScheduleSlotsTableCompanion.insert(
+                id: id,
+                classroomSubjectId: classroomSubjectId,
+                weekday: weekday,
+                orderIndex: orderIndex,
+                startTime: startTime,
+                endTime: endTime,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ScheduleSlotsTableTable, ScheduleSlotsTableData>(
+                    table,
+                  ),
+                  $$ScheduleSlotsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({classroomSubjectId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (classroomSubjectId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.classroomSubjectId,
+                        referencedTable: $$ScheduleSlotsTableTableReferences
+                            ._classroomSubjectIdTable(db),
+                        referencedColumn: $$ScheduleSlotsTableTableReferences
+                            ._classroomSubjectIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ScheduleSlotsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ScheduleSlotsTableTable,
+      ScheduleSlotsTableData,
+      $$ScheduleSlotsTableTableFilterComposer,
+      $$ScheduleSlotsTableTableOrderingComposer,
+      $$ScheduleSlotsTableTableAnnotationComposer,
+      $$ScheduleSlotsTableTableCreateCompanionBuilder,
+      $$ScheduleSlotsTableTableUpdateCompanionBuilder,
+      (ScheduleSlotsTableData, $$ScheduleSlotsTableTableReferences),
+      ScheduleSlotsTableData,
+      PrefetchHooks Function({bool classroomSubjectId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4265,4 +6316,11 @@ class $AppDatabaseManager {
       );
   $$PlannedLessonsTableTableTableManager get plannedLessonsTable =>
       $$PlannedLessonsTableTableTableManager(_db, _db.plannedLessonsTable);
+  $$SchoolCalendarEventsTableTableTableManager get schoolCalendarEventsTable =>
+      $$SchoolCalendarEventsTableTableTableManager(
+        _db,
+        _db.schoolCalendarEventsTable,
+      );
+  $$ScheduleSlotsTableTableTableManager get scheduleSlotsTable =>
+      $$ScheduleSlotsTableTableTableManager(_db, _db.scheduleSlotsTable);
 }

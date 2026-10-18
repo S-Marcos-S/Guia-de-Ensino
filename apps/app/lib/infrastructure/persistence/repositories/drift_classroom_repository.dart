@@ -25,7 +25,24 @@ class DriftClassroomRepository implements ClassroomRepository {
             ),
           );
 
-      // Atualiza os vínculos das disciplinas da turma
+      // Sincroniza vínculos: remove configurações que foram desassociadas da turma
+      final currentConfigIds = classroom.subjectConfigs
+          .map((c) => c.id)
+          .toList();
+      if (currentConfigIds.isEmpty) {
+        await (_db.delete(
+          _db.classroomSubjectsTable,
+        )..where((tbl) => tbl.classroomId.equals(classroom.id))).go();
+      } else {
+        await (_db.delete(_db.classroomSubjectsTable)..where(
+              (tbl) =>
+                  tbl.classroomId.equals(classroom.id) &
+                  tbl.id.isNotIn(currentConfigIds),
+            ))
+            .go();
+      }
+
+      // Atualiza ou insere os vínculos vigentes das disciplinas da turma
       for (final config in classroom.subjectConfigs) {
         await _db
             .into(_db.classroomSubjectsTable)

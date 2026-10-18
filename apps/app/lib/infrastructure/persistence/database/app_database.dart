@@ -17,6 +17,8 @@ part 'app_database.g.dart';
     SubjectsTable,
     ClassroomSubjectsTable,
     PlannedLessonsTable,
+    SchoolCalendarEventsTable,
+    ScheduleSlotsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -26,12 +28,18 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(schoolCalendarEventsTable);
+        await m.createTable(scheduleSlotsTable);
+      }
     },
     beforeOpen: (details) async {
       // Garante estritamente a ativação da integridade referencial do SQLite
