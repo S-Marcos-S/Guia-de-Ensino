@@ -95,13 +95,14 @@ class DriftLessonExecutionRepository implements LessonExecutionRepository {
             );
       }
 
-      // 6. Sincronização do status e notas da PlannedLesson para manter integridade com o modelo legado
+      // 6. Sincronização do status da PlannedLesson para manter integridade com o modelo legado,
+      // preservando estritamente a anotação original do planejamento (plannedLesson.notes).
       await (_db.update(
         _db.plannedLessonsTable,
       )..where((tbl) => tbl.id.equals(record.plannedLessonId))).write(
         PlannedLessonsTableCompanion(
           status: Value(record.status.name),
-          notes: Value(record.pedagogicalNotes ?? plannedLesson.notes),
+          notes: Value(plannedLesson.notes),
         ),
       );
     });
@@ -222,8 +223,8 @@ class DriftLessonExecutionRepository implements LessonExecutionRepository {
       pedagogicalNotes: data.pedagogicalNotes,
       needsFollowUp: data.needsFollowUp,
       followUpNotes: data.followUpNotes,
-      recordedAt: data.recordedAt,
-      updatedAt: data.updatedAt,
+      recordedAt: data.recordedAt.toUtc(),
+      updatedAt: data.updatedAt?.toUtc(),
     );
   }
 }

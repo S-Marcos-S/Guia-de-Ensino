@@ -146,6 +146,29 @@ erDiagram
   - `future_lessons_count`: Aulas futuras aguardando ocorrência.
   - Invariante determinística: `completed + partiallyCompleted + notHeld + pendingRecord + future == totalLessonsPlanned`.
   - Propriedades calculadas: `totalLessonsRecorded`, `totalLessonsEffective`, `completionRate`, `recordingRate`, `hasPendingPastLessons`.
+- **`ClassroomSubjectDetailedProgress` (Indicadores Detalhados de Execução e Conteúdo - Etapa 6.3)**:
+  - Classificação mutuamente exclusiva e exaustiva:
+    - `completedLessonsCount`: Aulas realizadas integralmente (`completed`).
+    - `partiallyCompletedLessonsCount`: Aulas realizadas parcialmente (`partiallyCompleted`).
+    - `notHeldLessonsCount`: Aulas canceladas/não realizadas com justificativa (`notHeld`).
+    - `pendingPastLessonsCount`: Aulas de datas passadas sem apontamento.
+    - `pendingTodayLessonsCount`: Aulas programadas para a data de hoje sem apontamento.
+    - `futureLessonsCount`: Aulas programadas para datas futuras.
+    - **Invariante de Soma**: $\text{completed} + \text{partiallyCompleted} + \text{notHeld} + \text{pendingPast} + \text{pendingToday} + \text{future} = \text{totalLessonsPlanned}$.
+  - Taxas e Fórmulas Determinísticas (com numerador e denominador explícitos):
+    - `effectiveCompletionRate`: $\frac{\text{completed} + \text{partiallyCompleted}}{\text{totalLessonsPlanned}}$
+    - `strictCompletionRate`: $\frac{\text{completed}}{\text{totalLessonsPlanned}}$
+    - `recordingRate`: $\frac{\text{totalLessonsRecorded}}{\text{totalLessonsPlanned}}$
+    - `cancellationRate`: $\frac{\text{notHeld}}{\text{totalLessonsRecorded}}$ (quando $\text{totalLessonsRecorded} > 0$, senão 0.0)
+  - Regra de Conclusão Pedagógica de Conteúdos:
+    - A conclusão de um conteúdo não é inferida por mero registro. Cada conteúdo possui `estimatedLessons` (duração estimada em aulas).
+    - O conteúdo é considerado **concluído** (`completed`) quando a contagem de vezes em que foi ministrado em aulas realizadas/parciais for $\ge \text{estimatedLessons}$.
+    - Conteúdo **em andamento** (`inProgress`): ministrado ao menos uma vez, mas com carga inferior a `estimatedLessons`.
+    - Conteúdo **não iniciado** (`notStarted`): nunca ministrado em nenhuma aula.
+    - `contentCompletionRate`: $\frac{\text{completedContentsCount}}{\text{totalContentsPlannedCount}}$
+  - Continuidade Pedagógica:
+    - `pendingFollowUpsCount`: contagem de registros com `needsFollowUp == true`.
+    - `followUpRecords`: coleção de registros com pendências a retomar.
 
 ### 2.6 Versões e Histórico de Replanejamento
 - **`PlanningVersion`**:

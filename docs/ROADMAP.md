@@ -156,7 +156,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 6 — Acompanhamento e Registro de Aulas
-- **Status**: **Em andamento** (Incrementos 6.1 e 6.2 concluídos)
+- **Status**: **Em andamento** (Incrementos 6.1, 6.2 e 6.3 concluídos)
 - **Incrementos**:
   - **6.1 — Modelo de Domínio e Contratos**: **Concluído**
     - Entidade `LessonExecutionRecord` com validação de status, regras estritas de cancelamento e integridade de conteúdos ministrados.
@@ -169,13 +169,17 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
     - Elevação do `schemaVersion` para 5 com estratégia de migração incremental de v1, v2, v3 e v4 para v5.
     - Implementação de `DriftLessonExecutionRepository` com validação transacional e atômica de correspondência de vínculos (aula planejada, disciplina da turma e conteúdos).
     - 9 testes automatizados de migração, integridade referencial, unicidade e persistência aprovados (totalizando 109 testes na suíte geral).
-  - **6.3 — Casos de Uso e Cálculo de Progresso**: Planejado
+  - **6.3 — Casos de Uso e Cálculo de Progresso**: **Concluído**
+    - `RecordLessonExecutionUseCase`: Apontamento fático e retificação pedagógica com preservação estrita de `recordedAt`, atualização controlada de `updatedAt` e proteção das notas originais de planejamento.
+    - `GetClassroomSubjectProgressUseCase`: Cálculo determinístico de indicadores com classificação mutuamente exclusiva e exaustiva de aulas, taxas percentuais documentadas e regra de conclusão de conteúdo por duração estimada.
+    - `GetPendingLessonsUseCase`: Consulta categorizada de pendências docentes (atrasadas, de hoje e futuras) com ordenação determinística.
+    - 8 testes automatizados implementados e 100% aprovados (totalizando 117 testes na suíte geral).
   - **6.4 — Interface de Acompanhamento e Diário de Aula**: Planejado
 - **Critérios de Aceitação Gerais**:
   1. [x] Modelo de domínio puro separando a aula planejada (`PlannedLesson`) do fato registrado (`LessonExecutionRecord`).
   2. [x] Registros históricos persistidos com data/hora e nunca apagados por alterações futuras (Schema v5 com `KeyAction.restrict`).
-  3. [ ] Indicadores de progresso atualizados em tempo real por turma e disciplina.
-  4. [ ] Testes cobrindo registros com falha, cancelamento, aula parcial e continuidade pedagógica.
+  3. [x] Indicadores de progresso atualizados em tempo real por turma e disciplina (`GetClassroomSubjectProgressUseCase`).
+  4. [x] Testes cobrindo registros com falha, cancelamento, aula parcial e continuidade pedagógica.
 
 ---
 

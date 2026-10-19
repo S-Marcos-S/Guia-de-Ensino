@@ -11,6 +11,9 @@ import 'package:app/domain/services/calendar_calculation_service.dart';
 import 'package:app/domain/services/curriculum_integrity_service.dart';
 import 'package:app/domain/services/planning_engine_service.dart';
 import 'package:app/domain/usecases/generate_schedule_plan_usecase.dart';
+import 'package:app/domain/usecases/get_classroom_subject_progress_usecase.dart';
+import 'package:app/domain/usecases/get_pending_lessons_usecase.dart';
+import 'package:app/domain/usecases/record_lesson_execution_usecase.dart';
 import 'package:app/infrastructure/curriculum/curriculum_seed_loader.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_academic_year_repository.dart';
@@ -42,6 +45,9 @@ class AppDependencies {
     CurriculumSeedLoader? curriculumSeedLoader,
     PlanningEngineService? planningEngineService,
     GenerateSchedulePlanUseCase? generateSchedulePlanUseCase,
+    RecordLessonExecutionUseCase? recordLessonExecutionUseCase,
+    GetClassroomSubjectProgressUseCase? getClassroomSubjectProgressUseCase,
+    GetPendingLessonsUseCase? getPendingLessonsUseCase,
   }) : academicYearRepository =
            academicYearRepository ?? DriftAcademicYearRepository(database),
        subjectRepository =
@@ -110,6 +116,39 @@ class AppDependencies {
              plannedLessonRepository:
                  plannedLessonRepository ??
                  DriftPlannedLessonRepository(database),
+           ),
+       recordLessonExecutionUseCase =
+           recordLessonExecutionUseCase ??
+           RecordLessonExecutionUseCase(
+             lessonExecutionRepository:
+                 lessonExecutionRepository ??
+                 DriftLessonExecutionRepository(database),
+             plannedLessonRepository:
+                 plannedLessonRepository ??
+                 DriftPlannedLessonRepository(database),
+           ),
+       getClassroomSubjectProgressUseCase =
+           getClassroomSubjectProgressUseCase ??
+           GetClassroomSubjectProgressUseCase(
+             plannedLessonRepository:
+                 plannedLessonRepository ??
+                 DriftPlannedLessonRepository(database),
+             lessonExecutionRepository:
+                 lessonExecutionRepository ??
+                 DriftLessonExecutionRepository(database),
+             courseContentRepository:
+                 courseContentRepository ??
+                 DriftCourseContentRepository(database),
+           ),
+       getPendingLessonsUseCase =
+           getPendingLessonsUseCase ??
+           GetPendingLessonsUseCase(
+             plannedLessonRepository:
+                 plannedLessonRepository ??
+                 DriftPlannedLessonRepository(database),
+             lessonExecutionRepository:
+                 lessonExecutionRepository ??
+                 DriftLessonExecutionRepository(database),
            );
 
   final AppDatabase database;
@@ -127,6 +166,9 @@ class AppDependencies {
   final CurriculumSeedLoader curriculumSeedLoader;
   final PlanningEngineService planningEngineService;
   final GenerateSchedulePlanUseCase generateSchedulePlanUseCase;
+  final RecordLessonExecutionUseCase recordLessonExecutionUseCase;
+  final GetClassroomSubjectProgressUseCase getClassroomSubjectProgressUseCase;
+  final GetPendingLessonsUseCase getPendingLessonsUseCase;
 }
 
 /// Provedor de dependências via InheritedWidget para a árvore de widgets.
