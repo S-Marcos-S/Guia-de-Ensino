@@ -157,22 +157,43 @@ void main() {
   }
 
   group('RecordLessonDialog Widget Tests', () {
+    Future<void> pumpDialog(
+      WidgetTester tester, {
+      PlannedLesson? lesson,
+      LessonExecutionRecord? record,
+      CourseContentRepository? contentRepo,
+      RecordLessonExecutionUseCase? useCase,
+    }) async {
+      tester.view.physicalSize = const Size(800, 1000);
+      addTearDown(tester.view.resetPhysicalSize);
+      await tester.pumpWidget(
+        createWidget(
+          lesson: lesson,
+          record: record,
+          contentRepo: contentRepo,
+          useCase: useCase,
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
     testWidgets('1. Pré-seleção editável e seleção de conteúdos adicionais', (
       tester,
     ) async {
       final fakeUseCase = FakeRecordLessonExecutionUseCase();
 
-      await tester.pumpWidget(
-        createWidget(
-          useCase: fakeUseCase,
-          contentRepo: FakeCourseContentRepository(contents: testContents),
-        ),
+      await pumpDialog(
+        tester,
+        useCase: fakeUseCase,
+        contentRepo: FakeCourseContentRepository(contents: testContents),
       );
-      await tester.pumpAndSettle();
 
-      // Verifica que os conteúdos planejados (cnt-1 e cnt-2) estão inicialmente marcados
-      final checkboxes = find.byType(Checkbox);
-      expect(checkboxes, findsNWidgets(3));
+      // Verifica que os conteúdos planejados (cnt-1 e cnt-2) estão inicialmente marcados no seletor
+      final contentCheckboxes = find.descendant(
+        of: find.byType(ListView),
+        matching: find.byType(Checkbox),
+      );
+      expect(contentCheckboxes, findsNWidgets(3));
 
       // Desmarca o cnt-1 (primeiro checkbox)
       await tester.tap(find.text('Tópico 1 - Funções Afins'));
@@ -207,8 +228,7 @@ void main() {
       (tester) async {
         final fakeUseCase = FakeRecordLessonExecutionUseCase();
 
-        await tester.pumpWidget(createWidget(useCase: fakeUseCase));
-        await tester.pumpAndSettle();
+        await pumpDialog(tester, useCase: fakeUseCase);
 
         // Seleciona status "Não Realizada"
         await tester.tap(find.text(AppStrings.statusNotHeldOption));
@@ -235,8 +255,7 @@ void main() {
     ) async {
       final fakeUseCase = FakeRecordLessonExecutionUseCase();
 
-      await tester.pumpWidget(createWidget(useCase: fakeUseCase));
-      await tester.pumpAndSettle();
+      await pumpDialog(tester, useCase: fakeUseCase);
 
       // Seleciona status "Não Realizada"
       await tester.tap(find.text(AppStrings.statusNotHeldOption));
@@ -267,8 +286,7 @@ void main() {
       (tester) async {
         final fakeUseCase = FakeRecordLessonExecutionUseCase();
 
-        await tester.pumpWidget(createWidget(useCase: fakeUseCase));
-        await tester.pumpAndSettle();
+        await pumpDialog(tester, useCase: fakeUseCase);
 
         // Seleciona status "Parcial"
         await tester.tap(find.text(AppStrings.statusPartiallyCompletedOption));
@@ -317,8 +335,7 @@ void main() {
       (tester) async {
         final fakeUseCase = FakeRecordLessonExecutionUseCase(shouldThrow: true);
 
-        await tester.pumpWidget(createWidget(useCase: fakeUseCase));
-        await tester.pumpAndSettle();
+        await pumpDialog(tester, useCase: fakeUseCase);
 
         // Digita observações pedagógicas
         await tester.enterText(
@@ -359,8 +376,7 @@ void main() {
           delay: const Duration(milliseconds: 200),
         );
 
-        await tester.pumpWidget(createWidget(useCase: fakeUseCase));
-        await tester.pumpAndSettle();
+        await pumpDialog(tester, useCase: fakeUseCase);
 
         // Dispara o primeiro clique
         await tester.tap(find.text(AppStrings.saveRecordButton));
@@ -378,6 +394,9 @@ void main() {
     );
 
     testWidgets('7. Cancelamento do diálogo sem gravação', (tester) async {
+      tester.view.physicalSize = const Size(800, 1000);
+      addTearDown(tester.view.resetPhysicalSize);
+
       final fakeUseCase = FakeRecordLessonExecutionUseCase();
       bool? result;
 
@@ -424,8 +443,7 @@ void main() {
       (tester) async {
         final failingRepo = FakeCourseContentRepository(shouldThrow: true);
 
-        await tester.pumpWidget(createWidget(contentRepo: failingRepo));
-        await tester.pumpAndSettle();
+        await pumpDialog(tester, contentRepo: failingRepo);
 
         // Verifica que o erro de carregamento foi exibido
         expect(find.text(AppStrings.loadingContentsError), findsOneWidget);

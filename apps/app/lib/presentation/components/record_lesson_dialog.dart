@@ -419,31 +419,42 @@ class _RecordLessonDialogState extends State<RecordLessonDialog> {
 
                       // 2. Seção de Conteúdos Ministrados (oculta/desabilitada se notHeld)
                       if (_status != LessonExecutionStatus.notHeld) ...[
-                        Row(
+                        Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 4,
                           children: [
-                            Expanded(
-                              child: Text(
-                                AppStrings.contentsTaughtSectionLabel,
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                            Text(
+                              AppStrings.contentsTaughtSectionLabel,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextButton.icon(
+                                  onPressed: _quickSelectPlannedContents,
+                                  icon: const Icon(
+                                    Icons.bookmark_added,
+                                    size: 14,
+                                  ),
+                                  label: const Text(
+                                    AppStrings.selectPlannedContentsQuickAction,
+                                    style: TextStyle(fontSize: 12),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            TextButton.icon(
-                              onPressed: _quickSelectPlannedContents,
-                              icon: const Icon(Icons.bookmark_added, size: 16),
-                              label: const Text(
-                                AppStrings.selectPlannedContentsQuickAction,
-                                style: TextStyle(fontSize: 12),
-                              ),
-                            ),
-                            TextButton.icon(
-                              onPressed: _quickClearContents,
-                              icon: const Icon(Icons.clear_all, size: 16),
-                              label: const Text(
-                                AppStrings.clearSelectedContentsQuickAction,
-                                style: TextStyle(fontSize: 12),
-                              ),
+                                const SizedBox(width: 4),
+                                TextButton.icon(
+                                  onPressed: _quickClearContents,
+                                  icon: const Icon(Icons.clear_all, size: 14),
+                                  label: const Text(
+                                    AppStrings.clearSelectedContentsQuickAction,
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -483,6 +494,7 @@ class _RecordLessonDialogState extends State<RecordLessonDialog> {
                         // Motivo do Cancelamento
                         DropdownButtonFormField<LessonCancellationReason>(
                           initialValue: _cancellationReason,
+                          isExpanded: true,
                           decoration: const InputDecoration(
                             labelText:
                                 '${AppStrings.cancellationReasonLabel} *',
