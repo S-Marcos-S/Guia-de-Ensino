@@ -482,7 +482,7 @@ class _RecordLessonDialogState extends State<RecordLessonDialog> {
 
                         // Motivo do Cancelamento
                         DropdownButtonFormField<LessonCancellationReason>(
-                          value: _cancellationReason,
+                          initialValue: _cancellationReason,
                           decoration: const InputDecoration(
                             labelText:
                                 '${AppStrings.cancellationReasonLabel} *',

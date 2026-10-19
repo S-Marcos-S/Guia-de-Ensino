@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:app/core/di/app_dependencies.dart';
 import 'package:app/core/localization/app_strings.dart';
 import 'package:app/domain/models/academic_year.dart';
@@ -9,6 +7,7 @@ import 'package:app/domain/models/lesson_execution_record.dart';
 import 'package:app/domain/models/planned_lesson.dart';
 import 'package:app/domain/models/subject.dart';
 import 'package:app/domain/usecases/get_classroom_subject_lessons_usecase.dart';
+import 'package:app/domain/usecases/record_lesson_execution_usecase.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
 import 'package:app/presentation/components/status_badge.dart';
 import 'package:app/presentation/screens/lessons_screen.dart';
@@ -698,8 +697,8 @@ void main() {
         // Progresso inicial: 0 aulas executadas
         var progress = await dependencies.getClassroomSubjectProgressUseCase
             .execute(classroomSubjectId: 'cs-9a-mat');
-        expect(progress.executedLessons, equals(0));
-        expect(progress.completedLessons, equals(0));
+        expect(progress.totalLessonsRecorded, equals(0));
+        expect(progress.completedLessonsCount, equals(0));
 
         // Grava apontamento como realizada
         await dependencies.recordLessonExecutionUseCase.execute(
@@ -715,9 +714,9 @@ void main() {
         // Progresso pós-gravação: 1 executada e 1 completada
         progress = await dependencies.getClassroomSubjectProgressUseCase
             .execute(classroomSubjectId: 'cs-9a-mat');
-        expect(progress.executedLessons, equals(1));
-        expect(progress.completedLessons, equals(1));
-        expect(progress.notHeldLessons, equals(0));
+        expect(progress.totalLessonsRecorded, equals(1));
+        expect(progress.completedLessonsCount, equals(1));
+        expect(progress.notHeldLessonsCount, equals(0));
 
         // Retifica para não realizada
         await dependencies.recordLessonExecutionUseCase.execute(
@@ -733,9 +732,9 @@ void main() {
         // Progresso pós-retificação: 1 executada, 0 completadas, 1 notHeld
         progress = await dependencies.getClassroomSubjectProgressUseCase
             .execute(classroomSubjectId: 'cs-9a-mat');
-        expect(progress.executedLessons, equals(1));
-        expect(progress.completedLessons, equals(0));
-        expect(progress.notHeldLessons, equals(1));
+        expect(progress.totalLessonsRecorded, equals(1));
+        expect(progress.completedLessonsCount, equals(0));
+        expect(progress.notHeldLessonsCount, equals(1));
       },
     );
   });

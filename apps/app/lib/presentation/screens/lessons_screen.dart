@@ -736,7 +736,8 @@ class _LessonsScreenState extends State<LessonsScreen> {
         plannedLesson: item.plannedLesson,
         classroomSubjectId: _selectedClassroomSubject!.id,
         classroomName: _selectedClassroom?.name ?? '',
-        subjectName: _selectedSubject?.name ?? '',
+        subjectName:
+            _subjectsMap[_selectedClassroomSubject?.subjectId]?.name ?? '',
         executionRecord: item.executionRecord,
       ),
     );

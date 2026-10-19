@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:app/core/localization/app_strings.dart';
 import 'package:app/domain/models/course_content.dart';
 import 'package:app/domain/models/lesson_execution_record.dart';

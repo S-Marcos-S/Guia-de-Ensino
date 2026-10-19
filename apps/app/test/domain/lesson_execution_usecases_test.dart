@@ -9,7 +9,7 @@ import 'package:app/infrastructure/persistence/database/app_database.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_course_content_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_lesson_execution_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_planned_lesson_repository.dart';
-import 'package:drift/drift.dart' hide isNull;
+import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
