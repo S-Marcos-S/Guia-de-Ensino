@@ -126,7 +126,9 @@ class HomeScreen extends StatelessWidget {
                 icon: Icons.assignment_outlined,
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const LessonsScreen()),
+                    MaterialPageRoute<void>(
+                      builder: (_) => const LessonsScreen(),
+                    ),
                   );
                 },
               ),

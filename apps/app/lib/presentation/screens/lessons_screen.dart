@@ -2,6 +2,7 @@ import 'package:app/core/di/app_dependencies.dart';
 import 'package:app/core/localization/app_strings.dart';
 import 'package:app/domain/models/academic_year.dart';
 import 'package:app/domain/models/classroom.dart';
+import 'package:app/domain/models/lesson_execution_record.dart';
 import 'package:app/domain/models/planned_lesson.dart';
 import 'package:app/domain/models/subject.dart';
 import 'package:app/domain/usecases/get_classroom_subject_lessons_usecase.dart';
@@ -207,11 +208,11 @@ class _LessonsScreenState extends State<LessonsScreen> {
     }
 
     if (_activeYear == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text(AppStrings.lessonsScreenTitle)),
+      return const Scaffold(
+        appBar: AppBar(title: Text(AppStrings.lessonsScreenTitle)),
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: EdgeInsets.symmetric(horizontal: 24),
             child: EmptyStateView(
               title: 'Ano Letivo Necessário',
               description: 'Antes de consultar aulas, configure o Ano Letivo na aba Calendário.',
@@ -223,11 +224,11 @@ class _LessonsScreenState extends State<LessonsScreen> {
     }
 
     if (_classrooms.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: const Text(AppStrings.lessonsScreenTitle)),
+      return const Scaffold(
+        appBar: AppBar(title: Text(AppStrings.lessonsScreenTitle)),
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: EdgeInsets.symmetric(horizontal: 24),
             child: EmptyStateView(
               title: 'Nenhuma Turma Cadastrada',
               description: 'Cadastre turmas e vincule disciplinas para consultar o cronograma de aulas.',
@@ -374,7 +375,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
                     ButtonSegment(
                       value: LessonFilter.future,
                       label: Text(AppStrings.filterFuture),
-                      icon: Icon(Icons.event_upcoming),
+                      icon: Icon(Icons.event),
                     ),
                   ],
                   selected: {_selectedFilter},
@@ -454,7 +455,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
 
     return ListView.separated(
       itemCount: filtered.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (context, index) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final item = filtered[index];
         return _buildLessonCard(context, item);

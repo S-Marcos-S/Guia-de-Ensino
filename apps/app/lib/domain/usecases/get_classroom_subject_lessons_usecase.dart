@@ -1,4 +1,3 @@
-import 'package:app/domain/models/course_content.dart';
 import 'package:app/domain/models/lesson_execution_record.dart';
 import 'package:app/domain/models/planned_lesson.dart';
 import 'package:app/domain/repositories/course_content_repository.dart';

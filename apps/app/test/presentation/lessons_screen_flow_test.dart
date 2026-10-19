@@ -122,11 +122,13 @@ void main() {
         subjectConfigs: [
           ClassroomSubjectConfig(
             id: 'cs-9a-mat',
+            classroomId: 'c-9a',
             subjectId: 'subj-mat',
             weeklyLessons: 4,
           ),
           ClassroomSubjectConfig(
             id: 'cs-9a-cie',
+            classroomId: 'c-9a',
             subjectId: 'subj-cie',
             weeklyLessons: 3,
           ),
@@ -276,11 +278,13 @@ void main() {
             subjectConfigs: [
               ClassroomSubjectConfig(
                 id: 'cs-slow',
+                classroomId: 'c-concurrency',
                 subjectId: 'subj-slow',
                 weeklyLessons: 2,
               ),
               ClassroomSubjectConfig(
                 id: 'cs-fast',
+                classroomId: 'c-concurrency',
                 subjectId: 'subj-fast',
                 weeklyLessons: 2,
               ),

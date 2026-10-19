@@ -238,7 +238,7 @@ class _ClassroomsScreenState extends State<ClassroomsScreen> {
                                   ),
                                   onPressed: () {
                                     Navigator.of(context).push(
-                                      MaterialPageRoute(
+                                      MaterialPageRoute<void>(
                                         builder: (_) => LessonsScreen(
                                           initialClassroomId:
                                               currentClassroom.id,
@@ -877,7 +877,7 @@ class _ClassroomsScreenState extends State<ClassroomsScreen> {
                                   label: const Text('Aulas'),
                                   onPressed: () {
                                     Navigator.of(context).push(
-                                      MaterialPageRoute(
+                                      MaterialPageRoute<void>(
                                         builder: (_) => LessonsScreen(
                                           initialClassroomId: classroom.id,
                                         ),

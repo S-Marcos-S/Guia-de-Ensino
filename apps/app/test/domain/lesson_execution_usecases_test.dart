@@ -1060,7 +1060,7 @@ void main() {
           executionDate: DateTime.utc(2026, 3, 2),
           status: LessonExecutionStatus.notHeld,
           actualContentIds: const [],
-          cancellationReason: LessonCancellationReason.weatherEvent,
+          cancellationReason: LessonCancellationReason.infrastructureIssue,
           recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
         ),
       );
