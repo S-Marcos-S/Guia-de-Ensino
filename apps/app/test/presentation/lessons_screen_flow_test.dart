@@ -10,6 +10,7 @@ import 'package:app/domain/models/planned_lesson.dart';
 import 'package:app/domain/models/subject.dart';
 import 'package:app/domain/usecases/get_classroom_subject_lessons_usecase.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
+import 'package:app/presentation/components/status_badge.dart';
 import 'package:app/presentation/screens/lessons_screen.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -233,10 +234,19 @@ void main() {
         expect(find.text('9º Ano A'), findsWidgets);
         expect(find.text('Matemática'), findsWidgets);
 
-        // 2. Badges de status
-        expect(find.text(AppStrings.badgePastUnrecorded), findsOneWidget);
-        expect(find.text(AppStrings.badgeToday), findsOneWidget);
-        expect(find.text(AppStrings.statusCompleted), findsOneWidget);
+        // 2. Badges de status dos cards
+        expect(
+          find.widgetWithText(StatusBadge, AppStrings.badgePastUnrecorded),
+          findsOneWidget,
+        );
+        expect(
+          find.widgetWithText(StatusBadge, AppStrings.badgeToday),
+          findsOneWidget,
+        );
+        expect(
+          find.widgetWithText(StatusBadge, AppStrings.statusCompleted),
+          findsOneWidget,
+        );
 
         // 3. Conteúdos planejados e ministrados
         expect(find.text('• Frações e Números Decimais'), findsOneWidget);
@@ -339,10 +349,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // A consulta rápida completou imediatamente e a tela exibe seus dados
-        expect(
-          find.textContaining('Conteúdo Rápido de Física'),
-          findsOneWidget,
-        );
+        expect(find.textContaining('Conteúdo Rápido de Física'), findsWidgets);
 
         // Agora, com atraso, a consulta antiga LENTA finalmente termina
         slowCompleter.complete([
@@ -363,10 +370,7 @@ void main() {
 
         // VALIDAÇÃO CRÍTICA: O conteúdo rápido de Física CONTINUA na tela!
         // O resultado obsoleto de História Lenta foi descartado e NÃO sobrescreveu a interface!
-        expect(
-          find.textContaining('Conteúdo Rápido de Física'),
-          findsOneWidget,
-        );
+        expect(find.textContaining('Conteúdo Rápido de Física'), findsWidgets);
         expect(
           find.textContaining('Conteúdo Lento Obsoleto de História'),
           findsNothing,
