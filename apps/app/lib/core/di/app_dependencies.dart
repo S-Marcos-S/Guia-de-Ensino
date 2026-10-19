@@ -10,6 +10,10 @@ import 'package:app/domain/repositories/subject_repository.dart';
 import 'package:app/domain/services/calendar_calculation_service.dart';
 import 'package:app/domain/services/curriculum_integrity_service.dart';
 import 'package:app/domain/services/planning_engine_service.dart';
+import 'package:app/domain/services/replanning_engine_service.dart';
+import 'package:app/domain/usecases/apply_replanning_proposal_usecase.dart';
+import 'package:app/domain/usecases/detect_schedule_delay_usecase.dart';
+import 'package:app/domain/usecases/generate_replanning_proposal_usecase.dart';
 import 'package:app/domain/usecases/generate_schedule_plan_usecase.dart';
 import 'package:app/domain/usecases/get_classroom_subject_lessons_usecase.dart';
 import 'package:app/domain/usecases/get_classroom_subject_progress_usecase.dart';
@@ -50,6 +54,10 @@ class AppDependencies {
     GetClassroomSubjectProgressUseCase? getClassroomSubjectProgressUseCase,
     GetPendingLessonsUseCase? getPendingLessonsUseCase,
     GetClassroomSubjectLessonsUseCase? getClassroomSubjectLessonsUseCase,
+    ReplanningEngineService? replanningEngineService,
+    DetectScheduleDelayUseCase? detectScheduleDelayUseCase,
+    GenerateReplanningProposalUseCase? generateReplanningProposalUseCase,
+    ApplyReplanningProposalUseCase? applyReplanningProposalUseCase,
   }) : academicYearRepository =
            academicYearRepository ?? DriftAcademicYearRepository(database),
        subjectRepository =
@@ -164,6 +172,103 @@ class AppDependencies {
              courseContentRepository:
                  courseContentRepository ??
                  DriftCourseContentRepository(database),
+           ),
+       replanningEngineService =
+           replanningEngineService ??
+           ReplanningEngineService(
+             planningEngineService:
+                 planningEngineService ??
+                 PlanningEngineService(
+                   curriculumIntegrityService:
+                       curriculumIntegrityService ??
+                       const CurriculumIntegrityService(),
+                 ),
+           ),
+       detectScheduleDelayUseCase =
+           detectScheduleDelayUseCase ??
+           DetectScheduleDelayUseCase(
+             plannedLessonRepository:
+                 plannedLessonRepository ??
+                 DriftPlannedLessonRepository(database),
+             lessonExecutionRepository:
+                 lessonExecutionRepository ??
+                 DriftLessonExecutionRepository(database),
+             courseContentRepository:
+                 courseContentRepository ??
+                 DriftCourseContentRepository(database),
+             classroomRepository:
+                 classroomRepository ?? DriftClassroomRepository(database),
+             academicYearRepository:
+                 academicYearRepository ??
+                 DriftAcademicYearRepository(database),
+             calendarEventRepository:
+                 calendarEventRepository ??
+                 DriftCalendarEventRepository(database),
+             calendarCalculationService:
+                 calendarCalculationService ??
+                 const CalendarCalculationService(),
+             scheduleSlotRepository:
+                 scheduleSlotRepository ??
+                 DriftScheduleSlotRepository(database),
+             replanningEngineService:
+                 replanningEngineService ??
+                 ReplanningEngineService(
+                   planningEngineService:
+                       planningEngineService ??
+                       PlanningEngineService(
+                         curriculumIntegrityService:
+                             curriculumIntegrityService ??
+                             const CurriculumIntegrityService(),
+                       ),
+                 ),
+           ),
+       generateReplanningProposalUseCase =
+           generateReplanningProposalUseCase ??
+           GenerateReplanningProposalUseCase(
+             classroomRepository:
+                 classroomRepository ?? DriftClassroomRepository(database),
+             academicYearRepository:
+                 academicYearRepository ??
+                 DriftAcademicYearRepository(database),
+             calendarEventRepository:
+                 calendarEventRepository ??
+                 DriftCalendarEventRepository(database),
+             calendarCalculationService:
+                 calendarCalculationService ??
+                 const CalendarCalculationService(),
+             scheduleSlotRepository:
+                 scheduleSlotRepository ??
+                 DriftScheduleSlotRepository(database),
+             courseContentRepository:
+                 courseContentRepository ??
+                 DriftCourseContentRepository(database),
+             plannedLessonRepository:
+                 plannedLessonRepository ??
+                 DriftPlannedLessonRepository(database),
+             lessonExecutionRepository:
+                 lessonExecutionRepository ??
+                 DriftLessonExecutionRepository(database),
+             replanningEngineService:
+                 replanningEngineService ??
+                 ReplanningEngineService(
+                   planningEngineService:
+                       planningEngineService ??
+                       PlanningEngineService(
+                         curriculumIntegrityService:
+                             curriculumIntegrityService ??
+                             const CurriculumIntegrityService(),
+                       ),
+                 ),
+           ),
+       applyReplanningProposalUseCase =
+           applyReplanningProposalUseCase ??
+           ApplyReplanningProposalUseCase(
+             plannedLessonRepository:
+                 plannedLessonRepository ??
+                 DriftPlannedLessonRepository(database),
+             lessonExecutionRepository:
+                 lessonExecutionRepository ??
+                 DriftLessonExecutionRepository(database),
            );
 
   final AppDatabase database;
@@ -185,6 +290,10 @@ class AppDependencies {
   final GetClassroomSubjectProgressUseCase getClassroomSubjectProgressUseCase;
   final GetPendingLessonsUseCase getPendingLessonsUseCase;
   final GetClassroomSubjectLessonsUseCase getClassroomSubjectLessonsUseCase;
+  final ReplanningEngineService replanningEngineService;
+  final DetectScheduleDelayUseCase detectScheduleDelayUseCase;
+  final GenerateReplanningProposalUseCase generateReplanningProposalUseCase;
+  final ApplyReplanningProposalUseCase applyReplanningProposalUseCase;
 }
 
 /// Provedor de dependências via InheritedWidget para a árvore de widgets.
