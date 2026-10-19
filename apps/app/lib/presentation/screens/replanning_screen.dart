@@ -473,9 +473,7 @@ class _ReplanningScreenState extends State<ReplanningScreen> {
                                           _delayResult!.notHeldCount == 0
                                       ? 'Risco de Déficit Curricular Antecipado'
                                       : 'Atraso Identificado no Cronograma',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
+                                  style: Theme.of(context).textTheme.titleSmall
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: const Color(0xFFE65100),
@@ -484,7 +482,9 @@ class _ReplanningScreenState extends State<ReplanningScreen> {
                                 const SizedBox(width: 6),
                                 if (_delayResult!.hasCapacityDeficit)
                                   StatusBadge.custom(
-                                    label: _delayResult!.viabilityStatus.displayName,
+                                    label: _delayResult!
+                                        .viabilityStatus
+                                        .displayName,
                                     background: const Color(0xFFFFEBEE),
                                     foreground: const Color(0xFFC62828),
                                   ),
@@ -493,12 +493,8 @@ class _ReplanningScreenState extends State<ReplanningScreen> {
                             const SizedBox(height: 2),
                             Text(
                               _delayResult!.summaryMessage,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: const Color(0xFF5D4037),
-                                  ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: const Color(0xFF5D4037)),
                             ),
                           ],
                         ),
@@ -545,9 +541,7 @@ class _ReplanningScreenState extends State<ReplanningScreen> {
                       Expanded(
                         child: Text(
                           _delayResult!.summaryMessage,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
+                          style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: const Color(0xFF1B5E20),
                                 fontWeight: FontWeight.w500,

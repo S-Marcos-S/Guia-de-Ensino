@@ -166,13 +166,14 @@ class ReplanningEngineService {
 
     final String summary;
     if (!hasDelay) {
-      summary =
-          'Cronograma em dia. Nenhuma divergência fática ou aula cancelada identificada.';
+      summary = 'Cronograma em dia. Nenhuma divergência fática ou aula cancelada identificada.';
     } else {
       final parts = <String>[];
       if (notHeldCount > 0) parts.add('$notHeldCount aula(s) cancelada(s)');
       if (partiallyCompletedPendingCount > 0) {
-        parts.add('$partiallyCompletedPendingCount aula(s) com continuidade pendente');
+        parts.add(
+          '$partiallyCompletedPendingCount aula(s) com continuidade pendente',
+        );
       }
       if (pastUnrecordedCount > 0) {
         parts.add('$pastUnrecordedCount aula(s) passada(s) sem registro');
@@ -243,7 +244,8 @@ class ReplanningEngineService {
               completedCountPerContent[cid] =
                   (completedCountPerContent[cid] ?? 0) + 1;
             }
-          } else if (record.status == LessonExecutionStatus.partiallyCompleted) {
+          } else if (record.status ==
+              LessonExecutionStatus.partiallyCompleted) {
             if (record.needsFollowUp) {
               followUpContentIds.addAll(record.actualContentIds);
             }
@@ -308,13 +310,13 @@ class ReplanningEngineService {
         return a.orderInDay.compareTo(b.orderInDay);
       });
 
-    final sortedProposed = List<PlannedLessonAllocation>.from(
-      planningResult.plannedLessons,
-    )..sort((a, b) {
-      final dComp = a.lesson.date.compareTo(b.lesson.date);
-      if (dComp != 0) return dComp;
-      return a.lesson.orderInDay.compareTo(b.lesson.orderInDay);
-    });
+    final sortedProposed =
+        List<PlannedLessonAllocation>.from(planningResult.plannedLessons)
+          ..sort((a, b) {
+            final dComp = a.lesson.date.compareTo(b.lesson.date);
+            if (dComp != 0) return dComp;
+            return a.lesson.orderInDay.compareTo(b.lesson.orderInDay);
+          });
 
     final shifts = <LessonReplanningShift>[];
     final explanations = <String>[];
@@ -417,8 +419,7 @@ class ReplanningEngineService {
           affectedCount++;
         } else if (!dateChanged && contentChanged) {
           shiftType = LessonReplanningShiftType.reallocatedContent;
-          reason =
-              'Conteúdo atualizado para atender à sequência pedagógica de pré-requisitos.';
+          reason = 'Conteúdo atualizado para atender à sequência pedagógica de pré-requisitos.';
           affectedCount++;
         } else {
           shiftType = LessonReplanningShiftType.rescheduledDateAndContent;
@@ -537,7 +538,8 @@ class ReplanningEngineService {
       explanations.add(
         'Alerta de Viabilidade: Déficit de ${capacityAnalysis.capacityDeficit} aula(s). O currículo completo transborda o término do ano letivo.',
       );
-    } else if (capacityAnalysis.viabilityStatus == CurricularViabilityStatus.atRisk) {
+    } else if (capacityAnalysis.viabilityStatus ==
+        CurricularViabilityStatus.atRisk) {
       explanations.add(
         'Atenção: Margem de segurança de vagas é zero. Qualquer nova falta gerará déficit.',
       );
@@ -627,12 +629,15 @@ class ReplanningEngineService {
     }
 
     // 2. Mapear dias letivos válidos no intervalo do ano letivo
-    final validTeachingDays = teachingDays
-        .map((d) => DateTime(d.year, d.month, d.day))
-        .where((d) => !d.isBefore(normalizedStart) && !d.isAfter(normalizedEnd))
-        .toSet()
-        .toList()
-      ..sort();
+    final validTeachingDays =
+        teachingDays
+            .map((d) => DateTime(d.year, d.month, d.day))
+            .where(
+              (d) => !d.isBefore(normalizedStart) && !d.isAfter(normalizedEnd),
+            )
+            .toSet()
+            .toList()
+          ..sort();
 
     // 3. Gerar todas as vagas possíveis no calendário escolar
     final allSlots = <_LessonSlot>[];
@@ -678,7 +683,8 @@ class ReplanningEngineService {
               completedCountPerContent[cid] =
                   (completedCountPerContent[cid] ?? 0) + 1;
             }
-          } else if (record.status == LessonExecutionStatus.partiallyCompleted) {
+          } else if (record.status ==
+              LessonExecutionStatus.partiallyCompleted) {
             if (record.needsFollowUp) {
               followUpContentIds.addAll(record.actualContentIds);
             }
@@ -690,8 +696,7 @@ class ReplanningEngineService {
     // 5. Vagas futuras válidas e livres (capacidade restante real)
     final futureAvailableSlots = allSlots
         .where(
-          (s) =>
-              !s.date.isBefore(refCivil) && !occupiedSlots.containsKey(s),
+          (s) => !s.date.isBefore(refCivil) && !occupiedSlots.containsKey(s),
         )
         .toList();
     final totalFutureAvailableSlots = futureAvailableSlots.length;
@@ -771,8 +776,9 @@ class ReplanningEngineService {
       overflowsAcademicYear = true;
       final slotsPerWeek = max(1, scheduleSlots.length);
       final extraWeeks = (capacityDeficit / slotsPerWeek).ceil();
-      estimatedCompletionDate =
-          normalizedEnd.add(Duration(days: extraWeeks * 7));
+      estimatedCompletionDate = normalizedEnd.add(
+        Duration(days: extraWeeks * 7),
+      );
     }
 
     // 10. Mapeamento detalhado dos Conteúdos em Risco
@@ -802,8 +808,7 @@ class ReplanningEngineService {
         riskReason =
             'Capacidade letiva esgotada: faltam $missing aula(s) para completar a estimativa de $needed aula(s).';
       } else if (hasPrereqRisk) {
-        riskReason =
-            'Alocação comprometida: pré-requisito curricular em risco de não conclusão.';
+        riskReason = 'Alocação comprometida: pré-requisito curricular em risco de não conclusão.';
       } else {
         riskReason = 'Alocação garantida nas vagas livres disponíveis.';
       }
@@ -868,8 +873,7 @@ class ReplanningEngineService {
             'Planejamento inviável: faltam $mandatoryCapacityDeficit aula(s) obrigatória(s) ($capacityDeficit no total). Conclusão estimada transborda o ano letivo para ${_formatDate(estimatedCompletionDate!)}.';
         break;
       case CurricularViabilityStatus.indeterminate:
-        summary =
-            'Não foi possível projetar a viabilidade: grade horária semanal ou calendário letivo insuficientes.';
+        summary = 'Não foi possível projetar a viabilidade: grade horária semanal ou calendário letivo insuficientes.';
         break;
     }
 
@@ -928,8 +932,9 @@ class ReplanningEngineService {
     }
 
     final bool hasData = totalStarted > 0 && totalEstimated > 0;
-    final double paceRatio =
-        hasData ? (totalLessonsSpent / totalEstimated) : 1.0;
+    final double paceRatio = hasData
+        ? (totalLessonsSpent / totalEstimated)
+        : 1.0;
     final int projectedAdditional = hasData && paceRatio > 1.0
         ? ((totalRemainingDemandLessons * (paceRatio - 1.0)).round())
         : 0;
@@ -991,10 +996,8 @@ class ReplanningEngineService {
       RecoveryScenario(
         type: RecoveryScenarioType.baseline,
         title: 'Cenário A — Planejamento Vigente',
-        description:
-            'Distribui os conteúdos pendentes mantendo rigorosamente as estimativas pedagógicas atuais.',
-        hypothesis:
-            'Considera o calendário escolar aprovado, a grade horária semanal e as estimativas originais sem alterações.',
+        description: 'Distribui os conteúdos pendentes mantendo rigorosamente as estimativas pedagógicas atuais.',
+        hypothesis: 'Considera o calendário escolar aprovado, a grade horária semanal e as estimativas originais sem alterações.',
         capacityAnalysis: baselineCapacity,
         proposedAllocations: const [],
         extraLessonsNeeded: baselineCapacity.capacityDeficit,
@@ -1010,16 +1013,14 @@ class ReplanningEngineService {
       addHypothesis =
           'Adição de $additionalNeeded aula(s) de reforço/reposição em dias letivos extras ou contraturno escolar.';
     } else {
-      addHypothesis =
-          'A capacidade atual já é suficiente. Não há necessidade de aulas extras.';
+      addHypothesis = 'A capacidade atual já é suficiente. Não há necessidade de aulas extras.';
     }
 
     scenarios.add(
       RecoveryScenario(
         type: RecoveryScenarioType.additionalCapacity,
         title: 'Cenário B — Capacidade Adicional',
-        description:
-            'Projeta o volume de aulas extras de reposição necessário para zerar o déficit curricular.',
+        description: 'Projeta o volume de aulas extras de reposição necessário para zerar o déficit curricular.',
         hypothesis: addHypothesis,
         capacityAnalysis: baselineCapacity,
         proposedAllocations: const [],
@@ -1051,8 +1052,7 @@ class ReplanningEngineService {
       RecoveryScenario(
         type: RecoveryScenarioType.essentialPriority,
         title: 'Cenário C — Priorização de Obrigatórios',
-        description:
-            'Prioriza integralmente os conteúdos e habilidades essenciais, postergando itens opcionais e complementares.',
+        description: 'Prioriza integralmente os conteúdos e habilidades essenciais, postergando itens opcionais e complementares.',
         hypothesis:
             'Garante o cumprimento dos conteúdos obrigatórios (${essentialCapacity.mandatoryRemainingDemandLessons} aula(s)) dentro das vagas letivas disponíveis.',
         capacityAnalysis: essentialCapacity,
@@ -1087,10 +1087,8 @@ class ReplanningEngineService {
         RecoveryScenario(
           type: RecoveryScenarioType.customEstimates,
           title: 'Cenário D — Estimativas Revisadas',
-          description:
-              'Simula o impacto de durações pedagógicas revisadas e compactadas informadas pelo professor.',
-          hypothesis:
-              'Aplica estimativas personalizadas sem alterar os registros permanentes até aprovação docente.',
+          description: 'Simula o impacto de durações pedagógicas revisadas e compactadas informadas pelo professor.',
+          hypothesis: 'Aplica estimativas personalizadas sem alterar os registros permanentes até aprovação docente.',
           capacityAnalysis: customCapacity,
           proposedAllocations: const [],
           extraLessonsNeeded: customCapacity.capacityDeficit,
@@ -1150,10 +1148,9 @@ class ReplanningEngineService {
 
     if (result.length < contents.length) {
       final includedIds = result.map((c) => c.id).toSet();
-      final remaining = contents
-          .where((c) => !includedIds.contains(c.id))
-          .toList()
-        ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+      final remaining =
+          contents.where((c) => !includedIds.contains(c.id)).toList()
+            ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
       result.addAll(remaining);
     }
 

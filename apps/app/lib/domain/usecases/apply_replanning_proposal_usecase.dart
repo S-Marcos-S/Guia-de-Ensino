@@ -54,13 +54,14 @@ class ApplyReplanningProposalUseCase {
 
     if (!isAlreadyApplied) {
       // Verificar se novos apontamentos foram feitos após a geração da proposta
-      final hasNewRecords = !currentRecordIds.difference(
-        proposal.sourceExecutionRecordIds,
-      ).isEmpty;
+      final hasNewRecords = !currentRecordIds
+          .difference(proposal.sourceExecutionRecordIds)
+          .isEmpty;
 
       // Verificar se aulas foram modificadas ou excluídas externamente
-      final hasDivergentLessons =
-          currentLessonIds.difference(proposal.sourcePlannedLessonIds).isNotEmpty;
+      final hasDivergentLessons = currentLessonIds
+          .difference(proposal.sourcePlannedLessonIds)
+          .isNotEmpty;
 
       if (hasNewRecords || hasDivergentLessons) {
         throw const OutdatedReplanningProposalException(

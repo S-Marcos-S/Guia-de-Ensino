@@ -109,9 +109,16 @@ class _ReplanningPreviewDialogState extends State<ReplanningPreviewDialog> {
                             ),
                             if (prop.capacityAnalysis != null)
                               StatusBadge.custom(
-                                label: prop.capacityAnalysis!.viabilityStatus.displayName,
-                                background: _getViabilityBackground(prop.capacityAnalysis!.viabilityStatus),
-                                foreground: _getViabilityForeground(prop.capacityAnalysis!.viabilityStatus),
+                                label: prop
+                                    .capacityAnalysis!
+                                    .viabilityStatus
+                                    .displayName,
+                                background: _getViabilityBackground(
+                                  prop.capacityAnalysis!.viabilityStatus,
+                                ),
+                                foreground: _getViabilityForeground(
+                                  prop.capacityAnalysis!.viabilityStatus,
+                                ),
                               )
                             else if (prop.isIdenticalToCurrentPlan)
                               StatusBadge.custom(
@@ -139,7 +146,9 @@ class _ReplanningPreviewDialogState extends State<ReplanningPreviewDialog> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: _isApplying ? null : () => Navigator.pop(context),
+                    onPressed: _isApplying
+                        ? null
+                        : () => Navigator.pop(context),
                   ),
                 ],
               ),
@@ -233,7 +242,9 @@ class _ReplanningPreviewDialogState extends State<ReplanningPreviewDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   OutlinedButton(
-                    onPressed: _isApplying ? null : () => Navigator.pop(context),
+                    onPressed: _isApplying
+                        ? null
+                        : () => Navigator.pop(context),
                     child: const Text('Rejeitar e Descartar'),
                   ),
                   const SizedBox(width: 12),
@@ -426,8 +437,9 @@ class _ReplanningPreviewDialogState extends State<ReplanningPreviewDialog> {
     final analysis = widget.proposal.capacityAnalysis!;
     final pace = widget.proposal.paceAnalysis;
 
-    final atRiskContents =
-        analysis.contentsAtRisk.where((c) => c.isAtRisk).toList();
+    final atRiskContents = analysis.contentsAtRisk
+        .where((c) => c.isAtRisk)
+        .toList();
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -523,7 +535,9 @@ class _ReplanningPreviewDialogState extends State<ReplanningPreviewDialog> {
                   child: _buildMiniStat(
                     context,
                     label: 'Conclusão Estimada',
-                    value: _dateFormat.format(analysis.estimatedCompletionDate!),
+                    value: _dateFormat.format(
+                      analysis.estimatedCompletionDate!,
+                    ),
                     icon: Icons.flag_outlined,
                     color: analysis.overflowsAcademicYear
                         ? const Color(0xFFC62828)
@@ -884,7 +898,9 @@ class _ReplanningPreviewDialogState extends State<ReplanningPreviewDialog> {
             ),
           ] else ...[
             Text(
-              propContentStr.isNotEmpty ? propContentStr : 'Sem conteúdo vinculado',
+              propContentStr.isNotEmpty
+                  ? propContentStr
+                  : 'Sem conteúdo vinculado',
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),

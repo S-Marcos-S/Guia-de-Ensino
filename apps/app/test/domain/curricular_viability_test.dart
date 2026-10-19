@@ -73,7 +73,11 @@ void main() {
     test('1. Demanda exatamente igual à capacidade resulta em status atRisk com margem zero', () {
       final teachingDays = List.generate(
         10,
-        (i) => DateTime(2026, 3, 2).add(Duration(days: i * 7)), // 10 segundas-feiras
+        (i) => DateTime(
+          2026,
+          3,
+          2,
+        ).add(Duration(days: i * 7)), // 10 segundas-feiras
       );
       final slots = [makeSlot('s1', 1, 1)];
       final contents = [
@@ -138,7 +142,12 @@ void main() {
       );
       final slots = [makeSlot('s1', 1, 1)];
       final contents = [
-        makeContent(id: 'c1', title: 'Geometria Espacial', estimatedLessons: 12, isMandatory: true),
+        makeContent(
+          id: 'c1',
+          title: 'Geometria Espacial',
+          estimatedLessons: 12,
+          isMandatory: true,
+        ),
       ];
 
       final analysis = service.analyzeCurricularCapacity(
@@ -186,7 +195,12 @@ void main() {
       expect(result.hasCapacityDeficit, isTrue);
       expect(result.capacityDeficit, 4);
       expect(result.hasDelay, isTrue);
-      expect(result.delayReasons.any((r) => r.contains('Déficit de capacidade curricular antecipado')), isTrue);
+      expect(
+        result.delayReasons.any(
+          (r) => r.contains('Déficit de capacidade curricular antecipado'),
+        ),
+        isTrue,
+      );
     });
 
     // 5. Aulas não realizadas que também afetam a capacidade
@@ -200,7 +214,11 @@ void main() {
       final contents = [
         makeContent(id: 'c1', title: 'Probabilidade', estimatedLessons: 3),
       ];
-      final lesson1 = makeLesson(id: 'l1', date: DateTime(2026, 3, 2), contentIds: ['c1']);
+      final lesson1 = makeLesson(
+        id: 'l1',
+        date: DateTime(2026, 3, 2),
+        contentIds: ['c1'],
+      );
       final record1 = LessonExecutionRecord(
         id: 'rec1',
         plannedLessonId: 'l1',
@@ -235,7 +253,11 @@ void main() {
       final contents = [
         makeContent(id: 'c1', title: 'Equações', estimatedLessons: 2),
       ];
-      final lesson1 = makeLesson(id: 'l1', date: DateTime(2026, 3, 2), contentIds: ['c1']);
+      final lesson1 = makeLesson(
+        id: 'l1',
+        date: DateTime(2026, 3, 2),
+        contentIds: ['c1'],
+      );
       final record1 = LessonExecutionRecord(
         id: 'rec1',
         plannedLessonId: 'l1',
@@ -268,7 +290,11 @@ void main() {
       final contents = [
         makeContent(id: 'c1', title: 'Trigonometria', estimatedLessons: 1),
       ];
-      final lesson1 = makeLesson(id: 'l1', date: DateTime(2026, 3, 2), contentIds: ['c1']);
+      final lesson1 = makeLesson(
+        id: 'l1',
+        date: DateTime(2026, 3, 2),
+        contentIds: ['c1'],
+      );
       final record1 = LessonExecutionRecord(
         id: 'rec1',
         plannedLessonId: 'l1',
@@ -296,68 +322,80 @@ void main() {
     });
 
     // 8. Conteúdos com durações estimadas diferentes
-    test('8. Calcula demanda heterogênea somando durações distintas com precisão', () {
-      final teachingDays = List.generate(
-        10,
-        (i) => DateTime(2026, 3, 2).add(Duration(days: i * 7)),
-      );
-      final slots = [makeSlot('s1', 1, 1)];
-      final contents = [
-        makeContent(id: 'c1', title: 'Estatística', estimatedLessons: 4),
-        makeContent(id: 'c2', title: 'Gráficos', estimatedLessons: 2),
-        makeContent(id: 'c3', title: 'Tabelas', estimatedLessons: 1),
-      ];
+    test(
+      '8. Calcula demanda heterogênea somando durações distintas com precisão',
+      () {
+        final teachingDays = List.generate(
+          10,
+          (i) => DateTime(2026, 3, 2).add(Duration(days: i * 7)),
+        );
+        final slots = [makeSlot('s1', 1, 1)];
+        final contents = [
+          makeContent(id: 'c1', title: 'Estatística', estimatedLessons: 4),
+          makeContent(id: 'c2', title: 'Gráficos', estimatedLessons: 2),
+          makeContent(id: 'c3', title: 'Tabelas', estimatedLessons: 1),
+        ];
 
-      final analysis = service.analyzeCurricularCapacity(
-        classroomSubjectId: csId,
-        referenceDate: DateTime(2026, 3, 2),
-        academicYear: academicYear,
-        teachingDays: teachingDays,
-        scheduleSlots: slots,
-        contents: contents,
-        existingLessons: const [],
-        executionRecords: const [],
-      );
+        final analysis = service.analyzeCurricularCapacity(
+          classroomSubjectId: csId,
+          referenceDate: DateTime(2026, 3, 2),
+          academicYear: academicYear,
+          teachingDays: teachingDays,
+          scheduleSlots: slots,
+          contents: contents,
+          existingLessons: const [],
+          executionRecords: const [],
+        );
 
-      expect(analysis.totalRemainingDemandLessons, 7); // 4 + 2 + 1
-      expect(analysis.totalFutureAvailableSlots, 10);
-      expect(analysis.safetyMarginLessons, 3);
-    });
+        expect(analysis.totalRemainingDemandLessons, 7); // 4 + 2 + 1
+        expect(analysis.totalFutureAvailableSlots, 10);
+        expect(analysis.safetyMarginLessons, 3);
+      },
+    );
 
     // 9. Aulas bloqueadas e registros factuais preservados
-    test('9. Aulas bloqueadas futuras ocupam vagas e reduzem capacidade livre', () {
-      final teachingDays = [
-        DateTime(2026, 3, 2),
-        DateTime(2026, 3, 9),
-        DateTime(2026, 3, 16),
-      ];
-      final slots = [makeSlot('s1', 1, 1)];
-      final contents = [
-        makeContent(id: 'c1', title: 'Matrizes', estimatedLessons: 2),
-      ];
-      // Aula bloqueada para avaliação em 09/03
-      final lockedLesson = makeLesson(
-        id: 'locked1',
-        date: DateTime(2026, 3, 9),
-        isLocked: true,
-      );
+    test(
+      '9. Aulas bloqueadas futuras ocupam vagas e reduzem capacidade livre',
+      () {
+        final teachingDays = [
+          DateTime(2026, 3, 2),
+          DateTime(2026, 3, 9),
+          DateTime(2026, 3, 16),
+        ];
+        final slots = [makeSlot('s1', 1, 1)];
+        final contents = [
+          makeContent(id: 'c1', title: 'Matrizes', estimatedLessons: 2),
+        ];
+        // Aula bloqueada para avaliação em 09/03
+        final lockedLesson = makeLesson(
+          id: 'locked1',
+          date: DateTime(2026, 3, 9),
+          isLocked: true,
+        );
 
-      final analysis = service.analyzeCurricularCapacity(
-        classroomSubjectId: csId,
-        referenceDate: DateTime(2026, 3, 2),
-        academicYear: academicYear,
-        teachingDays: teachingDays,
-        scheduleSlots: slots,
-        contents: contents,
-        existingLessons: [lockedLesson],
-        executionRecords: const [],
-      );
+        final analysis = service.analyzeCurricularCapacity(
+          classroomSubjectId: csId,
+          referenceDate: DateTime(2026, 3, 2),
+          academicYear: academicYear,
+          teachingDays: teachingDays,
+          scheduleSlots: slots,
+          contents: contents,
+          existingLessons: [lockedLesson],
+          executionRecords: const [],
+        );
 
-      expect(analysis.totalFutureAvailableSlots, 2); // 3 dias - 1 bloqueado = 2 vagas livres
-      expect(analysis.totalRemainingDemandLessons, 2);
-      expect(analysis.safetyMarginLessons, 0);
-      expect(analysis.limitingConstraints.any((c) => c.contains('travada(s)')), isTrue);
-    });
+        expect(
+          analysis.totalFutureAvailableSlots,
+          2,
+        ); // 3 dias - 1 bloqueado = 2 vagas livres
+        expect(analysis.totalRemainingDemandLessons, 2);
+        expect(analysis.safetyMarginLessons, 0);
+        expect(
+          analysis.limitingConstraints.any((c) => c.contains('travada(s)')),
+          isTrue,
+        );
+      },
+    );
 
     // 10. Feriados, recessos e término do ano letivo
     test('10. Respeita término do ano letivo e desconsidera dias fora do intervalo', () {
@@ -387,29 +425,45 @@ void main() {
     });
 
     // 11. Restrições de grade horária e pré-requisitos
-    test('11. Conteúdo com pré-requisito não alocado herda risco de pré-requisito', () {
-      final teachingDays = [DateTime(2026, 3, 2)];
-      final slots = [makeSlot('s1', 1, 1)];
-      final contents = [
-        makeContent(id: 'c1', title: 'Básico', estimatedLessons: 2, orderIndex: 1),
-        makeContent(id: 'c2', title: 'Avançado', estimatedLessons: 1, orderIndex: 2, prerequisiteIds: ['c1']),
-      ];
+    test(
+      '11. Conteúdo com pré-requisito não alocado herda risco de pré-requisito',
+      () {
+        final teachingDays = [DateTime(2026, 3, 2)];
+        final slots = [makeSlot('s1', 1, 1)];
+        final contents = [
+          makeContent(
+            id: 'c1',
+            title: 'Básico',
+            estimatedLessons: 2,
+            orderIndex: 1,
+          ),
+          makeContent(
+            id: 'c2',
+            title: 'Avançado',
+            estimatedLessons: 1,
+            orderIndex: 2,
+            prerequisiteIds: ['c1'],
+          ),
+        ];
 
-      final analysis = service.analyzeCurricularCapacity(
-        classroomSubjectId: csId,
-        referenceDate: DateTime(2026, 3, 2),
-        academicYear: academicYear,
-        teachingDays: teachingDays,
-        scheduleSlots: slots,
-        contents: contents,
-        existingLessons: const [],
-        executionRecords: const [],
-      );
+        final analysis = service.analyzeCurricularCapacity(
+          classroomSubjectId: csId,
+          referenceDate: DateTime(2026, 3, 2),
+          academicYear: academicYear,
+          teachingDays: teachingDays,
+          scheduleSlots: slots,
+          contents: contents,
+          existingLessons: const [],
+          executionRecords: const [],
+        );
 
-      final c2Risk = analysis.contentsAtRisk.firstWhere((r) => r.content.id == 'c2');
-      expect(c2Risk.isAtRisk, isTrue);
-      expect(c2Risk.hasPrerequisiteRisk, isTrue);
-    });
+        final c2Risk = analysis.contentsAtRisk.firstWhere(
+          (r) => r.content.id == 'c2',
+        );
+        expect(c2Risk.isAtRisk, isTrue);
+        expect(c2Risk.hasPrerequisiteRisk, isTrue);
+      },
+    );
 
     // 12. Dados incompletos ou insuficientes para estimativa
     test('12. Grade horária vazia resulta em status indeterminate', () {
@@ -435,8 +489,18 @@ void main() {
       );
       final slots = [makeSlot('s1', 1, 1)];
       final contents = [
-        makeContent(id: 'c1', title: 'Obrigatório', estimatedLessons: 4, isMandatory: true),
-        makeContent(id: 'c2', title: 'Opcional', estimatedLessons: 3, isMandatory: false),
+        makeContent(
+          id: 'c1',
+          title: 'Obrigatório',
+          estimatedLessons: 4,
+          isMandatory: true,
+        ),
+        makeContent(
+          id: 'c2',
+          title: 'Opcional',
+          estimatedLessons: 3,
+          isMandatory: false,
+        ),
       ];
 
       final scenarios = service.generateRecoveryScenarios(
@@ -451,13 +515,22 @@ void main() {
       );
 
       expect(scenarios.length, greaterThanOrEqualTo(3));
-      final baseline = scenarios.firstWhere((s) => s.type == RecoveryScenarioType.baseline);
-      final additional = scenarios.firstWhere((s) => s.type == RecoveryScenarioType.additionalCapacity);
-      final essential = scenarios.firstWhere((s) => s.type == RecoveryScenarioType.essentialPriority);
+      final baseline = scenarios.firstWhere(
+        (s) => s.type == RecoveryScenarioType.baseline,
+      );
+      final additional = scenarios.firstWhere(
+        (s) => s.type == RecoveryScenarioType.additionalCapacity,
+      );
+      final essential = scenarios.firstWhere(
+        (s) => s.type == RecoveryScenarioType.essentialPriority,
+      );
 
       expect(baseline.extraLessonsNeeded, 2); // 7 demanda - 5 vagas = 2
       expect(additional.extraLessonsNeeded, 2);
-      expect(essential.extraLessonsNeeded, 0); // 4 obrigatórias cabem em 5 vagas!
+      expect(
+        essential.extraLessonsNeeded,
+        0,
+      ); // 4 obrigatórias cabem em 5 vagas!
       expect(essential.unallocatedContentTitles, contains('Opcional'));
     });
 
@@ -502,14 +575,21 @@ void main() {
 
     // 15. Identificação dos conteúdos que não cabem na capacidade restante
     test('15. Identifica com exatidão conteúdos em risco e número de aulas faltantes', () {
-      final teachingDays = [
-        DateTime(2026, 3, 2),
-        DateTime(2026, 3, 9),
-      ];
+      final teachingDays = [DateTime(2026, 3, 2), DateTime(2026, 3, 9)];
       final slots = [makeSlot('s1', 1, 1)];
       final contents = [
-        makeContent(id: 'c1', title: 'Tópico 1', estimatedLessons: 2, orderIndex: 1),
-        makeContent(id: 'c2', title: 'Tópico 2', estimatedLessons: 2, orderIndex: 2),
+        makeContent(
+          id: 'c1',
+          title: 'Tópico 1',
+          estimatedLessons: 2,
+          orderIndex: 1,
+        ),
+        makeContent(
+          id: 'c2',
+          title: 'Tópico 2',
+          estimatedLessons: 2,
+          orderIndex: 2,
+        ),
       ];
 
       final analysis = service.analyzeCurricularCapacity(
@@ -523,8 +603,12 @@ void main() {
         executionRecords: const [],
       );
 
-      final c1Risk = analysis.contentsAtRisk.firstWhere((r) => r.content.id == 'c1');
-      final c2Risk = analysis.contentsAtRisk.firstWhere((r) => r.content.id == 'c2');
+      final c1Risk = analysis.contentsAtRisk.firstWhere(
+        (r) => r.content.id == 'c1',
+      );
+      final c2Risk = analysis.contentsAtRisk.firstWhere(
+        (r) => r.content.id == 'c2',
+      );
 
       expect(c1Risk.isAtRisk, isFalse);
       expect(c1Risk.allocatedLessons, 2);
@@ -557,7 +641,11 @@ void main() {
       expect(before.capacityDeficit, 1);
 
       // Professor aponta 2 aulas completed no passado
-      final lessonPast1 = makeLesson(id: 'lp1', date: DateTime(2026, 2, 16), contentIds: ['c1']);
+      final lessonPast1 = makeLesson(
+        id: 'lp1',
+        date: DateTime(2026, 2, 16),
+        contentIds: ['c1'],
+      );
       final recordPast1 = LessonExecutionRecord(
         id: 'recp1',
         plannedLessonId: 'lp1',
@@ -567,7 +655,11 @@ void main() {
         status: LessonExecutionStatus.completed,
         actualContentIds: const ['c1'],
       );
-      final lessonPast2 = makeLesson(id: 'lp2', date: DateTime(2026, 2, 23), contentIds: ['c1']);
+      final lessonPast2 = makeLesson(
+        id: 'lp2',
+        date: DateTime(2026, 2, 23),
+        contentIds: ['c1'],
+      );
       final recordPast2 = LessonExecutionRecord(
         id: 'recp2',
         plannedLessonId: 'lp2',
@@ -681,7 +773,10 @@ void main() {
 
       expect(pace.hasSufficientHistoricalData, isTrue);
       expect(pace.observedPaceRatio, 1.5);
-      expect(pace.projectedAdditionalLessonsIfPaceMaintained, 5); // 10 * 0.5 = 5
+      expect(
+        pace.projectedAdditionalLessonsIfPaceMaintained,
+        5,
+      ); // 10 * 0.5 = 5
       expect(pace.methodologyExplanation, isNotEmpty);
       expect(pace.limitationsExplanation, isNotEmpty);
     });

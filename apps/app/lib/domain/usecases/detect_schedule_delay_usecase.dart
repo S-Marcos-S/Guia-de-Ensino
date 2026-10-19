@@ -84,8 +84,8 @@ class DetectScheduleDelayUseCase {
           final events = await calendarEventRepository!.getByAcademicYear(
             academicYear.id,
           );
-          final calendarResult =
-              calendarCalculationService.calculateTeachingDays(
+          final calendarResult = calendarCalculationService
+              .calculateTeachingDays(
                 academicYear: academicYear,
                 events: events,
               );

@@ -78,49 +78,57 @@ void main() {
     );
 
     // Setup base do ano letivo 2026
-    await db.into(db.academicYearsTable).insert(
-      AcademicYearsTableCompanion.insert(
-        id: 'ay-test',
-        year: 2026,
-        title: 'Ano Letivo 2026',
-        startDate: DateTime.utc(2026, 2, 2),
-        endDate: DateTime.utc(2026, 12, 18),
-        createdAt: DateTime.now(),
-      ),
-    );
+    await db
+        .into(db.academicYearsTable)
+        .insert(
+          AcademicYearsTableCompanion.insert(
+            id: 'ay-test',
+            year: 2026,
+            title: 'Ano Letivo 2026',
+            startDate: DateTime.utc(2026, 2, 2),
+            endDate: DateTime.utc(2026, 12, 18),
+            createdAt: DateTime.now(),
+          ),
+        );
 
     // Turma 6º Ano A
-    await db.into(db.classroomsTable).insert(
-      ClassroomsTableCompanion.insert(
-        id: 'c-test',
-        academicYearId: 'ay-test',
-        name: '6º Ano A',
-        gradeLevel: '6º Ano',
-        shift: 'morning',
-        createdAt: DateTime.now(),
-      ),
-    );
+    await db
+        .into(db.classroomsTable)
+        .insert(
+          ClassroomsTableCompanion.insert(
+            id: 'c-test',
+            academicYearId: 'ay-test',
+            name: '6º Ano A',
+            gradeLevel: '6º Ano',
+            shift: 'morning',
+            createdAt: DateTime.now(),
+          ),
+        );
 
     // Disciplina Matemática
-    await db.into(db.subjectsTable).insert(
-      SubjectsTableCompanion.insert(
-        id: 's-test',
-        name: 'Matemática',
-        colorHex: '#2196F3',
-        createdAt: DateTime.now(),
-      ),
-    );
+    await db
+        .into(db.subjectsTable)
+        .insert(
+          SubjectsTableCompanion.insert(
+            id: 's-test',
+            name: 'Matemática',
+            colorHex: '#2196F3',
+            createdAt: DateTime.now(),
+          ),
+        );
 
     // Vínculo Turma-Disciplina
-    await db.into(db.classroomSubjectsTable).insert(
-      ClassroomSubjectsTableCompanion.insert(
-        id: 'cs-test',
-        classroomId: 'c-test',
-        subjectId: 's-test',
-        weeklyLessons: 2,
-        createdAt: DateTime.now(),
-      ),
-    );
+    await db
+        .into(db.classroomSubjectsTable)
+        .insert(
+          ClassroomSubjectsTableCompanion.insert(
+            id: 'cs-test',
+            classroomId: 'c-test',
+            subjectId: 's-test',
+            weeklyLessons: 2,
+            createdAt: DateTime.now(),
+          ),
+        );
 
     // Grade semanal: Segundas-feiras aula 1
     await scheduleSlotRepo.save(
@@ -301,7 +309,9 @@ void main() {
       expect(proposal.shifts.isNotEmpty, isTrue);
 
       // A aula histórica em 02/02 deve estar preservada no shift
-      final historicShift = proposal.shifts.firstWhere((s) => s.plannedLessonId == 'l1');
+      final historicShift = proposal.shifts.firstWhere(
+        (s) => s.plannedLessonId == 'l1',
+      );
       expect(historicShift.isPreservedHistoric, isTrue);
       expect(historicShift.shiftType, LessonReplanningShiftType.unchanged);
     });
@@ -340,7 +350,10 @@ void main() {
       final savedRecord = await lessonExecutionRepo.findById('r1');
       expect(savedRecord, isNotNull);
       expect(savedRecord!.status, LessonExecutionStatus.notHeld);
-      expect(savedRecord.cancellationReason, LessonCancellationReason.teacherAbsence);
+      expect(
+        savedRecord.cancellationReason,
+        LessonCancellationReason.teacherAbsence,
+      );
 
       // Verifica se a aula histórica l1 continuou salva
       final savedHistoricLesson = await plannedLessonRepo.findById('l1');
@@ -348,7 +361,9 @@ void main() {
       expect(savedHistoricLesson!.date, DateTime.utc(2026, 2, 2));
 
       // Verifica se as aulas futuras foram geradas e salvas
-      final allLessons = await plannedLessonRepo.getByClassroomSubject('cs-test');
+      final allLessons = await plannedLessonRepo.getByClassroomSubject(
+        'cs-test',
+      );
       expect(allLessons.length, greaterThanOrEqualTo(3));
     });
 
@@ -381,13 +396,21 @@ void main() {
 
       // 1ª Aplicação
       await applyProposalUseCase.execute(proposal);
-      final countFirst = (await plannedLessonRepo.getByClassroomSubject('cs-test')).length;
+      final countFirst = (await plannedLessonRepo.getByClassroomSubject(
+        'cs-test',
+      )).length;
 
       // 2ª Aplicação consecutiva da mesma proposta
       await applyProposalUseCase.execute(proposal);
-      final countSecond = (await plannedLessonRepo.getByClassroomSubject('cs-test')).length;
+      final countSecond = (await plannedLessonRepo.getByClassroomSubject(
+        'cs-test',
+      )).length;
 
-      expect(countSecond, countFirst, reason: 'Aplicação repetida não deve duplicar aulas');
+      expect(
+        countSecond,
+        countFirst,
+        reason: 'Aplicação repetida não deve duplicar aulas',
+      );
     });
 
     test('Salvaguarda 6 - Concorrência: proposta desatualizada é rejeitada com OutdatedReplanningProposalException', () async {
