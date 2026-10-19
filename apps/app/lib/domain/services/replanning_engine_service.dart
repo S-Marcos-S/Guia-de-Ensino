@@ -281,8 +281,14 @@ class ReplanningEngineService {
       remainingLessonsPerContent[content.id] = remaining;
 
       if (remaining > 0) {
-        // Cria réplica com o saldo pedagógico restante de aulas
-        pendingContents.add(content.copyWith(estimatedLessons: remaining));
+        // Carga informada ao motor de planejamento:
+        // Como o PlanningEngineService deduz de content.estimatedLessons a quantidade alreadyPreserved
+        // (aulas concluídas e aulas bloqueadas), a carga informada deve ser: remaining + completed.
+        // Assim: needed = max(0, (remaining + completed) - completed) = remaining.
+        final effectiveEstimated = remaining + completed;
+        pendingContents.add(
+          content.copyWith(estimatedLessons: effectiveEstimated),
+        );
       }
     }
 

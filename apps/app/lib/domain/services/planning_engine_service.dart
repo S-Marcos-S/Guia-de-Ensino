@@ -212,12 +212,18 @@ class PlanningEngineService {
           ),
         );
 
-        for (final cid in existing.contentIds) {
-          preservedLessonsPerContent[cid] =
-              (preservedLessonsPerContent[cid] ?? 0) + 1;
-          preservedDatesPerContent
-              .putIfAbsent(cid, () => [])
-              .add(existing.date);
+        final countsAsCovered =
+            existing.status == LessonExecutionStatus.completed ||
+            existing.isLocked;
+
+        if (countsAsCovered) {
+          for (final cid in existing.contentIds) {
+            preservedLessonsPerContent[cid] =
+                (preservedLessonsPerContent[cid] ?? 0) + 1;
+            preservedDatesPerContent
+                .putIfAbsent(cid, () => [])
+                .add(existing.date);
+          }
         }
       }
     }

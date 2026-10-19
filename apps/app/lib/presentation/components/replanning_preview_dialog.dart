@@ -154,85 +154,101 @@ class _ReplanningPreviewDialogState extends State<ReplanningPreviewDialog> {
               ),
               const SizedBox(height: 12),
 
-              // Painel de Métricas e Capacidade
-              _buildMetricsPanel(context),
-              const SizedBox(height: 8),
-
-              // Card de Viabilidade Curricular e Ritmo de Ensino
-              if (prop.capacityAnalysis != null) ...[
-                _buildViabilityCard(context),
-                const SizedBox(height: 8),
-              ],
-
-              // Seletor de Cenários de Recuperação
-              if (prop.recoveryScenarios.isNotEmpty) ...[
-                _buildScenariosSelector(context),
-                const SizedBox(height: 8),
-              ],
-
-              // Alertas de Conflito e Déficit
-              if (prop.planningResult.conflicts.isNotEmpty) ...[
-                _buildConflictsView(context),
-                const SizedBox(height: 8),
-              ],
-
-              // Explicações estruturadas
-              if (prop.explanations.isNotEmpty) ...[
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+              // Conteúdo rolável responsivo (Métricas, Viabilidade, Cenários, Explicações e Lista)
+              Expanded(
+                child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: prop.explanations.map((exp) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Text(
-                          exp,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
+                    children: [
+                      // Painel de Métricas e Capacidade
+                      _buildMetricsPanel(context),
+                      const SizedBox(height: 8),
+
+                      // Card de Viabilidade Curricular e Ritmo de Ensino
+                      if (prop.capacityAnalysis != null) ...[
+                        _buildViabilityCard(context),
+                        const SizedBox(height: 8),
+                      ],
+
+                      // Seletor de Cenários de Recuperação
+                      if (prop.recoveryScenarios.isNotEmpty) ...[
+                        _buildScenariosSelector(context),
+                        const SizedBox(height: 8),
+                      ],
+
+                      // Alertas de Conflito e Déficit
+                      if (prop.planningResult.conflicts.isNotEmpty) ...[
+                        _buildConflictsView(context),
+                        const SizedBox(height: 8),
+                      ],
+
+                      // Explicações estruturadas
+                      if (prop.explanations.isNotEmpty) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: prop.explanations.map((exp) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 2,
+                                ),
+                                child: Text(
+                                  exp,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
                         ),
-                      );
-                    }).toList(),
+                        const SizedBox(height: 8),
+                      ],
+
+                      // Título da Lista
+                      Text(
+                        'Comparativo de Aulas (\'Antes\' vs. \'Depois\')',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Lista Comparativa
+                      if (prop.shifts.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: Text(
+                              'Nenhuma aula afetada.',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: prop.shifts.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+                            final shift = prop.shifts[index];
+                            return _buildShiftCard(context, shift);
+                          },
+                        ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-              ],
-
-              // Título da Lista
-              Text(
-                'Comparativo de Aulas (\'Antes\' vs. \'Depois\')',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 6),
-
-              // Lista Comparativa
-              Expanded(
-                child: prop.shifts.isEmpty
-                    ? Center(
-                        child: Text(
-                          'Nenhuma aula afetada.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      )
-                    : ListView.separated(
-                        itemCount: prop.shifts.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 8),
-                        itemBuilder: (context, index) {
-                          final shift = prop.shifts[index];
-                          return _buildShiftCard(context, shift);
-                        },
-                      ),
               ),
 
               const SizedBox(height: 12),
