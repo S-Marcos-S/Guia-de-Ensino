@@ -664,56 +664,61 @@ class _RecordLessonDialogState extends State<RecordLessonDialog> {
       );
     }
 
-    return Container(
-      constraints: const BoxConstraints(maxHeight: 180),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
+    return Material(
+      color: colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outlineVariant.withAlpha(100)),
+        side: BorderSide(color: colorScheme.outlineVariant.withAlpha(100)),
       ),
-      child: ListView.separated(
-        shrinkWrap: true,
-        itemCount: _availableContents.length,
-        separatorBuilder: (context, index) =>
-            Divider(height: 1, color: colorScheme.outlineVariant.withAlpha(50)),
-        itemBuilder: (context, index) {
-          final content = _availableContents[index];
-          final isSelected = _selectedContentIds.contains(content.id);
-          final isPlanned = widget.plannedLesson.contentIds.contains(
-            content.id,
-          );
+      clipBehavior: Clip.antiAlias,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 180),
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemCount: _availableContents.length,
+          separatorBuilder: (context, index) => Divider(
+            height: 1,
+            color: colorScheme.outlineVariant.withAlpha(50),
+          ),
+          itemBuilder: (context, index) {
+            final content = _availableContents[index];
+            final isSelected = _selectedContentIds.contains(content.id);
+            final isPlanned = widget.plannedLesson.contentIds.contains(
+              content.id,
+            );
 
-          return CheckboxListTile(
-            dense: true,
-            visualDensity: VisualDensity.compact,
-            value: isSelected,
-            title: Text(
-              content.title,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: isPlanned ? FontWeight.w600 : FontWeight.normal,
+            return CheckboxListTile(
+              dense: true,
+              visualDensity: VisualDensity.compact,
+              value: isSelected,
+              title: Text(
+                content.title,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: isPlanned ? FontWeight.w600 : FontWeight.normal,
+                ),
               ),
-            ),
-            subtitle: isPlanned
-                ? Text(
-                    AppStrings.plannedContentBadge,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                : null,
-            onChanged: (checked) {
-              setState(() {
-                if (checked == true) {
-                  _selectedContentIds.add(content.id);
-                } else {
-                  _selectedContentIds.remove(content.id);
-                }
-                _errorMessage = null;
-              });
-            },
-          );
-        },
+              subtitle: isPlanned
+                  ? Text(
+                      AppStrings.plannedContentBadge,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : null,
+              onChanged: (checked) {
+                setState(() {
+                  if (checked == true) {
+                    _selectedContentIds.add(content.id);
+                  } else {
+                    _selectedContentIds.remove(content.id);
+                  }
+                  _errorMessage = null;
+                });
+              },
+            );
+          },
+        ),
       ),
     );
   }

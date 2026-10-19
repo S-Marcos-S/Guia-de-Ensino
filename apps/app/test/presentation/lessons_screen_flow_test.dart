@@ -148,10 +148,10 @@ void main() {
     String? initialClassroomId,
     String? initialClassroomSubjectId,
   }) {
-    return MaterialApp(
-      home: AppDependencyScope(
-        dependencies: customDeps ?? dependencies,
-        child: LessonsScreen(
+    return AppDependencyScope(
+      dependencies: customDeps ?? dependencies,
+      child: MaterialApp(
+        home: LessonsScreen(
           initialClassroomId: initialClassroomId,
           initialClassroomSubjectId: initialClassroomSubjectId,
         ),
@@ -654,7 +654,12 @@ void main() {
         await tester.pumpAndSettle();
 
         // Seleciona o filtro "Hoje"
-        await tester.tap(find.text(AppStrings.filterToday));
+        await tester.tap(
+          find.descendant(
+            of: find.byType(SegmentedButton<LessonFilter>),
+            matching: find.text(AppStrings.filterToday),
+          ),
+        );
         await tester.pumpAndSettle();
 
         // Aponta a aula

@@ -387,12 +387,22 @@ void main() {
       );
       // Criar primeiro a turma/disciplina estrangeira
       await db
+          .into(db.subjectsTable)
+          .insert(
+            SubjectsTableCompanion.insert(
+              id: 's-foreign',
+              name: 'História',
+              colorHex: '#FF5722',
+              createdAt: DateTime.now(),
+            ),
+          );
+      await db
           .into(db.classroomSubjectsTable)
           .insert(
             ClassroomSubjectsTableCompanion.insert(
               id: 'cs-outra-disc',
               classroomId: 'c-test',
-              subjectId: 's-test',
+              subjectId: 's-foreign',
               weeklyLessons: 2,
               createdAt: DateTime.now(),
             ),

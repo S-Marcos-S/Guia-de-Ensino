@@ -729,6 +729,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
   }
 
   Future<void> _openRecordDialog(ClassroomSubjectLessonItem item) async {
+    final deps = AppDependencyScope.of(context);
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -739,6 +740,8 @@ class _LessonsScreenState extends State<LessonsScreen> {
         subjectName:
             _subjectsMap[_selectedClassroomSubject?.subjectId]?.name ?? '',
         executionRecord: item.executionRecord,
+        courseContentRepository: deps.courseContentRepository,
+        recordLessonExecutionUseCase: deps.recordLessonExecutionUseCase,
       ),
     );
 
