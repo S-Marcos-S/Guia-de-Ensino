@@ -208,9 +208,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
     }
 
     if (_activeYear == null) {
-      return const Scaffold(
-        appBar: AppBar(title: Text(AppStrings.lessonsScreenTitle)),
-        body: SafeArea(
+      return Scaffold(
+        appBar: AppBar(title: const Text(AppStrings.lessonsScreenTitle)),
+        body: const SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 24),
             child: EmptyStateView(
@@ -224,9 +224,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
     }
 
     if (_classrooms.isEmpty) {
-      return const Scaffold(
-        appBar: AppBar(title: Text(AppStrings.lessonsScreenTitle)),
-        body: SafeArea(
+      return Scaffold(
+        appBar: AppBar(title: const Text(AppStrings.lessonsScreenTitle)),
+        body: const SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 24),
             child: EmptyStateView(
