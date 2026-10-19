@@ -390,30 +390,37 @@ class _RecordLessonDialogState extends State<RecordLessonDialog> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      SegmentedButton<LessonExecutionStatus>(
-                        segments: const [
-                          ButtonSegment(
-                            value: LessonExecutionStatus.completed,
-                            label: Text(AppStrings.statusCompletedOption),
-                            icon: Icon(Icons.check_circle_outline),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SegmentedButton<LessonExecutionStatus>(
+                          showSelectedIcon: false,
+                          style: const ButtonStyle(
+                            visualDensity: VisualDensity.compact,
                           ),
-                          ButtonSegment(
-                            value: LessonExecutionStatus.partiallyCompleted,
-                            label: Text(
-                              AppStrings.statusPartiallyCompletedOption,
+                          segments: const [
+                            ButtonSegment(
+                              value: LessonExecutionStatus.completed,
+                              label: Text(AppStrings.statusCompletedOption),
+                              icon: Icon(Icons.check_circle_outline),
                             ),
-                            icon: Icon(Icons.timelapse),
-                          ),
-                          ButtonSegment(
-                            value: LessonExecutionStatus.notHeld,
-                            label: Text(AppStrings.statusNotHeldOption),
-                            icon: Icon(Icons.cancel_outlined),
-                          ),
-                        ],
-                        selected: {_status},
-                        onSelectionChanged: (newSelection) {
-                          _onStatusChanged(newSelection.first);
-                        },
+                            ButtonSegment(
+                              value: LessonExecutionStatus.partiallyCompleted,
+                              label: Text(
+                                AppStrings.statusPartiallyCompletedOption,
+                              ),
+                              icon: Icon(Icons.timelapse),
+                            ),
+                            ButtonSegment(
+                              value: LessonExecutionStatus.notHeld,
+                              label: Text(AppStrings.statusNotHeldOption),
+                              icon: Icon(Icons.cancel_outlined),
+                            ),
+                          ],
+                          selected: {_status},
+                          onSelectionChanged: (newSelection) {
+                            _onStatusChanged(newSelection.first);
+                          },
+                        ),
                       ),
                       const SizedBox(height: 18),
 
