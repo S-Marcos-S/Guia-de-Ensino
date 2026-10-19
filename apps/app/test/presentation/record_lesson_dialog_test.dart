@@ -165,7 +165,11 @@ void main() {
       RecordLessonExecutionUseCase? useCase,
     }) async {
       tester.view.physicalSize = const Size(800, 1000);
-      addTearDown(tester.view.resetPhysicalSize);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       await tester.pumpWidget(
         createWidget(
           lesson: lesson,
@@ -395,7 +399,11 @@ void main() {
 
     testWidgets('7. Cancelamento do diálogo sem gravação', (tester) async {
       tester.view.physicalSize = const Size(800, 1000);
-      addTearDown(tester.view.resetPhysicalSize);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
 
       final fakeUseCase = FakeRecordLessonExecutionUseCase();
       bool? result;

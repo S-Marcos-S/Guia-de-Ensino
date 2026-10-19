@@ -389,38 +389,46 @@ class _RecordLessonDialogState extends State<RecordLessonDialog> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: SegmentedButton<LessonExecutionStatus>(
-                          showSelectedIcon: false,
-                          style: const ButtonStyle(
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          segments: const [
-                            ButtonSegment(
-                              value: LessonExecutionStatus.completed,
-                              label: Text(AppStrings.statusCompletedOption),
-                              icon: Icon(Icons.check_circle_outline),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final button = SegmentedButton<LessonExecutionStatus>(
+                            showSelectedIcon: false,
+                            style: const ButtonStyle(
+                              visualDensity: VisualDensity.compact,
                             ),
-                            ButtonSegment(
-                              value: LessonExecutionStatus.partiallyCompleted,
-                              label: Text(
-                                AppStrings.statusPartiallyCompletedOption,
+                            segments: const [
+                              ButtonSegment(
+                                value: LessonExecutionStatus.completed,
+                                label: Text(AppStrings.statusCompletedOption),
+                                icon: Icon(Icons.check_circle_outline),
                               ),
-                              icon: Icon(Icons.timelapse),
-                            ),
-                            ButtonSegment(
-                              value: LessonExecutionStatus.notHeld,
-                              label: Text(AppStrings.statusNotHeldOption),
-                              icon: Icon(Icons.cancel_outlined),
-                            ),
-                          ],
-                          selected: {_status},
-                          onSelectionChanged: (newSelection) {
-                            _onStatusChanged(newSelection.first);
-                          },
-                        ),
+                              ButtonSegment(
+                                value: LessonExecutionStatus.partiallyCompleted,
+                                label: Text(
+                                  AppStrings.statusPartiallyCompletedOption,
+                                ),
+                                icon: Icon(Icons.timelapse),
+                              ),
+                              ButtonSegment(
+                                value: LessonExecutionStatus.notHeld,
+                                label: Text(AppStrings.statusNotHeldOption),
+                                icon: Icon(Icons.cancel_outlined),
+                              ),
+                            ],
+                            selected: {_status},
+                            onSelectionChanged: (newSelection) {
+                              _onStatusChanged(newSelection.first);
+                            },
+                          );
+
+                          if (constraints.maxWidth < 380) {
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: button,
+                            );
+                          }
+                          return button;
+                        },
                       ),
                       const SizedBox(height: 18),
 
@@ -580,8 +588,11 @@ class _RecordLessonDialogState extends State<RecordLessonDialog> {
               const SizedBox(height: 12),
 
               // Rodapé com Ações
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 12,
+                runSpacing: 8,
                 children: [
                   TextButton(
                     onPressed: _isSaving
@@ -589,7 +600,6 @@ class _RecordLessonDialogState extends State<RecordLessonDialog> {
                         : () => Navigator.of(context).pop(false),
                     child: const Text(AppStrings.cancelButton),
                   ),
-                  const SizedBox(width: 12),
                   AppButton(
                     label: AppStrings.saveRecordButton,
                     icon: Icons.save,

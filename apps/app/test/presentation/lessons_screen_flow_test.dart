@@ -165,7 +165,10 @@ void main() {
       (tester) async {
         tester.view.physicalSize = const Size(600, 1000);
         tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
         // Cadastrar conteúdos
         await dependencies.courseContentRepository.save(
@@ -266,7 +269,10 @@ void main() {
       (tester) async {
         tester.view.physicalSize = const Size(600, 1000);
         tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
         // Configura uma turma com duas disciplinas: lenta e rápida
         await dependencies.subjectRepository.save(
@@ -384,7 +390,10 @@ void main() {
       (tester) async {
         tester.view.physicalSize = const Size(800, 1000);
         tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
         // Cria conteúdos
         await dependencies.courseContentRepository.save(
@@ -499,7 +508,10 @@ void main() {
       (tester) async {
         tester.view.physicalSize = const Size(600, 1000);
         tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
         final failingUseCase = FailingLessonsUseCase(
           plannedLessonRepository: dependencies.plannedLessonRepository,
@@ -535,7 +547,10 @@ void main() {
       (tester) async {
         tester.view.physicalSize = const Size(800, 1200);
         tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
         // Cria conteúdo
         const content = CourseContent(
@@ -595,9 +610,13 @@ void main() {
         await tester.pumpAndSettle();
 
         // Altera para "Não Realizada", seleciona motivo e salva
+        await tester.ensureVisible(find.text(AppStrings.statusNotHeldOption));
         await tester.tap(find.text(AppStrings.statusNotHeldOption));
         await tester.pumpAndSettle();
 
+        await tester.ensureVisible(
+          find.byType(DropdownButtonFormField<LessonCancellationReason>),
+        );
         await tester.tap(
           find.byType(DropdownButtonFormField<LessonCancellationReason>),
         );
@@ -633,7 +652,10 @@ void main() {
       (tester) async {
         tester.view.physicalSize = const Size(800, 1200);
         tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
         // Cria aula de hoje
         final todayLesson = PlannedLesson(
