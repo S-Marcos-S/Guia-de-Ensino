@@ -115,17 +115,37 @@ erDiagram
   - `date`: Data fixada.
   - `lessons_count`: Quantas aulas consome no dia.
   - `is_locked`: Verdadeiro por padrão para datas de prova.
-- **`ExecutedLesson` (Registro de Execução / Diário de Aula)**:
-  - `id`: UUID.
-  - `planned_lesson_id`: Vínculo à aula planejada correspondente.
-  - `execution_date`: Data em que a aula ocorreu.
-  - `status`:
-    - `completed`: Aula realizada com conteúdo totalmente ministrado.
-    - `partially_completed`: Aula realizada, mas o conteúdo não foi finalizado.
-    - `not_held`: Aula não realizada (falta, evento imprevisto, suspensão de aulas).
-  - `notes`: Anotações pedagógicas do professor.
-  - `content_progress_percentage`: Percentual concluído do conteúdo alocado (0 a 100%).
-  - `created_at`: Carimbo de data/hora imutável de registro.
+- **`LessonExecutionRecord` (Registro de Execução Fática / Diário de Aula - Etapa 6.1)**:
+  - `id`: UUID único e estável.
+  - `planned_lesson_id`: Vínculo obrigatório com a aula planejada correspondente.
+  - `classroom_subject_id`: Vínculo direto com a disciplina e turma.
+  - `execution_date`: Data da realização da aula (normalizada em UTC, sem componente de horário).
+  - `status`: Fato consumado (`completed`, `partiallyCompleted`, `notHeld`). O status `planned` é proibido nesta entidade, pois a ausência de registro já expressa estado planejado.
+  - `actual_content_ids`: Lista de conteúdos programáticos efetivamente ministrados (sem duplicatas).
+  - `cancellation_reason`: Categoria padronizada obrigatória para aulas não realizadas (`LessonCancellationReason`).
+  - `cancellation_details`: Detalhes textuais adicionais do cancelamento.
+  - `pedagogical_notes`: Anotações reflexivas e observações pedagógicas do docente.
+  - `needs_follow_up`: Booleano sinalizando necessidade de continuidade pedagógica.
+  - `follow_up_notes`: Detalhamento das pendências a retomar.
+  - `recorded_at`: Data e hora de criação do registro original.
+  - `updated_at`: Data e hora da última retificação (`isRectified => updated_at != null`).
+- **`LessonCancellationReason` (Categorias Padronizadas de Não Realização)**:
+  - `schoolEvent`: Evento no calendário escolar, conselho ou reunião pedagógica.
+  - `teacherAbsence`: Ausência justificada ou licença do docente.
+  - `studentAbsenceOrSuspension`: Ausência de alunos, paralisação ou suspensão de aulas.
+  - `infrastructureIssue`: Falta de água/luz, obras ou evento climático adverso.
+  - `pedagogicalAdjustment`: Remanejamento de horário ou ajuste pedagógico da escola.
+  - `other`: Outro motivo justificado pelo docente.
+- **`ClassroomSubjectProgress` (Value Object de Métricas de Execução - Etapa 6.1)**:
+  - `classroom_subject_id`: Identificador da disciplina na turma.
+  - `total_lessons_planned`: Aulas totais no calendário letivo.
+  - `completed_lessons_count`: Aulas concluídas integralmente.
+  - `partially_completed_lessons_count`: Aulas com realização parcial.
+  - `not_held_lessons_count`: Aulas não realizadas justificadas.
+  - `pending_record_lessons_count`: Aulas passadas sem preenchimento de diário.
+  - `future_lessons_count`: Aulas futuras aguardando ocorrência.
+  - Invariante determinística: `completed + partiallyCompleted + notHeld + pendingRecord + future == totalLessonsPlanned`.
+  - Propriedades calculadas: `totalLessonsRecorded`, `totalLessonsEffective`, `completionRate`, `recordingRate`, `hasPendingPastLessons`.
 
 ### 2.6 Versões e Histórico de Replanejamento
 - **`PlanningVersion`**:

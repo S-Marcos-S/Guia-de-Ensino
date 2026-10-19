@@ -156,16 +156,22 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 6 — Acompanhamento e Registro de Aulas
-- **Status**: Planejada
-- **Objetivos**:
-  - Interface diária/semanal para o professor marcar aulas como: realizadas, parcialmente realizadas ou não realizadas.
-  - Registro de observações e conteúdos efetivamente ministrados.
-  - Visualização de indicadores de progresso (aulas dadas vs. previstas, conteúdos concluídos).
-  - Imutabilidade do histórico de aulas registradas.
-- **Critérios de Aceitação**:
-  1. Registros históricos persistidos com data/hora e nunca apagados por alterações futuras.
-  2. Indicadores de progresso atualizados em tempo real.
-  3. Testes cobrindo registros com falha, cancelamento e atrasos parciais.
+- **Status**: **Em andamento** (Incremento 6.1 concluído)
+- **Incrementos**:
+  - **6.1 — Modelo de Domínio e Contratos**: **Concluído**
+    - Entidade `LessonExecutionRecord` com validação de status, regras estritas de cancelamento e integridade de conteúdos ministrados.
+    - Enum `LessonCancellationReason` com categorias semânticas e rótulos/descrições em português.
+    - Value Object `ClassroomSubjectProgress` com métricas determinísticas e invariantes de contagem de aulas.
+    - Contrato `LessonExecutionRepository` puro de domínio.
+    - 24 testes unitários de domínio implementados e 100% aprovados (totalizando 100 testes na suíte).
+  - **6.2 — Persistência Drift e Migração v5**: Planejado
+  - **6.3 — Casos de Uso e Cálculo de Progresso**: Planejado
+  - **6.4 — Interface de Acompanhamento e Diário de Aula**: Planejado
+- **Critérios de Aceitação Gerais**:
+  1. [x] Modelo de domínio puro separando a aula planejada (`PlannedLesson`) do fato registrado (`LessonExecutionRecord`).
+  2. [ ] Registros históricos persistidos com data/hora e nunca apagados por alterações futuras (Schema v5).
+  3. [ ] Indicadores de progresso atualizados em tempo real por turma e disciplina.
+  4. [ ] Testes cobrindo registros com falha, cancelamento, aula parcial e continuidade pedagógica.
 
 ---
 
