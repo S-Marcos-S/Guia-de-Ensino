@@ -3160,6 +3160,1668 @@ class ScheduleSlotsTableCompanion
   }
 }
 
+class $CurriculumCompetenciesTableTable extends CurriculumCompetenciesTable
+    with
+        TableInfo<
+          $CurriculumCompetenciesTableTable,
+          CurriculumCompetenciesTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CurriculumCompetenciesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
+  @override
+  late final GeneratedColumn<String> code = GeneratedColumn<String>(
+    'code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _thematicUnitMeta = const VerificationMeta(
+    'thematicUnit',
+  );
+  @override
+  late final GeneratedColumn<String> thematicUnit = GeneratedColumn<String>(
+    'thematic_unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _knowledgeObjectMeta = const VerificationMeta(
+    'knowledgeObject',
+  );
+  @override
+  late final GeneratedColumn<String> knowledgeObject = GeneratedColumn<String>(
+    'knowledge_object',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stageMeta = const VerificationMeta('stage');
+  @override
+  late final GeneratedColumn<String> stage = GeneratedColumn<String>(
+    'stage',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _gradeLevelMeta = const VerificationMeta(
+    'gradeLevel',
+  );
+  @override
+  late final GeneratedColumn<String> gradeLevel = GeneratedColumn<String>(
+    'grade_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectNameMeta = const VerificationMeta(
+    'subjectName',
+  );
+  @override
+  late final GeneratedColumn<String> subjectName = GeneratedColumn<String>(
+    'subject_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceNameMeta = const VerificationMeta(
+    'sourceName',
+  );
+  @override
+  late final GeneratedColumn<String> sourceName = GeneratedColumn<String>(
+    'source_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceVersionMeta = const VerificationMeta(
+    'sourceVersion',
+  );
+  @override
+  late final GeneratedColumn<String> sourceVersion = GeneratedColumn<String>(
+    'source_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    code,
+    description,
+    thematicUnit,
+    knowledgeObject,
+    stage,
+    gradeLevel,
+    subjectName,
+    sourceName,
+    sourceVersion,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'curriculum_competencies_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CurriculumCompetenciesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('code')) {
+      context.handle(
+        _codeMeta,
+        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_codeMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('thematic_unit')) {
+      context.handle(
+        _thematicUnitMeta,
+        thematicUnit.isAcceptableOrUnknown(
+          data['thematic_unit']!,
+          _thematicUnitMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_thematicUnitMeta);
+    }
+    if (data.containsKey('knowledge_object')) {
+      context.handle(
+        _knowledgeObjectMeta,
+        knowledgeObject.isAcceptableOrUnknown(
+          data['knowledge_object']!,
+          _knowledgeObjectMeta,
+        ),
+      );
+    }
+    if (data.containsKey('stage')) {
+      context.handle(
+        _stageMeta,
+        stage.isAcceptableOrUnknown(data['stage']!, _stageMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stageMeta);
+    }
+    if (data.containsKey('grade_level')) {
+      context.handle(
+        _gradeLevelMeta,
+        gradeLevel.isAcceptableOrUnknown(data['grade_level']!, _gradeLevelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_gradeLevelMeta);
+    }
+    if (data.containsKey('subject_name')) {
+      context.handle(
+        _subjectNameMeta,
+        subjectName.isAcceptableOrUnknown(
+          data['subject_name']!,
+          _subjectNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_subjectNameMeta);
+    }
+    if (data.containsKey('source_name')) {
+      context.handle(
+        _sourceNameMeta,
+        sourceName.isAcceptableOrUnknown(data['source_name']!, _sourceNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceNameMeta);
+    }
+    if (data.containsKey('source_version')) {
+      context.handle(
+        _sourceVersionMeta,
+        sourceVersion.isAcceptableOrUnknown(
+          data['source_version']!,
+          _sourceVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceVersionMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {code},
+  ];
+  @override
+  CurriculumCompetenciesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CurriculumCompetenciesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      thematicUnit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thematic_unit'],
+      )!,
+      knowledgeObject: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}knowledge_object'],
+      ),
+      stage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stage'],
+      )!,
+      gradeLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}grade_level'],
+      )!,
+      subjectName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_name'],
+      )!,
+      sourceName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_name'],
+      )!,
+      sourceVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_version'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CurriculumCompetenciesTableTable createAlias(String alias) {
+    return $CurriculumCompetenciesTableTable(attachedDatabase, alias);
+  }
+}
+
+class CurriculumCompetenciesTableData extends DataClass
+    implements Insertable<CurriculumCompetenciesTableData> {
+  final String id;
+  final String code;
+  final String description;
+  final String thematicUnit;
+  final String? knowledgeObject;
+  final String stage;
+  final String gradeLevel;
+  final String subjectName;
+  final String sourceName;
+  final String sourceVersion;
+  final DateTime createdAt;
+  const CurriculumCompetenciesTableData({
+    required this.id,
+    required this.code,
+    required this.description,
+    required this.thematicUnit,
+    this.knowledgeObject,
+    required this.stage,
+    required this.gradeLevel,
+    required this.subjectName,
+    required this.sourceName,
+    required this.sourceVersion,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['code'] = Variable<String>(code);
+    map['description'] = Variable<String>(description);
+    map['thematic_unit'] = Variable<String>(thematicUnit);
+    if (!nullToAbsent || knowledgeObject != null) {
+      map['knowledge_object'] = Variable<String>(knowledgeObject);
+    }
+    map['stage'] = Variable<String>(stage);
+    map['grade_level'] = Variable<String>(gradeLevel);
+    map['subject_name'] = Variable<String>(subjectName);
+    map['source_name'] = Variable<String>(sourceName);
+    map['source_version'] = Variable<String>(sourceVersion);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  CurriculumCompetenciesTableCompanion toCompanion(bool nullToAbsent) {
+    return CurriculumCompetenciesTableCompanion(
+      id: Value(id),
+      code: Value(code),
+      description: Value(description),
+      thematicUnit: Value(thematicUnit),
+      knowledgeObject: knowledgeObject == null && nullToAbsent
+          ? const Value.absent()
+          : Value(knowledgeObject),
+      stage: Value(stage),
+      gradeLevel: Value(gradeLevel),
+      subjectName: Value(subjectName),
+      sourceName: Value(sourceName),
+      sourceVersion: Value(sourceVersion),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory CurriculumCompetenciesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CurriculumCompetenciesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      code: serializer.fromJson<String>(json['code']),
+      description: serializer.fromJson<String>(json['description']),
+      thematicUnit: serializer.fromJson<String>(json['thematicUnit']),
+      knowledgeObject: serializer.fromJson<String?>(json['knowledgeObject']),
+      stage: serializer.fromJson<String>(json['stage']),
+      gradeLevel: serializer.fromJson<String>(json['gradeLevel']),
+      subjectName: serializer.fromJson<String>(json['subjectName']),
+      sourceName: serializer.fromJson<String>(json['sourceName']),
+      sourceVersion: serializer.fromJson<String>(json['sourceVersion']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'code': serializer.toJson<String>(code),
+      'description': serializer.toJson<String>(description),
+      'thematicUnit': serializer.toJson<String>(thematicUnit),
+      'knowledgeObject': serializer.toJson<String?>(knowledgeObject),
+      'stage': serializer.toJson<String>(stage),
+      'gradeLevel': serializer.toJson<String>(gradeLevel),
+      'subjectName': serializer.toJson<String>(subjectName),
+      'sourceName': serializer.toJson<String>(sourceName),
+      'sourceVersion': serializer.toJson<String>(sourceVersion),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  CurriculumCompetenciesTableData copyWith({
+    String? id,
+    String? code,
+    String? description,
+    String? thematicUnit,
+    Value<String?> knowledgeObject = const Value.absent(),
+    String? stage,
+    String? gradeLevel,
+    String? subjectName,
+    String? sourceName,
+    String? sourceVersion,
+    DateTime? createdAt,
+  }) => CurriculumCompetenciesTableData(
+    id: id ?? this.id,
+    code: code ?? this.code,
+    description: description ?? this.description,
+    thematicUnit: thematicUnit ?? this.thematicUnit,
+    knowledgeObject: knowledgeObject.present
+        ? knowledgeObject.value
+        : this.knowledgeObject,
+    stage: stage ?? this.stage,
+    gradeLevel: gradeLevel ?? this.gradeLevel,
+    subjectName: subjectName ?? this.subjectName,
+    sourceName: sourceName ?? this.sourceName,
+    sourceVersion: sourceVersion ?? this.sourceVersion,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  CurriculumCompetenciesTableData copyWithCompanion(
+    CurriculumCompetenciesTableCompanion data,
+  ) {
+    return CurriculumCompetenciesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      code: data.code.present ? data.code.value : this.code,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      thematicUnit: data.thematicUnit.present
+          ? data.thematicUnit.value
+          : this.thematicUnit,
+      knowledgeObject: data.knowledgeObject.present
+          ? data.knowledgeObject.value
+          : this.knowledgeObject,
+      stage: data.stage.present ? data.stage.value : this.stage,
+      gradeLevel: data.gradeLevel.present
+          ? data.gradeLevel.value
+          : this.gradeLevel,
+      subjectName: data.subjectName.present
+          ? data.subjectName.value
+          : this.subjectName,
+      sourceName: data.sourceName.present
+          ? data.sourceName.value
+          : this.sourceName,
+      sourceVersion: data.sourceVersion.present
+          ? data.sourceVersion.value
+          : this.sourceVersion,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CurriculumCompetenciesTableData(')
+          ..write('id: $id, ')
+          ..write('code: $code, ')
+          ..write('description: $description, ')
+          ..write('thematicUnit: $thematicUnit, ')
+          ..write('knowledgeObject: $knowledgeObject, ')
+          ..write('stage: $stage, ')
+          ..write('gradeLevel: $gradeLevel, ')
+          ..write('subjectName: $subjectName, ')
+          ..write('sourceName: $sourceName, ')
+          ..write('sourceVersion: $sourceVersion, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    code,
+    description,
+    thematicUnit,
+    knowledgeObject,
+    stage,
+    gradeLevel,
+    subjectName,
+    sourceName,
+    sourceVersion,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CurriculumCompetenciesTableData &&
+          other.id == this.id &&
+          other.code == this.code &&
+          other.description == this.description &&
+          other.thematicUnit == this.thematicUnit &&
+          other.knowledgeObject == this.knowledgeObject &&
+          other.stage == this.stage &&
+          other.gradeLevel == this.gradeLevel &&
+          other.subjectName == this.subjectName &&
+          other.sourceName == this.sourceName &&
+          other.sourceVersion == this.sourceVersion &&
+          other.createdAt == this.createdAt);
+}
+
+class CurriculumCompetenciesTableCompanion
+    extends UpdateCompanion<CurriculumCompetenciesTableData> {
+  final Value<String> id;
+  final Value<String> code;
+  final Value<String> description;
+  final Value<String> thematicUnit;
+  final Value<String?> knowledgeObject;
+  final Value<String> stage;
+  final Value<String> gradeLevel;
+  final Value<String> subjectName;
+  final Value<String> sourceName;
+  final Value<String> sourceVersion;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const CurriculumCompetenciesTableCompanion({
+    this.id = const Value.absent(),
+    this.code = const Value.absent(),
+    this.description = const Value.absent(),
+    this.thematicUnit = const Value.absent(),
+    this.knowledgeObject = const Value.absent(),
+    this.stage = const Value.absent(),
+    this.gradeLevel = const Value.absent(),
+    this.subjectName = const Value.absent(),
+    this.sourceName = const Value.absent(),
+    this.sourceVersion = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CurriculumCompetenciesTableCompanion.insert({
+    required String id,
+    required String code,
+    required String description,
+    required String thematicUnit,
+    this.knowledgeObject = const Value.absent(),
+    required String stage,
+    required String gradeLevel,
+    required String subjectName,
+    required String sourceName,
+    required String sourceVersion,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       code = Value(code),
+       description = Value(description),
+       thematicUnit = Value(thematicUnit),
+       stage = Value(stage),
+       gradeLevel = Value(gradeLevel),
+       subjectName = Value(subjectName),
+       sourceName = Value(sourceName),
+       sourceVersion = Value(sourceVersion),
+       createdAt = Value(createdAt);
+  static Insertable<CurriculumCompetenciesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? code,
+    Expression<String>? description,
+    Expression<String>? thematicUnit,
+    Expression<String>? knowledgeObject,
+    Expression<String>? stage,
+    Expression<String>? gradeLevel,
+    Expression<String>? subjectName,
+    Expression<String>? sourceName,
+    Expression<String>? sourceVersion,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (code != null) 'code': code,
+      if (description != null) 'description': description,
+      if (thematicUnit != null) 'thematic_unit': thematicUnit,
+      if (knowledgeObject != null) 'knowledge_object': knowledgeObject,
+      if (stage != null) 'stage': stage,
+      if (gradeLevel != null) 'grade_level': gradeLevel,
+      if (subjectName != null) 'subject_name': subjectName,
+      if (sourceName != null) 'source_name': sourceName,
+      if (sourceVersion != null) 'source_version': sourceVersion,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CurriculumCompetenciesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? code,
+    Value<String>? description,
+    Value<String>? thematicUnit,
+    Value<String?>? knowledgeObject,
+    Value<String>? stage,
+    Value<String>? gradeLevel,
+    Value<String>? subjectName,
+    Value<String>? sourceName,
+    Value<String>? sourceVersion,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return CurriculumCompetenciesTableCompanion(
+      id: id ?? this.id,
+      code: code ?? this.code,
+      description: description ?? this.description,
+      thematicUnit: thematicUnit ?? this.thematicUnit,
+      knowledgeObject: knowledgeObject ?? this.knowledgeObject,
+      stage: stage ?? this.stage,
+      gradeLevel: gradeLevel ?? this.gradeLevel,
+      subjectName: subjectName ?? this.subjectName,
+      sourceName: sourceName ?? this.sourceName,
+      sourceVersion: sourceVersion ?? this.sourceVersion,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (code.present) {
+      map['code'] = Variable<String>(code.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (thematicUnit.present) {
+      map['thematic_unit'] = Variable<String>(thematicUnit.value);
+    }
+    if (knowledgeObject.present) {
+      map['knowledge_object'] = Variable<String>(knowledgeObject.value);
+    }
+    if (stage.present) {
+      map['stage'] = Variable<String>(stage.value);
+    }
+    if (gradeLevel.present) {
+      map['grade_level'] = Variable<String>(gradeLevel.value);
+    }
+    if (subjectName.present) {
+      map['subject_name'] = Variable<String>(subjectName.value);
+    }
+    if (sourceName.present) {
+      map['source_name'] = Variable<String>(sourceName.value);
+    }
+    if (sourceVersion.present) {
+      map['source_version'] = Variable<String>(sourceVersion.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CurriculumCompetenciesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('code: $code, ')
+          ..write('description: $description, ')
+          ..write('thematicUnit: $thematicUnit, ')
+          ..write('knowledgeObject: $knowledgeObject, ')
+          ..write('stage: $stage, ')
+          ..write('gradeLevel: $gradeLevel, ')
+          ..write('subjectName: $subjectName, ')
+          ..write('sourceName: $sourceName, ')
+          ..write('sourceVersion: $sourceVersion, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CourseContentsTableTable extends CourseContentsTable
+    with TableInfo<$CourseContentsTableTable, CourseContentsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CourseContentsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _classroomSubjectIdMeta =
+      const VerificationMeta('classroomSubjectId');
+  @override
+  late final GeneratedColumn<String> classroomSubjectId =
+      GeneratedColumn<String>(
+        'classroom_subject_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES classroom_subjects_table (id) ON DELETE RESTRICT',
+        ),
+      );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _thematicUnitMeta = const VerificationMeta(
+    'thematicUnit',
+  );
+  @override
+  late final GeneratedColumn<String> thematicUnit = GeneratedColumn<String>(
+    'thematic_unit',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _estimatedLessonsMeta = const VerificationMeta(
+    'estimatedLessons',
+  );
+  @override
+  late final GeneratedColumn<int> estimatedLessons = GeneratedColumn<int>(
+    'estimated_lessons',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _orderIndexMeta = const VerificationMeta(
+    'orderIndex',
+  );
+  @override
+  late final GeneratedColumn<int> orderIndex = GeneratedColumn<int>(
+    'order_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isMandatoryMeta = const VerificationMeta(
+    'isMandatory',
+  );
+  @override
+  late final GeneratedColumn<bool> isMandatory = GeneratedColumn<bool>(
+    'is_mandatory',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_mandatory" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _curriculumCompetencyIdMeta =
+      const VerificationMeta('curriculumCompetencyId');
+  @override
+  late final GeneratedColumn<String> curriculumCompetencyId =
+      GeneratedColumn<String>(
+        'curriculum_competency_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES curriculum_competencies_table (id) ON DELETE SET NULL',
+        ),
+      );
+  static const VerificationMeta _originMeta = const VerificationMeta('origin');
+  @override
+  late final GeneratedColumn<String> origin = GeneratedColumn<String>(
+    'origin',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    classroomSubjectId,
+    title,
+    description,
+    thematicUnit,
+    estimatedLessons,
+    orderIndex,
+    isMandatory,
+    curriculumCompetencyId,
+    origin,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'course_contents_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CourseContentsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('classroom_subject_id')) {
+      context.handle(
+        _classroomSubjectIdMeta,
+        classroomSubjectId.isAcceptableOrUnknown(
+          data['classroom_subject_id']!,
+          _classroomSubjectIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_classroomSubjectIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('thematic_unit')) {
+      context.handle(
+        _thematicUnitMeta,
+        thematicUnit.isAcceptableOrUnknown(
+          data['thematic_unit']!,
+          _thematicUnitMeta,
+        ),
+      );
+    }
+    if (data.containsKey('estimated_lessons')) {
+      context.handle(
+        _estimatedLessonsMeta,
+        estimatedLessons.isAcceptableOrUnknown(
+          data['estimated_lessons']!,
+          _estimatedLessonsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('order_index')) {
+      context.handle(
+        _orderIndexMeta,
+        orderIndex.isAcceptableOrUnknown(data['order_index']!, _orderIndexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orderIndexMeta);
+    }
+    if (data.containsKey('is_mandatory')) {
+      context.handle(
+        _isMandatoryMeta,
+        isMandatory.isAcceptableOrUnknown(
+          data['is_mandatory']!,
+          _isMandatoryMeta,
+        ),
+      );
+    }
+    if (data.containsKey('curriculum_competency_id')) {
+      context.handle(
+        _curriculumCompetencyIdMeta,
+        curriculumCompetencyId.isAcceptableOrUnknown(
+          data['curriculum_competency_id']!,
+          _curriculumCompetencyIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('origin')) {
+      context.handle(
+        _originMeta,
+        origin.isAcceptableOrUnknown(data['origin']!, _originMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_originMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CourseContentsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CourseContentsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      classroomSubjectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}classroom_subject_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      thematicUnit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thematic_unit'],
+      ),
+      estimatedLessons: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}estimated_lessons'],
+      )!,
+      orderIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order_index'],
+      )!,
+      isMandatory: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_mandatory'],
+      )!,
+      curriculumCompetencyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}curriculum_competency_id'],
+      ),
+      origin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CourseContentsTableTable createAlias(String alias) {
+    return $CourseContentsTableTable(attachedDatabase, alias);
+  }
+}
+
+class CourseContentsTableData extends DataClass
+    implements Insertable<CourseContentsTableData> {
+  final String id;
+  final String classroomSubjectId;
+  final String title;
+  final String? description;
+  final String? thematicUnit;
+  final int estimatedLessons;
+  final int orderIndex;
+  final bool isMandatory;
+  final String? curriculumCompetencyId;
+  final String origin;
+  final DateTime createdAt;
+  const CourseContentsTableData({
+    required this.id,
+    required this.classroomSubjectId,
+    required this.title,
+    this.description,
+    this.thematicUnit,
+    required this.estimatedLessons,
+    required this.orderIndex,
+    required this.isMandatory,
+    this.curriculumCompetencyId,
+    required this.origin,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['classroom_subject_id'] = Variable<String>(classroomSubjectId);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || thematicUnit != null) {
+      map['thematic_unit'] = Variable<String>(thematicUnit);
+    }
+    map['estimated_lessons'] = Variable<int>(estimatedLessons);
+    map['order_index'] = Variable<int>(orderIndex);
+    map['is_mandatory'] = Variable<bool>(isMandatory);
+    if (!nullToAbsent || curriculumCompetencyId != null) {
+      map['curriculum_competency_id'] = Variable<String>(
+        curriculumCompetencyId,
+      );
+    }
+    map['origin'] = Variable<String>(origin);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  CourseContentsTableCompanion toCompanion(bool nullToAbsent) {
+    return CourseContentsTableCompanion(
+      id: Value(id),
+      classroomSubjectId: Value(classroomSubjectId),
+      title: Value(title),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      thematicUnit: thematicUnit == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thematicUnit),
+      estimatedLessons: Value(estimatedLessons),
+      orderIndex: Value(orderIndex),
+      isMandatory: Value(isMandatory),
+      curriculumCompetencyId: curriculumCompetencyId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(curriculumCompetencyId),
+      origin: Value(origin),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory CourseContentsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CourseContentsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      classroomSubjectId: serializer.fromJson<String>(
+        json['classroomSubjectId'],
+      ),
+      title: serializer.fromJson<String>(json['title']),
+      description: serializer.fromJson<String?>(json['description']),
+      thematicUnit: serializer.fromJson<String?>(json['thematicUnit']),
+      estimatedLessons: serializer.fromJson<int>(json['estimatedLessons']),
+      orderIndex: serializer.fromJson<int>(json['orderIndex']),
+      isMandatory: serializer.fromJson<bool>(json['isMandatory']),
+      curriculumCompetencyId: serializer.fromJson<String?>(
+        json['curriculumCompetencyId'],
+      ),
+      origin: serializer.fromJson<String>(json['origin']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'classroomSubjectId': serializer.toJson<String>(classroomSubjectId),
+      'title': serializer.toJson<String>(title),
+      'description': serializer.toJson<String?>(description),
+      'thematicUnit': serializer.toJson<String?>(thematicUnit),
+      'estimatedLessons': serializer.toJson<int>(estimatedLessons),
+      'orderIndex': serializer.toJson<int>(orderIndex),
+      'isMandatory': serializer.toJson<bool>(isMandatory),
+      'curriculumCompetencyId': serializer.toJson<String?>(
+        curriculumCompetencyId,
+      ),
+      'origin': serializer.toJson<String>(origin),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  CourseContentsTableData copyWith({
+    String? id,
+    String? classroomSubjectId,
+    String? title,
+    Value<String?> description = const Value.absent(),
+    Value<String?> thematicUnit = const Value.absent(),
+    int? estimatedLessons,
+    int? orderIndex,
+    bool? isMandatory,
+    Value<String?> curriculumCompetencyId = const Value.absent(),
+    String? origin,
+    DateTime? createdAt,
+  }) => CourseContentsTableData(
+    id: id ?? this.id,
+    classroomSubjectId: classroomSubjectId ?? this.classroomSubjectId,
+    title: title ?? this.title,
+    description: description.present ? description.value : this.description,
+    thematicUnit: thematicUnit.present ? thematicUnit.value : this.thematicUnit,
+    estimatedLessons: estimatedLessons ?? this.estimatedLessons,
+    orderIndex: orderIndex ?? this.orderIndex,
+    isMandatory: isMandatory ?? this.isMandatory,
+    curriculumCompetencyId: curriculumCompetencyId.present
+        ? curriculumCompetencyId.value
+        : this.curriculumCompetencyId,
+    origin: origin ?? this.origin,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  CourseContentsTableData copyWithCompanion(CourseContentsTableCompanion data) {
+    return CourseContentsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      classroomSubjectId: data.classroomSubjectId.present
+          ? data.classroomSubjectId.value
+          : this.classroomSubjectId,
+      title: data.title.present ? data.title.value : this.title,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      thematicUnit: data.thematicUnit.present
+          ? data.thematicUnit.value
+          : this.thematicUnit,
+      estimatedLessons: data.estimatedLessons.present
+          ? data.estimatedLessons.value
+          : this.estimatedLessons,
+      orderIndex: data.orderIndex.present
+          ? data.orderIndex.value
+          : this.orderIndex,
+      isMandatory: data.isMandatory.present
+          ? data.isMandatory.value
+          : this.isMandatory,
+      curriculumCompetencyId: data.curriculumCompetencyId.present
+          ? data.curriculumCompetencyId.value
+          : this.curriculumCompetencyId,
+      origin: data.origin.present ? data.origin.value : this.origin,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CourseContentsTableData(')
+          ..write('id: $id, ')
+          ..write('classroomSubjectId: $classroomSubjectId, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('thematicUnit: $thematicUnit, ')
+          ..write('estimatedLessons: $estimatedLessons, ')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('isMandatory: $isMandatory, ')
+          ..write('curriculumCompetencyId: $curriculumCompetencyId, ')
+          ..write('origin: $origin, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    classroomSubjectId,
+    title,
+    description,
+    thematicUnit,
+    estimatedLessons,
+    orderIndex,
+    isMandatory,
+    curriculumCompetencyId,
+    origin,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CourseContentsTableData &&
+          other.id == this.id &&
+          other.classroomSubjectId == this.classroomSubjectId &&
+          other.title == this.title &&
+          other.description == this.description &&
+          other.thematicUnit == this.thematicUnit &&
+          other.estimatedLessons == this.estimatedLessons &&
+          other.orderIndex == this.orderIndex &&
+          other.isMandatory == this.isMandatory &&
+          other.curriculumCompetencyId == this.curriculumCompetencyId &&
+          other.origin == this.origin &&
+          other.createdAt == this.createdAt);
+}
+
+class CourseContentsTableCompanion
+    extends UpdateCompanion<CourseContentsTableData> {
+  final Value<String> id;
+  final Value<String> classroomSubjectId;
+  final Value<String> title;
+  final Value<String?> description;
+  final Value<String?> thematicUnit;
+  final Value<int> estimatedLessons;
+  final Value<int> orderIndex;
+  final Value<bool> isMandatory;
+  final Value<String?> curriculumCompetencyId;
+  final Value<String> origin;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const CourseContentsTableCompanion({
+    this.id = const Value.absent(),
+    this.classroomSubjectId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.description = const Value.absent(),
+    this.thematicUnit = const Value.absent(),
+    this.estimatedLessons = const Value.absent(),
+    this.orderIndex = const Value.absent(),
+    this.isMandatory = const Value.absent(),
+    this.curriculumCompetencyId = const Value.absent(),
+    this.origin = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CourseContentsTableCompanion.insert({
+    required String id,
+    required String classroomSubjectId,
+    required String title,
+    this.description = const Value.absent(),
+    this.thematicUnit = const Value.absent(),
+    this.estimatedLessons = const Value.absent(),
+    required int orderIndex,
+    this.isMandatory = const Value.absent(),
+    this.curriculumCompetencyId = const Value.absent(),
+    required String origin,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       classroomSubjectId = Value(classroomSubjectId),
+       title = Value(title),
+       orderIndex = Value(orderIndex),
+       origin = Value(origin),
+       createdAt = Value(createdAt);
+  static Insertable<CourseContentsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? classroomSubjectId,
+    Expression<String>? title,
+    Expression<String>? description,
+    Expression<String>? thematicUnit,
+    Expression<int>? estimatedLessons,
+    Expression<int>? orderIndex,
+    Expression<bool>? isMandatory,
+    Expression<String>? curriculumCompetencyId,
+    Expression<String>? origin,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (classroomSubjectId != null)
+        'classroom_subject_id': classroomSubjectId,
+      if (title != null) 'title': title,
+      if (description != null) 'description': description,
+      if (thematicUnit != null) 'thematic_unit': thematicUnit,
+      if (estimatedLessons != null) 'estimated_lessons': estimatedLessons,
+      if (orderIndex != null) 'order_index': orderIndex,
+      if (isMandatory != null) 'is_mandatory': isMandatory,
+      if (curriculumCompetencyId != null)
+        'curriculum_competency_id': curriculumCompetencyId,
+      if (origin != null) 'origin': origin,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CourseContentsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? classroomSubjectId,
+    Value<String>? title,
+    Value<String?>? description,
+    Value<String?>? thematicUnit,
+    Value<int>? estimatedLessons,
+    Value<int>? orderIndex,
+    Value<bool>? isMandatory,
+    Value<String?>? curriculumCompetencyId,
+    Value<String>? origin,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return CourseContentsTableCompanion(
+      id: id ?? this.id,
+      classroomSubjectId: classroomSubjectId ?? this.classroomSubjectId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      thematicUnit: thematicUnit ?? this.thematicUnit,
+      estimatedLessons: estimatedLessons ?? this.estimatedLessons,
+      orderIndex: orderIndex ?? this.orderIndex,
+      isMandatory: isMandatory ?? this.isMandatory,
+      curriculumCompetencyId:
+          curriculumCompetencyId ?? this.curriculumCompetencyId,
+      origin: origin ?? this.origin,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (classroomSubjectId.present) {
+      map['classroom_subject_id'] = Variable<String>(classroomSubjectId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (thematicUnit.present) {
+      map['thematic_unit'] = Variable<String>(thematicUnit.value);
+    }
+    if (estimatedLessons.present) {
+      map['estimated_lessons'] = Variable<int>(estimatedLessons.value);
+    }
+    if (orderIndex.present) {
+      map['order_index'] = Variable<int>(orderIndex.value);
+    }
+    if (isMandatory.present) {
+      map['is_mandatory'] = Variable<bool>(isMandatory.value);
+    }
+    if (curriculumCompetencyId.present) {
+      map['curriculum_competency_id'] = Variable<String>(
+        curriculumCompetencyId.value,
+      );
+    }
+    if (origin.present) {
+      map['origin'] = Variable<String>(origin.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CourseContentsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('classroomSubjectId: $classroomSubjectId, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('thematicUnit: $thematicUnit, ')
+          ..write('estimatedLessons: $estimatedLessons, ')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('isMandatory: $isMandatory, ')
+          ..write('curriculumCompetencyId: $curriculumCompetencyId, ')
+          ..write('origin: $origin, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ContentPrerequisitesTableTable extends ContentPrerequisitesTable
+    with
+        TableInfo<
+          $ContentPrerequisitesTableTable,
+          ContentPrerequisitesTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ContentPrerequisitesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _contentIdMeta = const VerificationMeta(
+    'contentId',
+  );
+  @override
+  late final GeneratedColumn<String> contentId = GeneratedColumn<String>(
+    'content_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES course_contents_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _prerequisiteContentIdMeta =
+      const VerificationMeta('prerequisiteContentId');
+  @override
+  late final GeneratedColumn<String> prerequisiteContentId =
+      GeneratedColumn<String>(
+        'prerequisite_content_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES course_contents_table (id) ON DELETE RESTRICT',
+        ),
+      );
+  @override
+  List<GeneratedColumn> get $columns => [contentId, prerequisiteContentId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'content_prerequisites_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ContentPrerequisitesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('content_id')) {
+      context.handle(
+        _contentIdMeta,
+        contentId.isAcceptableOrUnknown(data['content_id']!, _contentIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentIdMeta);
+    }
+    if (data.containsKey('prerequisite_content_id')) {
+      context.handle(
+        _prerequisiteContentIdMeta,
+        prerequisiteContentId.isAcceptableOrUnknown(
+          data['prerequisite_content_id']!,
+          _prerequisiteContentIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_prerequisiteContentIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {contentId, prerequisiteContentId};
+  @override
+  ContentPrerequisitesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ContentPrerequisitesTableData(
+      contentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_id'],
+      )!,
+      prerequisiteContentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prerequisite_content_id'],
+      )!,
+    );
+  }
+
+  @override
+  $ContentPrerequisitesTableTable createAlias(String alias) {
+    return $ContentPrerequisitesTableTable(attachedDatabase, alias);
+  }
+}
+
+class ContentPrerequisitesTableData extends DataClass
+    implements Insertable<ContentPrerequisitesTableData> {
+  final String contentId;
+  final String prerequisiteContentId;
+  const ContentPrerequisitesTableData({
+    required this.contentId,
+    required this.prerequisiteContentId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['content_id'] = Variable<String>(contentId);
+    map['prerequisite_content_id'] = Variable<String>(prerequisiteContentId);
+    return map;
+  }
+
+  ContentPrerequisitesTableCompanion toCompanion(bool nullToAbsent) {
+    return ContentPrerequisitesTableCompanion(
+      contentId: Value(contentId),
+      prerequisiteContentId: Value(prerequisiteContentId),
+    );
+  }
+
+  factory ContentPrerequisitesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ContentPrerequisitesTableData(
+      contentId: serializer.fromJson<String>(json['contentId']),
+      prerequisiteContentId: serializer.fromJson<String>(
+        json['prerequisiteContentId'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'contentId': serializer.toJson<String>(contentId),
+      'prerequisiteContentId': serializer.toJson<String>(prerequisiteContentId),
+    };
+  }
+
+  ContentPrerequisitesTableData copyWith({
+    String? contentId,
+    String? prerequisiteContentId,
+  }) => ContentPrerequisitesTableData(
+    contentId: contentId ?? this.contentId,
+    prerequisiteContentId: prerequisiteContentId ?? this.prerequisiteContentId,
+  );
+  ContentPrerequisitesTableData copyWithCompanion(
+    ContentPrerequisitesTableCompanion data,
+  ) {
+    return ContentPrerequisitesTableData(
+      contentId: data.contentId.present ? data.contentId.value : this.contentId,
+      prerequisiteContentId: data.prerequisiteContentId.present
+          ? data.prerequisiteContentId.value
+          : this.prerequisiteContentId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContentPrerequisitesTableData(')
+          ..write('contentId: $contentId, ')
+          ..write('prerequisiteContentId: $prerequisiteContentId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(contentId, prerequisiteContentId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ContentPrerequisitesTableData &&
+          other.contentId == this.contentId &&
+          other.prerequisiteContentId == this.prerequisiteContentId);
+}
+
+class ContentPrerequisitesTableCompanion
+    extends UpdateCompanion<ContentPrerequisitesTableData> {
+  final Value<String> contentId;
+  final Value<String> prerequisiteContentId;
+  final Value<int> rowid;
+  const ContentPrerequisitesTableCompanion({
+    this.contentId = const Value.absent(),
+    this.prerequisiteContentId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ContentPrerequisitesTableCompanion.insert({
+    required String contentId,
+    required String prerequisiteContentId,
+    this.rowid = const Value.absent(),
+  }) : contentId = Value(contentId),
+       prerequisiteContentId = Value(prerequisiteContentId);
+  static Insertable<ContentPrerequisitesTableData> custom({
+    Expression<String>? contentId,
+    Expression<String>? prerequisiteContentId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (contentId != null) 'content_id': contentId,
+      if (prerequisiteContentId != null)
+        'prerequisite_content_id': prerequisiteContentId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ContentPrerequisitesTableCompanion copyWith({
+    Value<String>? contentId,
+    Value<String>? prerequisiteContentId,
+    Value<int>? rowid,
+  }) {
+    return ContentPrerequisitesTableCompanion(
+      contentId: contentId ?? this.contentId,
+      prerequisiteContentId:
+          prerequisiteContentId ?? this.prerequisiteContentId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (contentId.present) {
+      map['content_id'] = Variable<String>(contentId.value);
+    }
+    if (prerequisiteContentId.present) {
+      map['prerequisite_content_id'] = Variable<String>(
+        prerequisiteContentId.value,
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContentPrerequisitesTableCompanion(')
+          ..write('contentId: $contentId, ')
+          ..write('prerequisiteContentId: $prerequisiteContentId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3177,6 +4839,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $SchoolCalendarEventsTableTable(this);
   late final $ScheduleSlotsTableTable scheduleSlotsTable =
       $ScheduleSlotsTableTable(this);
+  late final $CurriculumCompetenciesTableTable curriculumCompetenciesTable =
+      $CurriculumCompetenciesTableTable(this);
+  late final $CourseContentsTableTable courseContentsTable =
+      $CourseContentsTableTable(this);
+  late final $ContentPrerequisitesTableTable contentPrerequisitesTable =
+      $ContentPrerequisitesTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3189,6 +4857,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     plannedLessonsTable,
     schoolCalendarEventsTable,
     scheduleSlotsTable,
+    curriculumCompetenciesTable,
+    courseContentsTable,
+    contentPrerequisitesTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -3216,6 +4887,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('schedule_slots_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'curriculum_competencies_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('course_contents_table', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'course_contents_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('content_prerequisites_table', kind: UpdateKind.delete),
+      ],
     ),
   ]);
 }
@@ -4578,6 +6265,33 @@ final class $$ClassroomSubjectsTableTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $CourseContentsTableTable,
+    List<CourseContentsTableData>
+  >
+  _courseContentsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.courseContentsTable,
+        aliasName: 'classroom_subjects_table__id__course_contents_table__classroom_subject_id',
+      );
+
+  $$CourseContentsTableTableProcessedTableManager get courseContentsTableRefs {
+    final manager =
+        $$CourseContentsTableTableTableManager(
+          $_db,
+          $_db.courseContentsTable,
+        ).filter(
+          (f) => f.classroomSubjectId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _courseContentsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ClassroomSubjectsTableTableFilterComposer
@@ -4691,6 +6405,31 @@ class $$ClassroomSubjectsTableTableFilterComposer
           }) => $$ScheduleSlotsTableTableFilterComposer(
             $db: $db,
             $table: $db.scheduleSlotsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> courseContentsTableRefs(
+    Expression<bool> Function($$CourseContentsTableTableFilterComposer f) f,
+  ) {
+    final $$CourseContentsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.courseContentsTable,
+      getReferencedColumn: (t) => t.classroomSubjectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseContentsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.courseContentsTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -4889,6 +6628,32 @@ class $$ClassroomSubjectsTableTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> courseContentsTableRefs<T extends Object>(
+    Expression<T> Function($$CourseContentsTableTableAnnotationComposer a) f,
+  ) {
+    final $$CourseContentsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.courseContentsTable,
+          getReferencedColumn: (t) => t.classroomSubjectId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CourseContentsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.courseContentsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$ClassroomSubjectsTableTableTableManager
@@ -4909,6 +6674,7 @@ class $$ClassroomSubjectsTableTableTableManager
             bool subjectId,
             bool plannedLessonsTableRefs,
             bool scheduleSlotsTableRefs,
+            bool courseContentsTableRefs,
           })
         > {
   $$ClassroomSubjectsTableTableTableManager(
@@ -4982,12 +6748,14 @@ class $$ClassroomSubjectsTableTableTableManager
                 subjectId = false,
                 plannedLessonsTableRefs = false,
                 scheduleSlotsTableRefs = false,
+                courseContentsTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (plannedLessonsTableRefs) db.plannedLessonsTable,
                     if (scheduleSlotsTableRefs) db.scheduleSlotsTable,
+                    if (courseContentsTableRefs) db.courseContentsTable,
                   ],
                   addJoins:
                       <
@@ -5080,6 +6848,28 @@ class $$ClassroomSubjectsTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (courseContentsTableRefs)
+                        await $_getPrefetchedData<
+                          ClassroomSubjectsTableData,
+                          $ClassroomSubjectsTableTable,
+                          CourseContentsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ClassroomSubjectsTableTableReferences
+                                  ._courseContentsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ClassroomSubjectsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).courseContentsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.classroomSubjectId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -5105,6 +6895,7 @@ typedef $$ClassroomSubjectsTableTableProcessedTableManager =
         bool subjectId,
         bool plannedLessonsTableRefs,
         bool scheduleSlotsTableRefs,
+        bool courseContentsTableRefs,
       })
     >;
 typedef $$PlannedLessonsTableTableCreateCompanionBuilder =
@@ -6299,6 +8090,1654 @@ typedef $$ScheduleSlotsTableTableProcessedTableManager =
       ScheduleSlotsTableData,
       PrefetchHooks Function({bool classroomSubjectId})
     >;
+typedef $$CurriculumCompetenciesTableTableCreateCompanionBuilder =
+    CurriculumCompetenciesTableCompanion Function({
+      required String id,
+      required String code,
+      required String description,
+      required String thematicUnit,
+      Value<String?> knowledgeObject,
+      required String stage,
+      required String gradeLevel,
+      required String subjectName,
+      required String sourceName,
+      required String sourceVersion,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$CurriculumCompetenciesTableTableUpdateCompanionBuilder =
+    CurriculumCompetenciesTableCompanion Function({
+      Value<String> id,
+      Value<String> code,
+      Value<String> description,
+      Value<String> thematicUnit,
+      Value<String?> knowledgeObject,
+      Value<String> stage,
+      Value<String> gradeLevel,
+      Value<String> subjectName,
+      Value<String> sourceName,
+      Value<String> sourceVersion,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$CurriculumCompetenciesTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CurriculumCompetenciesTableTable,
+          CurriculumCompetenciesTableData
+        > {
+  $$CurriculumCompetenciesTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $CourseContentsTableTable,
+    List<CourseContentsTableData>
+  >
+  _courseContentsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.courseContentsTable,
+        aliasName: 'curriculum_competencies_table__id__course_contents_table__curriculum_competency_id',
+      );
+
+  $$CourseContentsTableTableProcessedTableManager get courseContentsTableRefs {
+    final manager =
+        $$CourseContentsTableTableTableManager(
+          $_db,
+          $_db.courseContentsTable,
+        ).filter(
+          (f) => f.curriculumCompetencyId.id.sqlEquals(
+            $_itemColumn<String>('id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _courseContentsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$CurriculumCompetenciesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $CurriculumCompetenciesTableTable> {
+  $$CurriculumCompetenciesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thematicUnit => $composableBuilder(
+    column: $table.thematicUnit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get knowledgeObject => $composableBuilder(
+    column: $table.knowledgeObject,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stage => $composableBuilder(
+    column: $table.stage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get gradeLevel => $composableBuilder(
+    column: $table.gradeLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectName => $composableBuilder(
+    column: $table.subjectName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceName => $composableBuilder(
+    column: $table.sourceName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceVersion => $composableBuilder(
+    column: $table.sourceVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> courseContentsTableRefs(
+    Expression<bool> Function($$CourseContentsTableTableFilterComposer f) f,
+  ) {
+    final $$CourseContentsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.courseContentsTable,
+      getReferencedColumn: (t) => t.curriculumCompetencyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseContentsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.courseContentsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CurriculumCompetenciesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $CurriculumCompetenciesTableTable> {
+  $$CurriculumCompetenciesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thematicUnit => $composableBuilder(
+    column: $table.thematicUnit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get knowledgeObject => $composableBuilder(
+    column: $table.knowledgeObject,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stage => $composableBuilder(
+    column: $table.stage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get gradeLevel => $composableBuilder(
+    column: $table.gradeLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectName => $composableBuilder(
+    column: $table.subjectName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceName => $composableBuilder(
+    column: $table.sourceName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceVersion => $composableBuilder(
+    column: $table.sourceVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CurriculumCompetenciesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CurriculumCompetenciesTableTable> {
+  $$CurriculumCompetenciesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get code =>
+      $composableBuilder(column: $table.code, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get thematicUnit => $composableBuilder(
+    column: $table.thematicUnit,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get knowledgeObject => $composableBuilder(
+    column: $table.knowledgeObject,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get stage =>
+      $composableBuilder(column: $table.stage, builder: (column) => column);
+
+  GeneratedColumn<String> get gradeLevel => $composableBuilder(
+    column: $table.gradeLevel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get subjectName => $composableBuilder(
+    column: $table.subjectName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceName => $composableBuilder(
+    column: $table.sourceName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceVersion => $composableBuilder(
+    column: $table.sourceVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  Expression<T> courseContentsTableRefs<T extends Object>(
+    Expression<T> Function($$CourseContentsTableTableAnnotationComposer a) f,
+  ) {
+    final $$CourseContentsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.courseContentsTable,
+          getReferencedColumn: (t) => t.curriculumCompetencyId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CourseContentsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.courseContentsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$CurriculumCompetenciesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CurriculumCompetenciesTableTable,
+          CurriculumCompetenciesTableData,
+          $$CurriculumCompetenciesTableTableFilterComposer,
+          $$CurriculumCompetenciesTableTableOrderingComposer,
+          $$CurriculumCompetenciesTableTableAnnotationComposer,
+          $$CurriculumCompetenciesTableTableCreateCompanionBuilder,
+          $$CurriculumCompetenciesTableTableUpdateCompanionBuilder,
+          (
+            CurriculumCompetenciesTableData,
+            $$CurriculumCompetenciesTableTableReferences,
+          ),
+          CurriculumCompetenciesTableData,
+          PrefetchHooks Function({bool courseContentsTableRefs})
+        > {
+  $$CurriculumCompetenciesTableTableTableManager(
+    _$AppDatabase db,
+    $CurriculumCompetenciesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CurriculumCompetenciesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$CurriculumCompetenciesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CurriculumCompetenciesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> code = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String> thematicUnit = const Value.absent(),
+                Value<String?> knowledgeObject = const Value.absent(),
+                Value<String> stage = const Value.absent(),
+                Value<String> gradeLevel = const Value.absent(),
+                Value<String> subjectName = const Value.absent(),
+                Value<String> sourceName = const Value.absent(),
+                Value<String> sourceVersion = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CurriculumCompetenciesTableCompanion(
+                id: id,
+                code: code,
+                description: description,
+                thematicUnit: thematicUnit,
+                knowledgeObject: knowledgeObject,
+                stage: stage,
+                gradeLevel: gradeLevel,
+                subjectName: subjectName,
+                sourceName: sourceName,
+                sourceVersion: sourceVersion,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String code,
+                required String description,
+                required String thematicUnit,
+                Value<String?> knowledgeObject = const Value.absent(),
+                required String stage,
+                required String gradeLevel,
+                required String subjectName,
+                required String sourceName,
+                required String sourceVersion,
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => CurriculumCompetenciesTableCompanion.insert(
+                id: id,
+                code: code,
+                description: description,
+                thematicUnit: thematicUnit,
+                knowledgeObject: knowledgeObject,
+                stage: stage,
+                gradeLevel: gradeLevel,
+                subjectName: subjectName,
+                sourceName: sourceName,
+                sourceVersion: sourceVersion,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $CurriculumCompetenciesTableTable,
+                    CurriculumCompetenciesTableData
+                  >(table),
+                  $$CurriculumCompetenciesTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({courseContentsTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (courseContentsTableRefs) db.courseContentsTable,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (courseContentsTableRefs)
+                    await $_getPrefetchedData<
+                      CurriculumCompetenciesTableData,
+                      $CurriculumCompetenciesTableTable,
+                      CourseContentsTableData
+                    >(
+                      currentTable: table,
+                      referencedTable:
+                          $$CurriculumCompetenciesTableTableReferences
+                              ._courseContentsTableRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$CurriculumCompetenciesTableTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).courseContentsTableRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.curriculumCompetencyId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CurriculumCompetenciesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CurriculumCompetenciesTableTable,
+      CurriculumCompetenciesTableData,
+      $$CurriculumCompetenciesTableTableFilterComposer,
+      $$CurriculumCompetenciesTableTableOrderingComposer,
+      $$CurriculumCompetenciesTableTableAnnotationComposer,
+      $$CurriculumCompetenciesTableTableCreateCompanionBuilder,
+      $$CurriculumCompetenciesTableTableUpdateCompanionBuilder,
+      (
+        CurriculumCompetenciesTableData,
+        $$CurriculumCompetenciesTableTableReferences,
+      ),
+      CurriculumCompetenciesTableData,
+      PrefetchHooks Function({bool courseContentsTableRefs})
+    >;
+typedef $$CourseContentsTableTableCreateCompanionBuilder =
+    CourseContentsTableCompanion Function({
+      required String id,
+      required String classroomSubjectId,
+      required String title,
+      Value<String?> description,
+      Value<String?> thematicUnit,
+      Value<int> estimatedLessons,
+      required int orderIndex,
+      Value<bool> isMandatory,
+      Value<String?> curriculumCompetencyId,
+      required String origin,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$CourseContentsTableTableUpdateCompanionBuilder =
+    CourseContentsTableCompanion Function({
+      Value<String> id,
+      Value<String> classroomSubjectId,
+      Value<String> title,
+      Value<String?> description,
+      Value<String?> thematicUnit,
+      Value<int> estimatedLessons,
+      Value<int> orderIndex,
+      Value<bool> isMandatory,
+      Value<String?> curriculumCompetencyId,
+      Value<String> origin,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$CourseContentsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CourseContentsTableTable,
+          CourseContentsTableData
+        > {
+  $$CourseContentsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ClassroomSubjectsTableTable _classroomSubjectIdTable(
+    _$AppDatabase db,
+  ) => db.classroomSubjectsTable.createAlias(
+    'course_contents_table__classroom_subject_id__classroom_subjects_table__id',
+  );
+
+  $$ClassroomSubjectsTableTableProcessedTableManager get classroomSubjectId {
+    final $_column = $_itemColumn<String>('classroom_subject_id')!;
+
+    final manager = $$ClassroomSubjectsTableTableTableManager(
+      $_db,
+      $_db.classroomSubjectsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_classroomSubjectIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CurriculumCompetenciesTableTable _curriculumCompetencyIdTable(
+    _$AppDatabase db,
+  ) => db.curriculumCompetenciesTable.createAlias(
+    'course_contents_table__curriculum_competency_id__curriculum_competencies_table__id',
+  );
+
+  $$CurriculumCompetenciesTableTableProcessedTableManager?
+  get curriculumCompetencyId {
+    final $_column = $_itemColumn<String>('curriculum_competency_id');
+    if ($_column == null) return null;
+    final manager = $$CurriculumCompetenciesTableTableTableManager(
+      $_db,
+      $_db.curriculumCompetenciesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _curriculumCompetencyIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ContentPrerequisitesTableTable,
+    List<ContentPrerequisitesTableData>
+  >
+  _requiredPrerequisitesTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.contentPrerequisitesTable,
+    aliasName:
+        'course_contents_table__id__content_prerequisites_table__content_id',
+  );
+
+  $$ContentPrerequisitesTableTableProcessedTableManager
+  get requiredPrerequisites {
+    final manager = $$ContentPrerequisitesTableTableTableManager(
+      $_db,
+      $_db.contentPrerequisitesTable,
+    ).filter((f) => f.contentId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _requiredPrerequisitesTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ContentPrerequisitesTableTable,
+    List<ContentPrerequisitesTableData>
+  >
+  _prerequisiteForTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.contentPrerequisitesTable,
+    aliasName: 'course_contents_table__id__content_prerequisites_table__prerequisite_content_id',
+  );
+
+  $$ContentPrerequisitesTableTableProcessedTableManager get prerequisiteFor {
+    final manager =
+        $$ContentPrerequisitesTableTableTableManager(
+          $_db,
+          $_db.contentPrerequisitesTable,
+        ).filter(
+          (f) =>
+              f.prerequisiteContentId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_prerequisiteForTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$CourseContentsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $CourseContentsTableTable> {
+  $$CourseContentsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thematicUnit => $composableBuilder(
+    column: $table.thematicUnit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get estimatedLessons => $composableBuilder(
+    column: $table.estimatedLessons,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isMandatory => $composableBuilder(
+    column: $table.isMandatory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ClassroomSubjectsTableTableFilterComposer get classroomSubjectId {
+    final $$ClassroomSubjectsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.classroomSubjectId,
+          referencedTable: $db.classroomSubjectsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ClassroomSubjectsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.classroomSubjectsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$CurriculumCompetenciesTableTableFilterComposer get curriculumCompetencyId {
+    final $$CurriculumCompetenciesTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.curriculumCompetencyId,
+          referencedTable: $db.curriculumCompetenciesTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CurriculumCompetenciesTableTableFilterComposer(
+                $db: $db,
+                $table: $db.curriculumCompetenciesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<bool> requiredPrerequisites(
+    Expression<bool> Function($$ContentPrerequisitesTableTableFilterComposer f)
+    f,
+  ) {
+    final $$ContentPrerequisitesTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.contentPrerequisitesTable,
+          getReferencedColumn: (t) => t.contentId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContentPrerequisitesTableTableFilterComposer(
+                $db: $db,
+                $table: $db.contentPrerequisitesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> prerequisiteFor(
+    Expression<bool> Function($$ContentPrerequisitesTableTableFilterComposer f)
+    f,
+  ) {
+    final $$ContentPrerequisitesTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.contentPrerequisitesTable,
+          getReferencedColumn: (t) => t.prerequisiteContentId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContentPrerequisitesTableTableFilterComposer(
+                $db: $db,
+                $table: $db.contentPrerequisitesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$CourseContentsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $CourseContentsTableTable> {
+  $$CourseContentsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thematicUnit => $composableBuilder(
+    column: $table.thematicUnit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get estimatedLessons => $composableBuilder(
+    column: $table.estimatedLessons,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isMandatory => $composableBuilder(
+    column: $table.isMandatory,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ClassroomSubjectsTableTableOrderingComposer get classroomSubjectId {
+    final $$ClassroomSubjectsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.classroomSubjectId,
+          referencedTable: $db.classroomSubjectsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ClassroomSubjectsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.classroomSubjectsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$CurriculumCompetenciesTableTableOrderingComposer
+  get curriculumCompetencyId {
+    final $$CurriculumCompetenciesTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.curriculumCompetencyId,
+          referencedTable: $db.curriculumCompetenciesTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CurriculumCompetenciesTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.curriculumCompetenciesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$CourseContentsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CourseContentsTableTable> {
+  $$CourseContentsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get thematicUnit => $composableBuilder(
+    column: $table.thematicUnit,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get estimatedLessons => $composableBuilder(
+    column: $table.estimatedLessons,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isMandatory => $composableBuilder(
+    column: $table.isMandatory,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get origin =>
+      $composableBuilder(column: $table.origin, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$ClassroomSubjectsTableTableAnnotationComposer get classroomSubjectId {
+    final $$ClassroomSubjectsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.classroomSubjectId,
+          referencedTable: $db.classroomSubjectsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ClassroomSubjectsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.classroomSubjectsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$CurriculumCompetenciesTableTableAnnotationComposer
+  get curriculumCompetencyId {
+    final $$CurriculumCompetenciesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.curriculumCompetencyId,
+          referencedTable: $db.curriculumCompetenciesTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CurriculumCompetenciesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.curriculumCompetenciesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<T> requiredPrerequisites<T extends Object>(
+    Expression<T> Function($$ContentPrerequisitesTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$ContentPrerequisitesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.contentPrerequisitesTable,
+          getReferencedColumn: (t) => t.contentId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContentPrerequisitesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contentPrerequisitesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> prerequisiteFor<T extends Object>(
+    Expression<T> Function($$ContentPrerequisitesTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$ContentPrerequisitesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.contentPrerequisitesTable,
+          getReferencedColumn: (t) => t.prerequisiteContentId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContentPrerequisitesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contentPrerequisitesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$CourseContentsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CourseContentsTableTable,
+          CourseContentsTableData,
+          $$CourseContentsTableTableFilterComposer,
+          $$CourseContentsTableTableOrderingComposer,
+          $$CourseContentsTableTableAnnotationComposer,
+          $$CourseContentsTableTableCreateCompanionBuilder,
+          $$CourseContentsTableTableUpdateCompanionBuilder,
+          (CourseContentsTableData, $$CourseContentsTableTableReferences),
+          CourseContentsTableData,
+          PrefetchHooks Function({
+            bool classroomSubjectId,
+            bool curriculumCompetencyId,
+            bool requiredPrerequisites,
+            bool prerequisiteFor,
+          })
+        > {
+  $$CourseContentsTableTableTableManager(
+    _$AppDatabase db,
+    $CourseContentsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CourseContentsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CourseContentsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CourseContentsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> classroomSubjectId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String?> thematicUnit = const Value.absent(),
+                Value<int> estimatedLessons = const Value.absent(),
+                Value<int> orderIndex = const Value.absent(),
+                Value<bool> isMandatory = const Value.absent(),
+                Value<String?> curriculumCompetencyId = const Value.absent(),
+                Value<String> origin = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CourseContentsTableCompanion(
+                id: id,
+                classroomSubjectId: classroomSubjectId,
+                title: title,
+                description: description,
+                thematicUnit: thematicUnit,
+                estimatedLessons: estimatedLessons,
+                orderIndex: orderIndex,
+                isMandatory: isMandatory,
+                curriculumCompetencyId: curriculumCompetencyId,
+                origin: origin,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String classroomSubjectId,
+                required String title,
+                Value<String?> description = const Value.absent(),
+                Value<String?> thematicUnit = const Value.absent(),
+                Value<int> estimatedLessons = const Value.absent(),
+                required int orderIndex,
+                Value<bool> isMandatory = const Value.absent(),
+                Value<String?> curriculumCompetencyId = const Value.absent(),
+                required String origin,
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => CourseContentsTableCompanion.insert(
+                id: id,
+                classroomSubjectId: classroomSubjectId,
+                title: title,
+                description: description,
+                thematicUnit: thematicUnit,
+                estimatedLessons: estimatedLessons,
+                orderIndex: orderIndex,
+                isMandatory: isMandatory,
+                curriculumCompetencyId: curriculumCompetencyId,
+                origin: origin,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $CourseContentsTableTable,
+                    CourseContentsTableData
+                  >(table),
+                  $$CourseContentsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                classroomSubjectId = false,
+                curriculumCompetencyId = false,
+                requiredPrerequisites = false,
+                prerequisiteFor = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (requiredPrerequisites) db.contentPrerequisitesTable,
+                    if (prerequisiteFor) db.contentPrerequisitesTable,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (classroomSubjectId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.classroomSubjectId,
+                            referencedTable:
+                                $$CourseContentsTableTableReferences
+                                    ._classroomSubjectIdTable(db),
+                            referencedColumn:
+                                $$CourseContentsTableTableReferences
+                                    ._classroomSubjectIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (curriculumCompetencyId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.curriculumCompetencyId,
+                            referencedTable:
+                                $$CourseContentsTableTableReferences
+                                    ._curriculumCompetencyIdTable(db),
+                            referencedColumn:
+                                $$CourseContentsTableTableReferences
+                                    ._curriculumCompetencyIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (requiredPrerequisites)
+                        await $_getPrefetchedData<
+                          CourseContentsTableData,
+                          $CourseContentsTableTable,
+                          ContentPrerequisitesTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CourseContentsTableTableReferences
+                              ._requiredPrerequisitesTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CourseContentsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).requiredPrerequisites,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contentId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (prerequisiteFor)
+                        await $_getPrefetchedData<
+                          CourseContentsTableData,
+                          $CourseContentsTableTable,
+                          ContentPrerequisitesTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CourseContentsTableTableReferences
+                              ._prerequisiteForTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CourseContentsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).prerequisiteFor,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.prerequisiteContentId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$CourseContentsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CourseContentsTableTable,
+      CourseContentsTableData,
+      $$CourseContentsTableTableFilterComposer,
+      $$CourseContentsTableTableOrderingComposer,
+      $$CourseContentsTableTableAnnotationComposer,
+      $$CourseContentsTableTableCreateCompanionBuilder,
+      $$CourseContentsTableTableUpdateCompanionBuilder,
+      (CourseContentsTableData, $$CourseContentsTableTableReferences),
+      CourseContentsTableData,
+      PrefetchHooks Function({
+        bool classroomSubjectId,
+        bool curriculumCompetencyId,
+        bool requiredPrerequisites,
+        bool prerequisiteFor,
+      })
+    >;
+typedef $$ContentPrerequisitesTableTableCreateCompanionBuilder =
+    ContentPrerequisitesTableCompanion Function({
+      required String contentId,
+      required String prerequisiteContentId,
+      Value<int> rowid,
+    });
+typedef $$ContentPrerequisitesTableTableUpdateCompanionBuilder =
+    ContentPrerequisitesTableCompanion Function({
+      Value<String> contentId,
+      Value<String> prerequisiteContentId,
+      Value<int> rowid,
+    });
+
+final class $$ContentPrerequisitesTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ContentPrerequisitesTableTable,
+          ContentPrerequisitesTableData
+        > {
+  $$ContentPrerequisitesTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CourseContentsTableTable _contentIdTable(_$AppDatabase db) =>
+      db.courseContentsTable.createAlias(
+        'content_prerequisites_table__content_id__course_contents_table__id',
+      );
+
+  $$CourseContentsTableTableProcessedTableManager get contentId {
+    final $_column = $_itemColumn<String>('content_id')!;
+
+    final manager = $$CourseContentsTableTableTableManager(
+      $_db,
+      $_db.courseContentsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CourseContentsTableTable _prerequisiteContentIdTable(
+    _$AppDatabase db,
+  ) => db.courseContentsTable.createAlias(
+    'content_prerequisites_table__prerequisite_content_id__course_contents_table__id',
+  );
+
+  $$CourseContentsTableTableProcessedTableManager get prerequisiteContentId {
+    final $_column = $_itemColumn<String>('prerequisite_content_id')!;
+
+    final manager = $$CourseContentsTableTableTableManager(
+      $_db,
+      $_db.courseContentsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _prerequisiteContentIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ContentPrerequisitesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ContentPrerequisitesTableTable> {
+  $$ContentPrerequisitesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$CourseContentsTableTableFilterComposer get contentId {
+    final $$CourseContentsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contentId,
+      referencedTable: $db.courseContentsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseContentsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.courseContentsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CourseContentsTableTableFilterComposer get prerequisiteContentId {
+    final $$CourseContentsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.prerequisiteContentId,
+      referencedTable: $db.courseContentsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseContentsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.courseContentsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContentPrerequisitesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ContentPrerequisitesTableTable> {
+  $$ContentPrerequisitesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$CourseContentsTableTableOrderingComposer get contentId {
+    final $$CourseContentsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contentId,
+          referencedTable: $db.courseContentsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CourseContentsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.courseContentsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$CourseContentsTableTableOrderingComposer get prerequisiteContentId {
+    final $$CourseContentsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.prerequisiteContentId,
+          referencedTable: $db.courseContentsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CourseContentsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.courseContentsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ContentPrerequisitesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ContentPrerequisitesTableTable> {
+  $$ContentPrerequisitesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$CourseContentsTableTableAnnotationComposer get contentId {
+    final $$CourseContentsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contentId,
+          referencedTable: $db.courseContentsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CourseContentsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.courseContentsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$CourseContentsTableTableAnnotationComposer get prerequisiteContentId {
+    final $$CourseContentsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.prerequisiteContentId,
+          referencedTable: $db.courseContentsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CourseContentsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.courseContentsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ContentPrerequisitesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ContentPrerequisitesTableTable,
+          ContentPrerequisitesTableData,
+          $$ContentPrerequisitesTableTableFilterComposer,
+          $$ContentPrerequisitesTableTableOrderingComposer,
+          $$ContentPrerequisitesTableTableAnnotationComposer,
+          $$ContentPrerequisitesTableTableCreateCompanionBuilder,
+          $$ContentPrerequisitesTableTableUpdateCompanionBuilder,
+          (
+            ContentPrerequisitesTableData,
+            $$ContentPrerequisitesTableTableReferences,
+          ),
+          ContentPrerequisitesTableData,
+          PrefetchHooks Function({bool contentId, bool prerequisiteContentId})
+        > {
+  $$ContentPrerequisitesTableTableTableManager(
+    _$AppDatabase db,
+    $ContentPrerequisitesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ContentPrerequisitesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ContentPrerequisitesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ContentPrerequisitesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> contentId = const Value.absent(),
+                Value<String> prerequisiteContentId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContentPrerequisitesTableCompanion(
+                contentId: contentId,
+                prerequisiteContentId: prerequisiteContentId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String contentId,
+                required String prerequisiteContentId,
+                Value<int> rowid = const Value.absent(),
+              }) => ContentPrerequisitesTableCompanion.insert(
+                contentId: contentId,
+                prerequisiteContentId: prerequisiteContentId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $ContentPrerequisitesTableTable,
+                    ContentPrerequisitesTableData
+                  >(table),
+                  $$ContentPrerequisitesTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({contentId = false, prerequisiteContentId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (contentId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contentId,
+                            referencedTable:
+                                $$ContentPrerequisitesTableTableReferences
+                                    ._contentIdTable(db),
+                            referencedColumn:
+                                $$ContentPrerequisitesTableTableReferences
+                                    ._contentIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (prerequisiteContentId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.prerequisiteContentId,
+                            referencedTable:
+                                $$ContentPrerequisitesTableTableReferences
+                                    ._prerequisiteContentIdTable(db),
+                            referencedColumn:
+                                $$ContentPrerequisitesTableTableReferences
+                                    ._prerequisiteContentIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$ContentPrerequisitesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ContentPrerequisitesTableTable,
+      ContentPrerequisitesTableData,
+      $$ContentPrerequisitesTableTableFilterComposer,
+      $$ContentPrerequisitesTableTableOrderingComposer,
+      $$ContentPrerequisitesTableTableAnnotationComposer,
+      $$ContentPrerequisitesTableTableCreateCompanionBuilder,
+      $$ContentPrerequisitesTableTableUpdateCompanionBuilder,
+      (
+        ContentPrerequisitesTableData,
+        $$ContentPrerequisitesTableTableReferences,
+      ),
+      ContentPrerequisitesTableData,
+      PrefetchHooks Function({bool contentId, bool prerequisiteContentId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6323,4 +9762,17 @@ class $AppDatabaseManager {
       );
   $$ScheduleSlotsTableTableTableManager get scheduleSlotsTable =>
       $$ScheduleSlotsTableTableTableManager(_db, _db.scheduleSlotsTable);
+  $$CurriculumCompetenciesTableTableTableManager
+  get curriculumCompetenciesTable =>
+      $$CurriculumCompetenciesTableTableTableManager(
+        _db,
+        _db.curriculumCompetenciesTable,
+      );
+  $$CourseContentsTableTableTableManager get courseContentsTable =>
+      $$CourseContentsTableTableTableManager(_db, _db.courseContentsTable);
+  $$ContentPrerequisitesTableTableTableManager get contentPrerequisitesTable =>
+      $$ContentPrerequisitesTableTableTableManager(
+        _db,
+        _db.contentPrerequisitesTable,
+      );
 }

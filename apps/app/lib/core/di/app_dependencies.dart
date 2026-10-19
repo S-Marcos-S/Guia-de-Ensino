@@ -1,14 +1,20 @@
 import 'package:app/domain/repositories/academic_year_repository.dart';
 import 'package:app/domain/repositories/calendar_event_repository.dart';
 import 'package:app/domain/repositories/classroom_repository.dart';
+import 'package:app/domain/repositories/course_content_repository.dart';
+import 'package:app/domain/repositories/curriculum_competency_repository.dart';
 import 'package:app/domain/repositories/planned_lesson_repository.dart';
 import 'package:app/domain/repositories/schedule_slot_repository.dart';
 import 'package:app/domain/repositories/subject_repository.dart';
 import 'package:app/domain/services/calendar_calculation_service.dart';
+import 'package:app/domain/services/curriculum_integrity_service.dart';
+import 'package:app/infrastructure/curriculum/curriculum_seed_loader.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_academic_year_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_calendar_event_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_classroom_repository.dart';
+import 'package:app/infrastructure/persistence/repositories/drift_course_content_repository.dart';
+import 'package:app/infrastructure/persistence/repositories/drift_curriculum_competency_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_planned_lesson_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_schedule_slot_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_subject_repository.dart';
@@ -25,6 +31,10 @@ class AppDependencies {
     ScheduleSlotRepository? scheduleSlotRepository,
     PlannedLessonRepository? plannedLessonRepository,
     CalendarCalculationService? calendarCalculationService,
+    CurriculumCompetencyRepository? curriculumCompetencyRepository,
+    CourseContentRepository? courseContentRepository,
+    CurriculumIntegrityService? curriculumIntegrityService,
+    CurriculumSeedLoader? curriculumSeedLoader,
   }) : academicYearRepository =
            academicYearRepository ?? DriftAcademicYearRepository(database),
        subjectRepository =
@@ -38,7 +48,21 @@ class AppDependencies {
        plannedLessonRepository =
            plannedLessonRepository ?? DriftPlannedLessonRepository(database),
        calendarCalculationService =
-           calendarCalculationService ?? const CalendarCalculationService();
+           calendarCalculationService ?? const CalendarCalculationService(),
+       curriculumCompetencyRepository =
+           curriculumCompetencyRepository ??
+           DriftCurriculumCompetencyRepository(database),
+       courseContentRepository =
+           courseContentRepository ?? DriftCourseContentRepository(database),
+       curriculumIntegrityService =
+           curriculumIntegrityService ?? const CurriculumIntegrityService(),
+       curriculumSeedLoader =
+           curriculumSeedLoader ??
+           CurriculumSeedLoader(
+             repository:
+                 curriculumCompetencyRepository ??
+                 DriftCurriculumCompetencyRepository(database),
+           );
 
   final AppDatabase database;
   final AcademicYearRepository academicYearRepository;
@@ -48,6 +72,10 @@ class AppDependencies {
   final ScheduleSlotRepository scheduleSlotRepository;
   final PlannedLessonRepository plannedLessonRepository;
   final CalendarCalculationService calendarCalculationService;
+  final CurriculumCompetencyRepository curriculumCompetencyRepository;
+  final CourseContentRepository courseContentRepository;
+  final CurriculumIntegrityService curriculumIntegrityService;
+  final CurriculumSeedLoader curriculumSeedLoader;
 }
 
 /// Provedor de dependências via InheritedWidget para a árvore de widgets.

@@ -19,6 +19,9 @@ part 'app_database.g.dart';
     PlannedLessonsTable,
     SchoolCalendarEventsTable,
     ScheduleSlotsTable,
+    CurriculumCompetenciesTable,
+    CourseContentsTable,
+    ContentPrerequisitesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -28,7 +31,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -39,6 +42,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.createTable(schoolCalendarEventsTable);
         await m.createTable(scheduleSlotsTable);
+      }
+      if (from < 3) {
+        await m.createTable(curriculumCompetenciesTable);
+        await m.createTable(courseContentsTable);
+        await m.createTable(contentPrerequisitesTable);
       }
     },
     beforeOpen: (details) async {

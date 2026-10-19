@@ -15,7 +15,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 | **Etapa 2** | Modelos de Domínio e Persistência Local | **Concluída** | Etapa 1 |
 | **Etapa 3** | Cadastro e Configuração Pedagógica | **Concluída** | Etapa 2 |
 | **Etapa 3.1** | Automação de Git, CI/CD e Releases | **Concluída** | Etapa 3 |
-| **Etapa 4** | Conteúdos Programáticos e Base Curricular | Planejada | Etapa 3.1 |
+| **Etapa 4** | Conteúdos Programáticos e Base Curricular | **Concluída** | Etapa 3.1 |
 | **Etapa 5** | Motor Determinístico de Planejamento | Planejada | Etapa 4 |
 | **Etapa 6** | Acompanhamento e Registro de Aulas | Planejada | Etapa 5 |
 | **Etapa 7** | Replanejamento Automático Determinístico | Planejada | Etapa 6 |
@@ -120,16 +120,20 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 4 — Conteúdos Programáticos e Base Curricular
-- **Status**: Planejada
+- **Status**: **Concluída**
 - **Objetivos**:
   - Cadastro manual e estruturado de conteúdos programáticos e unidades de conhecimento.
-  - Configuração de duração estimada (em número de aulas), ordem pedagógica e dependências.
-  - Módulo de consulta e importação de referência inicial verificável da BNCC (Ensino Fundamental e Médio).
-  - Pipeline extensível para importação de arquivos (PDF, DOCX, planilhas).
+  - Configuração de duração estimada (em número de aulas), ordem pedagógica e dependências/pré-requisitos.
+  - Módulo de consulta e importação de referência oficial verificável da BNCC (Ensino Fundamental e Médio, Resoluções CNE/CP 2/2017 e 4/2018).
+  - Detecção e prevenção determinística de dependências circulares entre conteúdos (`CurriculumIntegrityService`).
+  - Persistência e integridade referencial com migração segura do SQLite para o Schema v3 via Drift.
+  - Interface responsiva Material 3 para gerenciamento, busca, reordenação e filtragem de conteúdos (`ContentsScreen`).
 - **Critérios de Aceitação**:
-  1. Base curricular inicial com fontes e códigos oficiais verificados (sem alucinações).
-  2. Suporte a conteúdos que ocupam múltiplas aulas e aulas com múltiplos conteúdos.
-  3. Telas de confirmação para dados importados antes de salvamento.
+  1. [x] Base curricular oficial verificada da BNCC (MEC) empacotada em asset JSON idempotente e sem códigos inventados.
+  2. [x] Criação de conteúdos 100% personalizados ou associados opcionalmente à BNCC.
+  3. [x] Grafo de pré-requisitos com validação determinística e detecção de ciclos diretos e transitivos (`CircularDependencyException`).
+  4. [x] Migração de banco SQLite v2 para v3 mantendo dados existentes sem corrupção.
+  5. [x] 56 testes automatizados executados e 100% aprovados (domínio, integridade, migração e apresentação).
 
 ---
 

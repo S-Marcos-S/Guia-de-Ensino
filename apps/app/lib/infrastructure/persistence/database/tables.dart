@@ -141,3 +141,72 @@ class ScheduleSlotsTable extends Table {
     {classroomSubjectId, weekday, orderIndex},
   ];
 }
+
+/// Tabela de Competências e Habilidades Curriculares Oficiais (BNCC / Diretrizes).
+class CurriculumCompetenciesTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get code => text()();
+  TextColumn get description => text()();
+  TextColumn get thematicUnit => text()();
+  TextColumn get knowledgeObject => text().nullable()();
+  TextColumn get stage => text()();
+  TextColumn get gradeLevel => text()();
+  TextColumn get subjectName => text()();
+  TextColumn get sourceName => text()();
+  TextColumn get sourceVersion => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {code},
+  ];
+}
+
+/// Tabela de Conteúdos Programáticos planejados pelo professor.
+class CourseContentsTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get classroomSubjectId => text().references(
+    ClassroomSubjectsTable,
+    #id,
+    onDelete: KeyAction.restrict,
+  )();
+  TextColumn get title => text()();
+  TextColumn get description => text().nullable()();
+  TextColumn get thematicUnit => text().nullable()();
+  IntColumn get estimatedLessons => integer().withDefault(const Constant(1))();
+  IntColumn get orderIndex => integer()();
+  BoolColumn get isMandatory => boolean().withDefault(const Constant(true))();
+  TextColumn get curriculumCompetencyId => text().nullable().references(
+    CurriculumCompetenciesTable,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
+  TextColumn get origin => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Tabela associativa de pré-requisitos entre conteúdos programáticos.
+class ContentPrerequisitesTable extends Table {
+  @ReferenceName('requiredPrerequisites')
+  TextColumn get contentId => text().references(
+    CourseContentsTable,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
+
+  @ReferenceName('prerequisiteFor')
+  TextColumn get prerequisiteContentId => text().references(
+    CourseContentsTable,
+    #id,
+    onDelete: KeyAction.restrict,
+  )();
+
+  @override
+  Set<Column> get primaryKey => {contentId, prerequisiteContentId};
+}

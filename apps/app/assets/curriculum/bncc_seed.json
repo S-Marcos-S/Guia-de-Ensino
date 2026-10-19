@@ -1,0 +1,123 @@
+[
+  {
+    "code": "EF06MA01",
+    "description": "Comparar, ordenar, ler e escrever números naturais e números racionais cuja representação decimal é finita, fazendo uso da reta numérica.",
+    "thematicUnit": "Números",
+    "knowledgeObject": "Sistema de numeração decimal: características, leitura, escrita e comparação de números naturais e de números racionais representados na forma decimal",
+    "stage": "Ensino Fundamental - Anos Finais",
+    "gradeLevel": "6º ano",
+    "subjectName": "Matemática",
+    "sourceName": "Base Nacional Comum Curricular (MEC)",
+    "sourceVersion": "Resolução CNE/CP nº 2/2017"
+  },
+  {
+    "code": "EF06MA02",
+    "description": "Reconhecer o sistema de numeração decimal, como o que prevaleceu no mundo ocidental, e destacar semelhanças e diferenças com outros sistemas, de modo a sistematizar suas principais características.",
+    "thematicUnit": "Números",
+    "knowledgeObject": "Sistema de numeração decimal: características, leitura, escrita e comparação de números naturais e de números racionais representados na forma decimal",
+    "stage": "Ensino Fundamental - Anos Finais",
+    "gradeLevel": "6º ano",
+    "subjectName": "Matemática",
+    "sourceName": "Base Nacional Comum Curricular (MEC)",
+    "sourceVersion": "Resolução CNE/CP nº 2/2017"
+  },
+  {
+    "code": "EF06MA03",
+    "description": "Resolver e elaborar problemas que envolvam cálculos (mentais ou escritos, exatos ou aproximados) com números naturais, por meio de estratégias variadas, com compreensão dos processos neles envolvidos com e sem uso de calculadora.",
+    "thematicUnit": "Números",
+    "knowledgeObject": "Operações (adição, subtração, multiplicação, divisão e potenciação) com números naturais",
+    "stage": "Ensino Fundamental - Anos Finais",
+    "gradeLevel": "6º ano",
+    "subjectName": "Matemática",
+    "sourceName": "Base Nacional Comum Curricular (MEC)",
+    "sourceVersion": "Resolução CNE/CP nº 2/2017"
+  },
+  {
+    "code": "EF06MA04",
+    "description": "Construir algoritmo em linguagem natural e representá-lo por fluxograma que indique a resolução de um problema simples.",
+    "thematicUnit": "Álgebra",
+    "knowledgeObject": "Fluxograma para determinar a paridade de um número natural, múltiplos e divisores",
+    "stage": "Ensino Fundamental - Anos Finais",
+    "gradeLevel": "6º ano",
+    "subjectName": "Matemática",
+    "sourceName": "Base Nacional Comum Curricular (MEC)",
+    "sourceVersion": "Resolução CNE/CP nº 2/2017"
+  },
+  {
+    "code": "EF06MA07",
+    "description": "Compreender, comparar e ordenar frações associadas às ideias de parte de inteiros e resultado de divisão, identificando frações equivalentes.",
+    "thematicUnit": "Números",
+    "knowledgeObject": "Frações: significados (parte/todo, quociente), equivalência, comparação e cálculo da fração de um número natural",
+    "stage": "Ensino Fundamental - Anos Finais",
+    "gradeLevel": "6º ano",
+    "subjectName": "Matemática",
+    "sourceName": "Base Nacional Comum Curricular (MEC)",
+    "sourceVersion": "Resolução CNE/CP nº 2/2017"
+  },
+  {
+    "code": "EF06MA16",
+    "description": "Associar pares ordenados de números a pontos do plano cartesiano do 1º quadrante, em situações como a localização dos vértices de um polígono.",
+    "thematicUnit": "Geometria",
+    "knowledgeObject": "Plano cartesiano: associação dos vértices de um polígono a pares ordenados",
+    "stage": "Ensino Fundamental - Anos Finais",
+    "gradeLevel": "6º ano",
+    "subjectName": "Matemática",
+    "sourceName": "Base Nacional Comum Curricular (MEC)",
+    "sourceVersion": "Resolução CNE/CP nº 2/2017"
+  },
+  {
+    "code": "EF06MA24",
+    "description": "Planejar e executar pesquisa amostral sobre questões relevantes, usando dados de fontes confiáveis, e comunicar os resultados por meio de relatório contendo gráficos e tabelas.",
+    "thematicUnit": "Probabilidade e Estatística",
+    "knowledgeObject": "Leitura e interpretação de tabelas e gráficos (de colunas ou barras simples ou múltiplas) referentes a variáveis categóricas e numéricas",
+    "stage": "Ensino Fundamental - Anos Finais",
+    "gradeLevel": "6º ano",
+    "subjectName": "Matemática",
+    "sourceName": "Base Nacional Comum Curricular (MEC)",
+    "sourceVersion": "Resolução CNE/CP nº 2/2017"
+  },
+  {
+    "code": "EF06LP01",
+    "description": "Reconhecer a impossibilidade de uma neutralidade absoluta no relato de fatos e identificar diferentes graus de parcialidade/imparcialidade dados pelo recorte feito e pelos efeitos de sentido gerados pelas escolhas lexicais.",
+    "thematicUnit": "Leitura",
+    "knowledgeObject": "Reconstrução do contexto de produção, circulação e recepção de textos. Caracterização do campo jornalístico e relação entre os gêneros em circulação",
+    "stage": "Ensino Fundamental - Anos Finais",
+    "gradeLevel": "6º ano",
+    "subjectName": "Língua Portuguesa",
+    "sourceName": "Base Nacional Comum Curricular (MEC)",
+    "sourceVersion": "Resolução CNE/CP nº 2/2017"
+  },
+  {
+    "code": "EF06LP02",
+    "description": "Estabelecer relação entre os diferentes gêneros jornalísticos, compreendendo a centralidade da notícia.",
+    "thematicUnit": "Leitura",
+    "knowledgeObject": "Relação entre textos",
+    "stage": "Ensino Fundamental - Anos Finais",
+    "gradeLevel": "6º ano",
+    "subjectName": "Língua Portuguesa",
+    "sourceName": "Base Nacional Comum Curricular (MEC)",
+    "sourceVersion": "Resolução CNE/CP nº 2/2017"
+  },
+  {
+    "code": "EM13MAT101",
+    "description": "Interpretar criticamente situações econômicas, sociais e fatos da realidade que envolvam a variação percentual de grandezas sobre a forma de taxas e índices para tomada de decisões com base em dados.",
+    "thematicUnit": "Matemática Financeira e Estatística",
+    "knowledgeObject": "Variação percentual, taxas e índices econômico-sociais",
+    "stage": "Ensino Médio",
+    "gradeLevel": "1º ao 3º ano EM",
+    "subjectName": "Matemática",
+    "sourceName": "Base Nacional Comum Curricular (MEC)",
+    "sourceVersion": "Resolução CNE/CP nº 4/2018"
+  },
+  {
+    "code": "EM13MAT102",
+    "description": "Analisar tabelas, gráficos e amostras de pesquisas estatísticas veiculadas pela mídia ou em textos científicos, identificando padrões de representação e possíveis distorções intencionais.",
+    "thematicUnit": "Estatística e Probabilidade",
+    "knowledgeObject": "Pesquisas estatísticas e análise crítica de dados",
+    "stage": "Ensino Médio",
+    "gradeLevel": "1º ao 3º ano EM",
+    "subjectName": "Matemática",
+    "sourceName": "Base Nacional Comum Curricular (MEC)",
+    "sourceVersion": "Resolução CNE/CP nº 4/2018"
+  }
+]

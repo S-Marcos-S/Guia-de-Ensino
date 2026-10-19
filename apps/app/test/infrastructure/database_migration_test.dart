@@ -8,10 +8,10 @@ void main() {
 
   group('SQLite Migration Tests (Version 1 to 2)', () {
     test(
-      'deve executar onCreate criando todas as tabelas na versão 2',
+      'deve executar onCreate criando todas as tabelas na versão atual',
       () async {
         final db = AppDatabase.forTesting(NativeDatabase.memory());
-        expect(db.schemaVersion, equals(2));
+        expect(db.schemaVersion, equals(3));
 
         // As novas tabelas devem aceitar inserções sem erro
         const yearId = 'ay-mig-2026';
