@@ -9,6 +9,7 @@ import 'package:app/presentation/components/app_confirm_dialog.dart';
 import 'package:app/presentation/components/app_header.dart';
 import 'package:app/presentation/components/empty_state_view.dart';
 import 'package:app/presentation/components/status_badge.dart';
+import 'package:app/presentation/screens/lessons_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
@@ -229,6 +230,24 @@ class _ClassroomsScreenState extends State<ClassroomsScreen> {
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                IconButton(
+                                  tooltip: 'Consultar Aulas',
+                                  icon: const Icon(
+                                    Icons.assignment_outlined,
+                                    color: Colors.teal,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => LessonsScreen(
+                                          initialClassroomId:
+                                              currentClassroom.id,
+                                          initialClassroomSubjectId: config.id,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
                                 IconButton(
                                   tooltip: 'Configurar Grade Semanal',
                                   icon: const Icon(
@@ -853,6 +872,20 @@ class _ClassroomsScreenState extends State<ClassroomsScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
+                                OutlinedButton.icon(
+                                  icon: const Icon(Icons.assignment_outlined),
+                                  label: const Text('Aulas'),
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => LessonsScreen(
+                                          initialClassroomId: classroom.id,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 8),
                                 OutlinedButton.icon(
                                   icon: const Icon(Icons.settings),
                                   label: const Text('Disciplinas e Grade'),

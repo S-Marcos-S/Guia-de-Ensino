@@ -2,6 +2,7 @@ import 'package:app/core/localization/app_strings.dart';
 import 'package:app/presentation/components/app_button.dart';
 import 'package:app/presentation/components/app_card.dart';
 import 'package:app/presentation/components/app_header.dart';
+import 'package:app/presentation/screens/lessons_screen.dart';
 import 'package:flutter/material.dart';
 
 /// Tela inicial funcional do Guia de Ensino.
@@ -117,6 +118,19 @@ class HomeScreen extends StatelessWidget {
                 icon: Icons.auto_mode_outlined,
                 badgeText: 'Determinístico',
                 onTap: () => onNavigateToTab(4),
+              ),
+              const SizedBox(height: 12),
+              AppCard(
+                title: AppStrings.cardLessonsTitle,
+                description: AppStrings.cardLessonsDesc,
+                icon: Icons.assignment_outlined,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const LessonsScreen(),
+                    ),
+                  );
+                },
               ),
             ],
           ),
