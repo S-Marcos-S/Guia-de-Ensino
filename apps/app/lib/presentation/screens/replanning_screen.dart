@@ -6,11 +6,13 @@ import 'package:app/domain/models/academic_year.dart';
 import 'package:app/domain/models/classroom.dart';
 import 'package:app/domain/models/course_content.dart';
 import 'package:app/domain/models/planned_lesson.dart';
+import 'package:app/domain/models/replanning_models.dart';
 import 'package:app/domain/models/subject.dart';
 import 'package:app/presentation/components/app_button.dart';
 import 'package:app/presentation/components/app_header.dart';
 import 'package:app/presentation/components/empty_state_view.dart';
 import 'package:app/presentation/components/planning_preview_dialog.dart';
+import 'package:app/presentation/components/replanning_preview_dialog.dart';
 import 'package:app/presentation/components/status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -32,6 +34,7 @@ class _ReplanningScreenState extends State<ReplanningScreen> {
   Map<String, CourseContent> _contentsMap = {};
 
   List<PlannedLesson> _lessons = [];
+  ScheduleDelayDetectionResult? _delayResult;
   bool _isLoading = true;
   bool _initialized = false;
   final _dateFormat = DateFormat('dd/MM/yyyy');
@@ -101,12 +104,64 @@ class _ReplanningScreenState extends State<ReplanningScreen> {
     final contents = await deps.courseContentRepository.getByClassroomSubject(
       classroomSubjectId,
     );
+    final delayResult = await deps.detectScheduleDelayUseCase.execute(
+      classroomSubjectId: classroomSubjectId,
+    );
 
     if (mounted) {
       setState(() {
         _lessons = lessons;
         _contentsMap = {for (final c in contents) c.id: c};
+        _delayResult = delayResult;
       });
+    }
+  }
+
+  Future<void> _replanSchedule() async {
+    if (_selectedClassroomSubject == null) return;
+
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => const Center(child: CircularProgressIndicator()),
+      ),
+    );
+
+    try {
+      final deps = AppDependencyScope.of(context);
+      final proposal = await deps.generateReplanningProposalUseCase.execute(
+        classroomSubjectId: _selectedClassroomSubject!.id,
+      );
+
+      if (mounted) {
+        Navigator.pop(context); // Fecha loading
+        final subjectName =
+            _subjectsMap[_selectedClassroomSubject!.subjectId]?.name ??
+            'Disciplina';
+
+        await showDialog<void>(
+          context: context,
+          builder: (ctx) => ReplanningPreviewDialog(
+            classroomName: _selectedClassroom?.name ?? '',
+            subjectName: subjectName,
+            proposal: proposal,
+            onPlanApplied: () {
+              _loadLessons(_selectedClassroomSubject!.id);
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Fecha loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao calcular replanejamento: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
@@ -238,13 +293,21 @@ class _ReplanningScreenState extends State<ReplanningScreen> {
               AppHeader(
                 title: AppStrings.cardReplanningTitle,
                 subtitle: 'Distribua ou reorganize os conteúdos pedagógicos no calendário letivo.',
-                action: AppButton(
-                  label: 'Gerar Planejamento',
-                  icon: Icons.auto_awesome_motion,
-                  onPressed: _selectedClassroomSubject != null
-                      ? _generatePlan
-                      : null,
-                ),
+                action: _lessons.isEmpty
+                    ? AppButton(
+                        label: 'Gerar Planejamento',
+                        icon: Icons.auto_awesome_motion,
+                        onPressed: _selectedClassroomSubject != null
+                            ? _generatePlan
+                            : null,
+                      )
+                    : AppButton(
+                        label: 'Replanejar Trilha',
+                        icon: Icons.auto_mode_outlined,
+                        onPressed: _selectedClassroomSubject != null
+                            ? _replanSchedule
+                            : null,
+                      ),
               ),
               const SizedBox(height: 8),
 
@@ -378,6 +441,117 @@ class _ReplanningScreenState extends State<ReplanningScreen> {
                     ],
                   ),
                 ),
+              if (_delayResult != null && _delayResult!.hasDelay) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3E0),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFFFB74D)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        _delayResult!.hasCapacityDeficit &&
+                                _delayResult!.notHeldCount == 0
+                            ? Icons.event_busy
+                            : Icons.warning_amber_rounded,
+                        color: const Color(0xFFE65100),
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  _delayResult!.hasCapacityDeficit &&
+                                          _delayResult!.notHeldCount == 0
+                                      ? 'Risco de Déficit Curricular Antecipado'
+                                      : 'Atraso Identificado no Cronograma',
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFFE65100),
+                                      ),
+                                ),
+                                const SizedBox(width: 6),
+                                if (_delayResult!.hasCapacityDeficit)
+                                  StatusBadge.custom(
+                                    label: _delayResult!
+                                        .viabilityStatus
+                                        .displayName,
+                                    background: const Color(0xFFFFEBEE),
+                                    foreground: const Color(0xFFC62828),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _delayResult!.summaryMessage,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: const Color(0xFF5D4037)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFE65100),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                        onPressed: _replanSchedule,
+                        icon: const Icon(Icons.auto_mode, size: 16),
+                        label: const Text('Replanejar'),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else if (_delayResult != null &&
+                  !_delayResult!.hasDelay &&
+                  _lessons.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F5E9),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFA5D6A7)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle_outline,
+                        color: Color(0xFF2E7D32),
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _delayResult!.summaryMessage,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: const Color(0xFF1B5E20),
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 8),
 
               // Lista de Aulas Planejadas

@@ -10,6 +10,7 @@ import 'package:app/presentation/components/app_button.dart';
 import 'package:app/presentation/components/empty_state_view.dart';
 import 'package:app/presentation/components/record_lesson_dialog.dart';
 import 'package:app/presentation/components/status_badge.dart';
+import 'package:app/presentation/screens/replanning_screen.dart';
 import 'package:flutter/material.dart';
 
 /// Filtro temporal de consulta de aulas.
@@ -387,6 +388,59 @@ class _LessonsScreenState extends State<LessonsScreen> {
                   },
                 ),
               ),
+              if (_lessons.any(
+                (l) =>
+                    l.effectiveStatus == LessonExecutionStatus.notHeld ||
+                    (l.executionRecord?.needsFollowUp ?? false),
+              )) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3E0),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFFFB74D)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.info_outline,
+                        color: Color(0xFFE65100),
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Aulas não realizadas ou com continuidade pendente identificadas.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: const Color(0xFF5D4037),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (_) => const ReplanningScreen(),
+                            ),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          foregroundColor: const Color(0xFFE65100),
+                        ),
+                        child: const Text('Replanejar'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 12),
 
               // Conteúdo principal (Carregando, Erro, Vazio ou Lista de Aulas)
