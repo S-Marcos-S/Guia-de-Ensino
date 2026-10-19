@@ -4822,6 +4822,292 @@ class ContentPrerequisitesTableCompanion
   }
 }
 
+class $LessonContentAllocationsTableTable extends LessonContentAllocationsTable
+    with
+        TableInfo<
+          $LessonContentAllocationsTableTable,
+          LessonContentAllocationsTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LessonContentAllocationsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _lessonIdMeta = const VerificationMeta(
+    'lessonId',
+  );
+  @override
+  late final GeneratedColumn<String> lessonId = GeneratedColumn<String>(
+    'lesson_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES planned_lessons_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _contentIdMeta = const VerificationMeta(
+    'contentId',
+  );
+  @override
+  late final GeneratedColumn<String> contentId = GeneratedColumn<String>(
+    'content_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES course_contents_table (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _orderIndexMeta = const VerificationMeta(
+    'orderIndex',
+  );
+  @override
+  late final GeneratedColumn<int> orderIndex = GeneratedColumn<int>(
+    'order_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [lessonId, contentId, orderIndex];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'lesson_content_allocations_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LessonContentAllocationsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('lesson_id')) {
+      context.handle(
+        _lessonIdMeta,
+        lessonId.isAcceptableOrUnknown(data['lesson_id']!, _lessonIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lessonIdMeta);
+    }
+    if (data.containsKey('content_id')) {
+      context.handle(
+        _contentIdMeta,
+        contentId.isAcceptableOrUnknown(data['content_id']!, _contentIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentIdMeta);
+    }
+    if (data.containsKey('order_index')) {
+      context.handle(
+        _orderIndexMeta,
+        orderIndex.isAcceptableOrUnknown(data['order_index']!, _orderIndexMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {lessonId, contentId};
+  @override
+  LessonContentAllocationsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LessonContentAllocationsTableData(
+      lessonId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lesson_id'],
+      )!,
+      contentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_id'],
+      )!,
+      orderIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order_index'],
+      )!,
+    );
+  }
+
+  @override
+  $LessonContentAllocationsTableTable createAlias(String alias) {
+    return $LessonContentAllocationsTableTable(attachedDatabase, alias);
+  }
+}
+
+class LessonContentAllocationsTableData extends DataClass
+    implements Insertable<LessonContentAllocationsTableData> {
+  final String lessonId;
+  final String contentId;
+  final int orderIndex;
+  const LessonContentAllocationsTableData({
+    required this.lessonId,
+    required this.contentId,
+    required this.orderIndex,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['lesson_id'] = Variable<String>(lessonId);
+    map['content_id'] = Variable<String>(contentId);
+    map['order_index'] = Variable<int>(orderIndex);
+    return map;
+  }
+
+  LessonContentAllocationsTableCompanion toCompanion(bool nullToAbsent) {
+    return LessonContentAllocationsTableCompanion(
+      lessonId: Value(lessonId),
+      contentId: Value(contentId),
+      orderIndex: Value(orderIndex),
+    );
+  }
+
+  factory LessonContentAllocationsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LessonContentAllocationsTableData(
+      lessonId: serializer.fromJson<String>(json['lessonId']),
+      contentId: serializer.fromJson<String>(json['contentId']),
+      orderIndex: serializer.fromJson<int>(json['orderIndex']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'lessonId': serializer.toJson<String>(lessonId),
+      'contentId': serializer.toJson<String>(contentId),
+      'orderIndex': serializer.toJson<int>(orderIndex),
+    };
+  }
+
+  LessonContentAllocationsTableData copyWith({
+    String? lessonId,
+    String? contentId,
+    int? orderIndex,
+  }) => LessonContentAllocationsTableData(
+    lessonId: lessonId ?? this.lessonId,
+    contentId: contentId ?? this.contentId,
+    orderIndex: orderIndex ?? this.orderIndex,
+  );
+  LessonContentAllocationsTableData copyWithCompanion(
+    LessonContentAllocationsTableCompanion data,
+  ) {
+    return LessonContentAllocationsTableData(
+      lessonId: data.lessonId.present ? data.lessonId.value : this.lessonId,
+      contentId: data.contentId.present ? data.contentId.value : this.contentId,
+      orderIndex: data.orderIndex.present
+          ? data.orderIndex.value
+          : this.orderIndex,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LessonContentAllocationsTableData(')
+          ..write('lessonId: $lessonId, ')
+          ..write('contentId: $contentId, ')
+          ..write('orderIndex: $orderIndex')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(lessonId, contentId, orderIndex);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LessonContentAllocationsTableData &&
+          other.lessonId == this.lessonId &&
+          other.contentId == this.contentId &&
+          other.orderIndex == this.orderIndex);
+}
+
+class LessonContentAllocationsTableCompanion
+    extends UpdateCompanion<LessonContentAllocationsTableData> {
+  final Value<String> lessonId;
+  final Value<String> contentId;
+  final Value<int> orderIndex;
+  final Value<int> rowid;
+  const LessonContentAllocationsTableCompanion({
+    this.lessonId = const Value.absent(),
+    this.contentId = const Value.absent(),
+    this.orderIndex = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LessonContentAllocationsTableCompanion.insert({
+    required String lessonId,
+    required String contentId,
+    this.orderIndex = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : lessonId = Value(lessonId),
+       contentId = Value(contentId);
+  static Insertable<LessonContentAllocationsTableData> custom({
+    Expression<String>? lessonId,
+    Expression<String>? contentId,
+    Expression<int>? orderIndex,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (lessonId != null) 'lesson_id': lessonId,
+      if (contentId != null) 'content_id': contentId,
+      if (orderIndex != null) 'order_index': orderIndex,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LessonContentAllocationsTableCompanion copyWith({
+    Value<String>? lessonId,
+    Value<String>? contentId,
+    Value<int>? orderIndex,
+    Value<int>? rowid,
+  }) {
+    return LessonContentAllocationsTableCompanion(
+      lessonId: lessonId ?? this.lessonId,
+      contentId: contentId ?? this.contentId,
+      orderIndex: orderIndex ?? this.orderIndex,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (lessonId.present) {
+      map['lesson_id'] = Variable<String>(lessonId.value);
+    }
+    if (contentId.present) {
+      map['content_id'] = Variable<String>(contentId.value);
+    }
+    if (orderIndex.present) {
+      map['order_index'] = Variable<int>(orderIndex.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LessonContentAllocationsTableCompanion(')
+          ..write('lessonId: $lessonId, ')
+          ..write('contentId: $contentId, ')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4845,6 +5131,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CourseContentsTableTable(this);
   late final $ContentPrerequisitesTableTable contentPrerequisitesTable =
       $ContentPrerequisitesTableTable(this);
+  late final $LessonContentAllocationsTableTable lessonContentAllocationsTable =
+      $LessonContentAllocationsTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4860,6 +5148,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     curriculumCompetenciesTable,
     courseContentsTable,
     contentPrerequisitesTable,
+    lessonContentAllocationsTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -4902,6 +5191,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       ),
       result: [
         TableUpdate('content_prerequisites_table', kind: UpdateKind.delete),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'planned_lessons_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate(
+          'lesson_content_allocations_table',
+          kind: UpdateKind.delete,
+        ),
       ],
     ),
   ]);
@@ -6955,6 +7256,28 @@ final class $$PlannedLessonsTableTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<
+    $LessonContentAllocationsTableTable,
+    List<LessonContentAllocationsTableData>
+  >
+  _lessonAllocationsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.lessonContentAllocationsTable,
+    aliasName: 'planned_lessons_table__id__lesson_content_allocations_table__lesson_id',
+  );
+
+  $$LessonContentAllocationsTableTableProcessedTableManager
+  get lessonAllocations {
+    final manager = $$LessonContentAllocationsTableTableTableManager(
+      $_db,
+      $_db.lessonContentAllocationsTable,
+    ).filter((f) => f.lessonId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_lessonAllocationsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$PlannedLessonsTableTableFilterComposer
@@ -7024,6 +7347,35 @@ class $$PlannedLessonsTableTableFilterComposer
               ),
         );
     return composer;
+  }
+
+  Expression<bool> lessonAllocations(
+    Expression<bool> Function(
+      $$LessonContentAllocationsTableTableFilterComposer f,
+    )
+    f,
+  ) {
+    final $$LessonContentAllocationsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.lessonContentAllocationsTable,
+          getReferencedColumn: (t) => t.lessonId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LessonContentAllocationsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.lessonContentAllocationsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
   }
 }
 
@@ -7154,6 +7506,35 @@ class $$PlannedLessonsTableTableAnnotationComposer
         );
     return composer;
   }
+
+  Expression<T> lessonAllocations<T extends Object>(
+    Expression<T> Function(
+      $$LessonContentAllocationsTableTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$LessonContentAllocationsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.lessonContentAllocationsTable,
+          getReferencedColumn: (t) => t.lessonId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LessonContentAllocationsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.lessonContentAllocationsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$PlannedLessonsTableTableTableManager
@@ -7169,7 +7550,10 @@ class $$PlannedLessonsTableTableTableManager
           $$PlannedLessonsTableTableUpdateCompanionBuilder,
           (PlannedLessonsTableData, $$PlannedLessonsTableTableReferences),
           PlannedLessonsTableData,
-          PrefetchHooks Function({bool classroomSubjectId})
+          PrefetchHooks Function({
+            bool classroomSubjectId,
+            bool lessonAllocations,
+          })
         > {
   $$PlannedLessonsTableTableTableManager(
     _$AppDatabase db,
@@ -7245,45 +7629,72 @@ class $$PlannedLessonsTableTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({classroomSubjectId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (classroomSubjectId) {
-                      state = state.withJoin(
-                        currentTable: table,
-                        currentColumn: table.classroomSubjectId,
-                        referencedTable: $$PlannedLessonsTableTableReferences
-                            ._classroomSubjectIdTable(db),
-                        referencedColumn: $$PlannedLessonsTableTableReferences
-                            ._classroomSubjectIdTable(db)
-                            .id,
-                      ) as T;
-                    }
+          prefetchHooksCallback:
+              ({classroomSubjectId = false, lessonAllocations = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (lessonAllocations) db.lessonContentAllocationsTable,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (classroomSubjectId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.classroomSubjectId,
+                            referencedTable:
+                                $$PlannedLessonsTableTableReferences
+                                    ._classroomSubjectIdTable(db),
+                            referencedColumn:
+                                $$PlannedLessonsTableTableReferences
+                                    ._classroomSubjectIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (lessonAllocations)
+                        await $_getPrefetchedData<
+                          PlannedLessonsTableData,
+                          $PlannedLessonsTableTable,
+                          LessonContentAllocationsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PlannedLessonsTableTableReferences
+                              ._lessonAllocationsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PlannedLessonsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).lessonAllocations,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.lessonId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -7300,7 +7711,7 @@ typedef $$PlannedLessonsTableTableProcessedTableManager =
       $$PlannedLessonsTableTableUpdateCompanionBuilder,
       (PlannedLessonsTableData, $$PlannedLessonsTableTableReferences),
       PlannedLessonsTableData,
-      PrefetchHooks Function({bool classroomSubjectId})
+      PrefetchHooks Function({bool classroomSubjectId, bool lessonAllocations})
     >;
 typedef $$SchoolCalendarEventsTableTableCreateCompanionBuilder =
     SchoolCalendarEventsTableCompanion Function({
@@ -8703,6 +9114,27 @@ final class $$CourseContentsTableTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $LessonContentAllocationsTableTable,
+    List<LessonContentAllocationsTableData>
+  >
+  _contentLessonsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.lessonContentAllocationsTable,
+    aliasName: 'course_contents_table__id__lesson_content_allocations_table__content_id',
+  );
+
+  $$LessonContentAllocationsTableTableProcessedTableManager get contentLessons {
+    final manager = $$LessonContentAllocationsTableTableTableManager(
+      $_db,
+      $_db.lessonContentAllocationsTable,
+    ).filter((f) => f.contentId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_contentLessonsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CourseContentsTableTableFilterComposer
@@ -8852,6 +9284,35 @@ class $$CourseContentsTableTableFilterComposer
               }) => $$ContentPrerequisitesTableTableFilterComposer(
                 $db: $db,
                 $table: $db.contentPrerequisitesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> contentLessons(
+    Expression<bool> Function(
+      $$LessonContentAllocationsTableTableFilterComposer f,
+    )
+    f,
+  ) {
+    final $$LessonContentAllocationsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.lessonContentAllocationsTable,
+          getReferencedColumn: (t) => t.contentId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LessonContentAllocationsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.lessonContentAllocationsTable,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -9114,6 +9575,35 @@ class $$CourseContentsTableTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> contentLessons<T extends Object>(
+    Expression<T> Function(
+      $$LessonContentAllocationsTableTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$LessonContentAllocationsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.lessonContentAllocationsTable,
+          getReferencedColumn: (t) => t.contentId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LessonContentAllocationsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.lessonContentAllocationsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$CourseContentsTableTableTableManager
@@ -9134,6 +9624,7 @@ class $$CourseContentsTableTableTableManager
             bool curriculumCompetencyId,
             bool requiredPrerequisites,
             bool prerequisiteFor,
+            bool contentLessons,
           })
         > {
   $$CourseContentsTableTableTableManager(
@@ -9228,12 +9719,14 @@ class $$CourseContentsTableTableTableManager
                 curriculumCompetencyId = false,
                 requiredPrerequisites = false,
                 prerequisiteFor = false,
+                contentLessons = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (requiredPrerequisites) db.contentPrerequisitesTable,
                     if (prerequisiteFor) db.contentPrerequisitesTable,
+                    if (contentLessons) db.lessonContentAllocationsTable,
                   ],
                   addJoins:
                       <
@@ -9324,6 +9817,27 @@ class $$CourseContentsTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (contentLessons)
+                        await $_getPrefetchedData<
+                          CourseContentsTableData,
+                          $CourseContentsTableTable,
+                          LessonContentAllocationsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CourseContentsTableTableReferences
+                              ._contentLessonsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CourseContentsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).contentLessons,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contentId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -9349,6 +9863,7 @@ typedef $$CourseContentsTableTableProcessedTableManager =
         bool curriculumCompetencyId,
         bool requiredPrerequisites,
         bool prerequisiteFor,
+        bool contentLessons,
       })
     >;
 typedef $$ContentPrerequisitesTableTableCreateCompanionBuilder =
@@ -9738,6 +10253,412 @@ typedef $$ContentPrerequisitesTableTableProcessedTableManager =
       ContentPrerequisitesTableData,
       PrefetchHooks Function({bool contentId, bool prerequisiteContentId})
     >;
+typedef $$LessonContentAllocationsTableTableCreateCompanionBuilder =
+    LessonContentAllocationsTableCompanion Function({
+      required String lessonId,
+      required String contentId,
+      Value<int> orderIndex,
+      Value<int> rowid,
+    });
+typedef $$LessonContentAllocationsTableTableUpdateCompanionBuilder =
+    LessonContentAllocationsTableCompanion Function({
+      Value<String> lessonId,
+      Value<String> contentId,
+      Value<int> orderIndex,
+      Value<int> rowid,
+    });
+
+final class $$LessonContentAllocationsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $LessonContentAllocationsTableTable,
+          LessonContentAllocationsTableData
+        > {
+  $$LessonContentAllocationsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PlannedLessonsTableTable _lessonIdTable(
+    _$AppDatabase db,
+  ) => db.plannedLessonsTable.createAlias(
+    'lesson_content_allocations_table__lesson_id__planned_lessons_table__id',
+  );
+
+  $$PlannedLessonsTableTableProcessedTableManager get lessonId {
+    final $_column = $_itemColumn<String>('lesson_id')!;
+
+    final manager = $$PlannedLessonsTableTableTableManager(
+      $_db,
+      $_db.plannedLessonsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_lessonIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CourseContentsTableTable _contentIdTable(
+    _$AppDatabase db,
+  ) => db.courseContentsTable.createAlias(
+    'lesson_content_allocations_table__content_id__course_contents_table__id',
+  );
+
+  $$CourseContentsTableTableProcessedTableManager get contentId {
+    final $_column = $_itemColumn<String>('content_id')!;
+
+    final manager = $$CourseContentsTableTableTableManager(
+      $_db,
+      $_db.courseContentsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LessonContentAllocationsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $LessonContentAllocationsTableTable> {
+  $$LessonContentAllocationsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PlannedLessonsTableTableFilterComposer get lessonId {
+    final $$PlannedLessonsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.lessonId,
+      referencedTable: $db.plannedLessonsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlannedLessonsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.plannedLessonsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CourseContentsTableTableFilterComposer get contentId {
+    final $$CourseContentsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contentId,
+      referencedTable: $db.courseContentsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseContentsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.courseContentsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LessonContentAllocationsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $LessonContentAllocationsTableTable> {
+  $$LessonContentAllocationsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PlannedLessonsTableTableOrderingComposer get lessonId {
+    final $$PlannedLessonsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.lessonId,
+          referencedTable: $db.plannedLessonsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PlannedLessonsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.plannedLessonsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$CourseContentsTableTableOrderingComposer get contentId {
+    final $$CourseContentsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contentId,
+          referencedTable: $db.courseContentsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CourseContentsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.courseContentsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LessonContentAllocationsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LessonContentAllocationsTableTable> {
+  $$LessonContentAllocationsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => column,
+  );
+
+  $$PlannedLessonsTableTableAnnotationComposer get lessonId {
+    final $$PlannedLessonsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.lessonId,
+          referencedTable: $db.plannedLessonsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PlannedLessonsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.plannedLessonsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$CourseContentsTableTableAnnotationComposer get contentId {
+    final $$CourseContentsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contentId,
+          referencedTable: $db.courseContentsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CourseContentsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.courseContentsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LessonContentAllocationsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LessonContentAllocationsTableTable,
+          LessonContentAllocationsTableData,
+          $$LessonContentAllocationsTableTableFilterComposer,
+          $$LessonContentAllocationsTableTableOrderingComposer,
+          $$LessonContentAllocationsTableTableAnnotationComposer,
+          $$LessonContentAllocationsTableTableCreateCompanionBuilder,
+          $$LessonContentAllocationsTableTableUpdateCompanionBuilder,
+          (
+            LessonContentAllocationsTableData,
+            $$LessonContentAllocationsTableTableReferences,
+          ),
+          LessonContentAllocationsTableData,
+          PrefetchHooks Function({bool lessonId, bool contentId})
+        > {
+  $$LessonContentAllocationsTableTableTableManager(
+    _$AppDatabase db,
+    $LessonContentAllocationsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LessonContentAllocationsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LessonContentAllocationsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LessonContentAllocationsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> lessonId = const Value.absent(),
+                Value<String> contentId = const Value.absent(),
+                Value<int> orderIndex = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LessonContentAllocationsTableCompanion(
+                lessonId: lessonId,
+                contentId: contentId,
+                orderIndex: orderIndex,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String lessonId,
+                required String contentId,
+                Value<int> orderIndex = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LessonContentAllocationsTableCompanion.insert(
+                lessonId: lessonId,
+                contentId: contentId,
+                orderIndex: orderIndex,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $LessonContentAllocationsTableTable,
+                    LessonContentAllocationsTableData
+                  >(table),
+                  $$LessonContentAllocationsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({lessonId = false, contentId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (lessonId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.lessonId,
+                        referencedTable:
+                            $$LessonContentAllocationsTableTableReferences
+                                ._lessonIdTable(db),
+                        referencedColumn:
+                            $$LessonContentAllocationsTableTableReferences
+                                ._lessonIdTable(db)
+                                .id,
+                      ) as T;
+                    }
+                    if (contentId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.contentId,
+                        referencedTable:
+                            $$LessonContentAllocationsTableTableReferences
+                                ._contentIdTable(db),
+                        referencedColumn:
+                            $$LessonContentAllocationsTableTableReferences
+                                ._contentIdTable(db)
+                                .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LessonContentAllocationsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LessonContentAllocationsTableTable,
+      LessonContentAllocationsTableData,
+      $$LessonContentAllocationsTableTableFilterComposer,
+      $$LessonContentAllocationsTableTableOrderingComposer,
+      $$LessonContentAllocationsTableTableAnnotationComposer,
+      $$LessonContentAllocationsTableTableCreateCompanionBuilder,
+      $$LessonContentAllocationsTableTableUpdateCompanionBuilder,
+      (
+        LessonContentAllocationsTableData,
+        $$LessonContentAllocationsTableTableReferences,
+      ),
+      LessonContentAllocationsTableData,
+      PrefetchHooks Function({bool lessonId, bool contentId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9774,5 +10695,11 @@ class $AppDatabaseManager {
       $$ContentPrerequisitesTableTableTableManager(
         _db,
         _db.contentPrerequisitesTable,
+      );
+  $$LessonContentAllocationsTableTableTableManager
+  get lessonContentAllocationsTable =>
+      $$LessonContentAllocationsTableTableTableManager(
+        _db,
+        _db.lessonContentAllocationsTable,
       );
 }

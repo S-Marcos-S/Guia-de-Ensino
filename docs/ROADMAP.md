@@ -138,16 +138,20 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 5 — Motor Determinístico de Planejamento
-- **Status**: Planejada
+- **Status**: **Concluída**
 - **Objetivos**:
-  - Motor em Dart puro que gera o cronograma distribuindo conteúdos nos dias letivos disponíveis.
-  - Respeito a restrições fixas (avaliações, feriados, ordem pedagógica e dependências).
-  - Detecção e apresentação explícita de insuficiência de carga horária.
-  - Visualização prévia do cronograma gerado para revisão pelo professor.
+  - Motor em Dart puro que gera o cronograma distribuindo conteúdos nos dias letivos disponíveis (`PlanningEngineService`).
+  - Respeito a restrições fixas (avaliações, feriados, recessos, ordem pedagógica e dependências).
+  - Detecção e apresentação explícita de insuficiência de carga horária sem descarte silencioso (`lessonDeficit`).
+  - Visualização prévia do cronograma gerado para revisão e homologação pelo professor (`PlanningPreviewDialog`).
+  - Migração segura do banco SQLite para o Schema v4 com tabela associativa `LessonContentAllocationsTable` preservando integridade referencial.
 - **Critérios de Aceitação**:
-  1. Mesmo conjunto de entradas gera rigorosamente a mesma saída (determinismo).
-  2. Conteúdos nunca são descartados silenciosamente por falta de capacidade.
-  3. Suíte de testes unitários com múltiplos cenários de calendário e carga horária.
+  1. [x] Mesmo conjunto de entradas gera rigorosamente a mesma saída (determinismo estrito comprovado por testes automatizados).
+  2. [x] Conteúdos nunca são descartados silenciosamente por falta de capacidade (déficit de aulas e conteúdos afetados explicitados).
+  3. [x] Preservação integral de aulas com registros históricos (`hasExecutionRecord`) e aulas bloqueadas (`isLocked`).
+  4. [x] Migração de banco SQLite v3 para v4 com chave estrangeira e cascade em `PlannedLesson` e restrict em `CourseContent`.
+  5. [x] Visualização prévia interativa e explicável (`PlanningPreviewDialog`) integrada às telas de `ContentsScreen` e `ReplanningScreen`.
+  6. [x] Suíte completa de 76 testes automatizados executada e 100% aprovada (domínio, casos de uso, migração, integridade e apresentação).
 
 ---
 

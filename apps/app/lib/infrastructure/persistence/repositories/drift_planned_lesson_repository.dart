@@ -13,40 +13,76 @@ class DriftPlannedLessonRepository implements PlannedLessonRepository {
 
   @override
   Future<void> save(PlannedLesson lesson) async {
-    await _db
-        .into(_db.plannedLessonsTable)
-        .insertOnConflictUpdate(
-          PlannedLessonsTableCompanion.insert(
-            id: lesson.id,
-            classroomSubjectId: lesson.classroomSubjectId,
-            lessonDate: lesson.date,
-            orderInDay: lesson.orderInDay,
-            status: lesson.status.name,
-            isLocked: Value(lesson.isLocked),
-            notes: Value(lesson.notes),
-            createdAt: DateTime.now().toUtc(),
-          ),
-        );
+    await _db.transaction(() async {
+      await _db
+          .into(_db.plannedLessonsTable)
+          .insertOnConflictUpdate(
+            PlannedLessonsTableCompanion.insert(
+              id: lesson.id,
+              classroomSubjectId: lesson.classroomSubjectId,
+              lessonDate: lesson.date,
+              orderInDay: lesson.orderInDay,
+              status: lesson.status.name,
+              isLocked: Value(lesson.isLocked),
+              notes: Value(lesson.notes),
+              createdAt: DateTime.now().toUtc(),
+            ),
+          );
+
+      await (_db.delete(
+        _db.lessonContentAllocationsTable,
+      )..where((tbl) => tbl.lessonId.equals(lesson.id))).go();
+
+      for (var i = 0; i < lesson.contentIds.length; i++) {
+        await _db
+            .into(_db.lessonContentAllocationsTable)
+            .insert(
+              LessonContentAllocationsTableCompanion.insert(
+                lessonId: lesson.id,
+                contentId: lesson.contentIds[i],
+                orderIndex: Value(i + 1),
+              ),
+              mode: InsertMode.insertOrReplace,
+            );
+      }
+    });
   }
 
   @override
   Future<void> saveAll(List<PlannedLesson> lessons) async {
-    await _db.batch((batch) {
+    await _db.transaction(() async {
       for (final lesson in lessons) {
-        batch.insert(
-          _db.plannedLessonsTable,
-          PlannedLessonsTableCompanion.insert(
-            id: lesson.id,
-            classroomSubjectId: lesson.classroomSubjectId,
-            lessonDate: lesson.date,
-            orderInDay: lesson.orderInDay,
-            status: lesson.status.name,
-            isLocked: Value(lesson.isLocked),
-            notes: Value(lesson.notes),
-            createdAt: DateTime.now().toUtc(),
-          ),
-          mode: InsertMode.insertOrReplace,
-        );
+        await _db
+            .into(_db.plannedLessonsTable)
+            .insertOnConflictUpdate(
+              PlannedLessonsTableCompanion.insert(
+                id: lesson.id,
+                classroomSubjectId: lesson.classroomSubjectId,
+                lessonDate: lesson.date,
+                orderInDay: lesson.orderInDay,
+                status: lesson.status.name,
+                isLocked: Value(lesson.isLocked),
+                notes: Value(lesson.notes),
+                createdAt: DateTime.now().toUtc(),
+              ),
+            );
+
+        await (_db.delete(
+          _db.lessonContentAllocationsTable,
+        )..where((tbl) => tbl.lessonId.equals(lesson.id))).go();
+
+        for (var i = 0; i < lesson.contentIds.length; i++) {
+          await _db
+              .into(_db.lessonContentAllocationsTable)
+              .insert(
+                LessonContentAllocationsTableCompanion.insert(
+                  lessonId: lesson.id,
+                  contentId: lesson.contentIds[i],
+                  orderIndex: Value(i + 1),
+                ),
+                mode: InsertMode.insertOrReplace,
+              );
+        }
       }
     });
   }
@@ -56,7 +92,10 @@ class DriftPlannedLessonRepository implements PlannedLessonRepository {
     final query = _db.select(_db.plannedLessonsTable)
       ..where((tbl) => tbl.id.equals(id));
     final row = await query.getSingleOrNull();
-    return row != null ? _toDomain(row) : null;
+    if (row == null) return null;
+
+    final contentMap = await _loadContentIdsForLessons([id]);
+    return _toDomain(row, contentMap[id] ?? const []);
   }
 
   @override
@@ -73,7 +112,11 @@ class DriftPlannedLessonRepository implements PlannedLessonRepository {
                 (tbl) => OrderingTerm.asc(tbl.orderInDay),
               ]))
             .get();
-    return rows.map(_toDomain).toList();
+
+    final lessonIds = rows.map((r) => r.id).toList();
+    final contentMap = await _loadContentIdsForLessons(lessonIds);
+
+    return rows.map((r) => _toDomain(r, contentMap[r.id] ?? const [])).toList();
   }
 
   @override
@@ -84,7 +127,11 @@ class DriftPlannedLessonRepository implements PlannedLessonRepository {
               ..where((tbl) => tbl.lessonDate.equals(dateStr))
               ..orderBy([(tbl) => OrderingTerm.asc(tbl.orderInDay)]))
             .get();
-    return rows.map(_toDomain).toList();
+
+    final lessonIds = rows.map((r) => r.id).toList();
+    final contentMap = await _loadContentIdsForLessons(lessonIds);
+
+    return rows.map((r) => _toDomain(r, contentMap[r.id] ?? const [])).toList();
   }
 
   @override
@@ -107,7 +154,11 @@ class DriftPlannedLessonRepository implements PlannedLessonRepository {
                 (tbl) => OrderingTerm.asc(tbl.orderInDay),
               ]))
             .get();
-    return rows.map(_toDomain).toList();
+
+    final lessonIds = rows.map((r) => r.id).toList();
+    final contentMap = await _loadContentIdsForLessons(lessonIds);
+
+    return rows.map((r) => _toDomain(r, contentMap[r.id] ?? const [])).toList();
   }
 
   @override
@@ -128,7 +179,28 @@ class DriftPlannedLessonRepository implements PlannedLessonRepository {
     )..where((tbl) => tbl.id.equals(id))).go();
   }
 
-  PlannedLesson _toDomain(PlannedLessonsTableData data) {
+  Future<Map<String, List<String>>> _loadContentIdsForLessons(
+    List<String> lessonIds,
+  ) async {
+    if (lessonIds.isEmpty) return const {};
+
+    final rows =
+        await (_db.select(_db.lessonContentAllocationsTable)
+              ..where((tbl) => tbl.lessonId.isIn(lessonIds))
+              ..orderBy([(tbl) => OrderingTerm.asc(tbl.orderIndex)]))
+            .get();
+
+    final map = <String, List<String>>{};
+    for (final r in rows) {
+      map.putIfAbsent(r.lessonId, () => []).add(r.contentId);
+    }
+    return map;
+  }
+
+  PlannedLesson _toDomain(
+    PlannedLessonsTableData data, [
+    List<String> contentIds = const [],
+  ]) {
     final status = LessonExecutionStatus.values.firstWhere(
       (s) => s.name == data.status,
       orElse: () => LessonExecutionStatus.planned,
@@ -139,6 +211,7 @@ class DriftPlannedLessonRepository implements PlannedLessonRepository {
       classroomSubjectId: data.classroomSubjectId,
       date: data.lessonDate,
       orderInDay: data.orderInDay,
+      contentIds: contentIds,
       status: status,
       isLocked: data.isLocked,
       notes: data.notes,

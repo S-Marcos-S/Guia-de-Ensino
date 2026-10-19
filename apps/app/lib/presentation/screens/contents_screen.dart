@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/core/di/app_dependencies.dart';
 import 'package:app/core/localization/app_strings.dart';
 import 'package:app/domain/models/academic_year.dart';
@@ -10,6 +12,7 @@ import 'package:app/presentation/components/app_button.dart';
 import 'package:app/presentation/components/app_confirm_dialog.dart';
 import 'package:app/presentation/components/app_header.dart';
 import 'package:app/presentation/components/empty_state_view.dart';
+import 'package:app/presentation/components/planning_preview_dialog.dart';
 import 'package:app/presentation/components/status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -619,6 +622,54 @@ class _ContentsScreenState extends State<ContentsScreen> {
     await _loadContents();
   }
 
+  Future<void> _openPlanningPreview() async {
+    if (_selectedClassroomSubject == null) return;
+
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => const Center(child: CircularProgressIndicator()),
+      ),
+    );
+
+    try {
+      final deps = AppDependencyScope.of(context);
+      final result = await deps.generateSchedulePlanUseCase.execute(
+        classroomSubjectId: _selectedClassroomSubject!.id,
+      );
+
+      if (mounted) {
+        Navigator.pop(context); // Fecha loading
+        final subjectName =
+            _subjectsMap[_selectedClassroomSubject!.subjectId]?.name ??
+            'Disciplina';
+
+        await showDialog<void>(
+          context: context,
+          builder: (ctx) => PlanningPreviewDialog(
+            classroomName: _selectedClassroom?.name ?? '',
+            subjectName: subjectName,
+            result: result,
+            onPlanApplied: () {
+              _loadContents();
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Fecha loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao calcular planejamento: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -842,6 +893,13 @@ class _ContentsScreenState extends State<ContentsScreen> {
                             setState(() => _filterQuery = val);
                           },
                         ),
+                      ),
+                      FilledButton.tonalIcon(
+                        icon: const Icon(Icons.auto_awesome_motion, size: 18),
+                        label: const Text('Distribuir Aulas'),
+                        onPressed: _contents.isEmpty
+                            ? null
+                            : _openPlanningPreview,
                       ),
                     ],
                   ),

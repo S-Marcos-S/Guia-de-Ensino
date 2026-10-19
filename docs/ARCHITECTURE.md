@@ -55,9 +55,20 @@ O Guia de Ensino adota uma **Arquitetura em Camadas Orientada ao Domínio (Clean
 - Interface 100% em português brasileiro, com foco em botões grandes, contraste visual, tipografia legível e feedback de carregamento/vazio.
 
 ### 2.4 Camada de Infraestrutura (`infrastructure/`)
-- **Persistência Local**: Banco SQLite com migrações explícitas versionadas.
+- **Persistência Local (SQLite via Drift)**: Banco local fortemente tipado com migrações versionadas explícitas e `PRAGMA foreign_keys = ON;`:
+  - **Schema v1**: `academic_years`, `subjects`, `classrooms`, `classroom_subjects`, `planned_lessons`.
+  - **Schema v2**: `school_calendar_events`, `schedule_slots` (grade horária semanal).
+  - **Schema v3**: `curriculum_competencies` (BNCC oficial), `course_contents`, `content_prerequisites`.
+  - **Schema v4**: `lesson_content_allocations` (tabela associativa com cascata na exclusão da aula e restrição na exclusão do conteúdo para assegurar integridade referencial).
 - **Sincronização**: Cliente de sincronização HTTP para comunicação com o backend NestJS quando online.
 - **Serviço de IA**: Implementação da interface `AiServiceProvider`, intermediando chamadas à API Gemini com proteção de segredos, esquemas JSON validados e tratamento de falhas.
+
+### 2.5 Motor Determinístico de Planejamento (`domain/services/planning_engine_service.dart`)
+- **Pureza**: Implementado 100% em Dart puro, sem dependência de UI, banco de dados ou IA.
+- **Topological Sorting**: Ordenação topológica estável dos conteúdos respeitando o grafo de dependências e pré-requisitos pedagógicos, desempatando deterministicamente por obrigatoriedade e ordem.
+- **IDs Determinísticos**: Geração estável de identificadores via UUID v5 para garantir reprodutibilidade idêntica de execuções.
+- **Preservação de Histórico**: Travamento incondicional de aulas com registros de realização (`hasExecutionRecord`) ou explicitamente bloqueadas pelo professor (`isLocked`).
+- **Detecção de Déficit**: Alerta explícito de insuficiência de capacidade letiva (`lessonDeficit`), garantindo que conteúdos obrigatórios nunca sejam descartados silenciosamente.
 
 ---
 

@@ -210,3 +210,25 @@ class ContentPrerequisitesTable extends Table {
   @override
   Set<Column> get primaryKey => {contentId, prerequisiteContentId};
 }
+
+/// Tabela associativa entre Aulas Planejadas e Conteúdos Programáticos.
+class LessonContentAllocationsTable extends Table {
+  @ReferenceName('lessonAllocations')
+  TextColumn get lessonId => text().references(
+    PlannedLessonsTable,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
+
+  @ReferenceName('contentLessons')
+  TextColumn get contentId => text().references(
+    CourseContentsTable,
+    #id,
+    onDelete: KeyAction.restrict,
+  )();
+
+  IntColumn get orderIndex => integer().withDefault(const Constant(1))();
+
+  @override
+  Set<Column> get primaryKey => {lessonId, contentId};
+}

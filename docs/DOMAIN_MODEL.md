@@ -137,11 +137,22 @@ erDiagram
   - `snapshot_data`: Representação estruturada (JSON) da grade alocada naquele momento.
   - `is_active`: Indica a versão vigente no momento.
 
+### 2.7 Contratos do Motor Determinístico de Planejamento (Etapa 5)
+- **`PlanningStrategy`**:
+  - `pedagogicalSequence`: Ordenação por pré-requisitos pedagógicos e `orderIndex`.
+  - `mandatoryFirst`: Priorização de conteúdos obrigatórios antes dos opcionais.
+- **`PlanningEngineRequest`**: Parâmetros de entrada contendo datas letivas efetivas, slots de horário da turma, conteúdos a alocar, registros históricos/travas e estratégia.
+- **`PlannedLessonAllocation`**: Aula planejada individual acompanhada de seus `contentIds`, flag `isPreservedFromHistory` e explicação textual.
+- **`ContentAllocationStatus`**: Estado de alocação de cada conteúdo (aulas necessárias vs alocadas, datas alocadas e motivo de déficit caso incompleto).
+- **`PlanningConflict`**: Representação tipada de impedimentos (`invalidConfiguration`, `scheduleMismatch`, `circularPrerequisite`, `insufficientCapacity`, `historicalLessonConflict`).
+- **`PlanningEngineResult`**: Resultado estruturado, imutável e 100% determinístico com cálculo exato de capacidade, déficit e explicações pedagógicas.
+
 ---
 
 ## 3. Regras Invioláveis de Domínio
 
-1. **Imutabilidade Histórica**: A tabela/entidade `ExecutedLesson` nunca tem seus registros históricos excluídos durante um replanejamento.
+1. **Imutabilidade Histórica**: A tabela/entidade `ExecutedLesson` / `PlannedLesson` com histórico de execução nunca tem seus registros excluídos durante um planejamento ou replanejamento.
 2. **Cálculo Real vs. Multiplicação Teórica**: A quantidade de aulas de um período letivo é contada iterando pelos dias da semana válidos entre `start_date` e `end_date`, subtraindo feriados e eventos que afetam as aulas. Não é permitido aproximar multiplicando semanas por carga horária.
-3. **Não-Descarte Silencioso**: Quando o total de aulas necessárias para os conteúdos ultrapassa a capacidade letiva disponível, o sistema não pode apagar conteúdos para "fazer caber". O motor emite um estado de `DeficitCapacityError`.
+3. **Não-Descarte Silencioso**: Quando o total de aulas necessárias para os conteúdos ultrapassa a capacidade letiva disponível, o sistema não pode apagar conteúdos para "fazer caber". O motor emite o conflito explícito de `insufficientCapacity` com a contagem do déficit em `lessonDeficit`.
 4. **Respeito a Compromissos Bloqueados**: Aulas ou avaliações marcadas com `is_locked = true` não são movidas automaticamente pelo algoritmo sem confirmação explícita do professor.
+5. **Determinismo Estrito**: O motor em Dart puro gera rigorosamente a mesma saída para o mesmo conjunto de entradas, com IDs estáveis e ordenação topológica à prova de ambiguidades.
