@@ -101,6 +101,11 @@ class RecordLessonExecutionUseCase {
       );
     } else {
       // Retificação pedagógica de registro existente: preserva id e recordedAt
+      // Garante monotonicidade (updatedAt >= recordedAt) caso o relógio retroceda.
+      final effectiveUpdatedAt = now.isBefore(existingRecord.recordedAt)
+          ? existingRecord.recordedAt
+          : now;
+
       recordToSave = LessonExecutionRecord(
         id: existingRecord.id,
         plannedLessonId: params.plannedLessonId,
@@ -114,7 +119,7 @@ class RecordLessonExecutionUseCase {
         needsFollowUp: params.needsFollowUp,
         followUpNotes: params.followUpNotes,
         recordedAt: existingRecord.recordedAt,
-        updatedAt: now,
+        updatedAt: effectiveUpdatedAt,
       );
     }
 

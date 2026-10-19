@@ -8,6 +8,7 @@ import 'package:app/domain/models/subject.dart';
 import 'package:app/domain/usecases/get_classroom_subject_lessons_usecase.dart';
 import 'package:app/presentation/components/app_button.dart';
 import 'package:app/presentation/components/empty_state_view.dart';
+import 'package:app/presentation/components/record_lesson_dialog.dart';
 import 'package:app/presentation/components/status_badge.dart';
 import 'package:flutter/material.dart';
 
@@ -702,9 +703,58 @@ class _LessonsScreenState extends State<LessonsScreen> {
               ),
             ),
           ],
+
+          // Ação Contextual: Apontar Aula ou Retificar Apontamento
+          const SizedBox(height: 10),
+          const Divider(height: 1),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: AppButton(
+              label: record == null
+                  ? AppStrings.recordLessonAction
+                  : AppStrings.rectifyLessonAction,
+              icon: record == null
+                  ? Icons.check_circle_outline
+                  : Icons.edit_note,
+              variant: record == null
+                  ? AppButtonVariant.primary
+                  : AppButtonVariant.outlined,
+              onPressed: () => _openRecordDialog(item),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _openRecordDialog(ClassroomSubjectLessonItem item) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => RecordLessonDialog(
+        plannedLesson: item.plannedLesson,
+        classroomSubjectId: _selectedClassroomSubject!.id,
+        classroomName: _selectedClassroom?.name ?? '',
+        subjectName: _selectedSubject?.name ?? '',
+        executionRecord: item.executionRecord,
+      ),
+    );
+
+    if (result == true && mounted) {
+      final isRectification = item.executionRecord != null;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isRectification
+                ? AppStrings.lessonRectifiedSuccess
+                : AppStrings.lessonRecordedSuccess,
+          ),
+          backgroundColor: const Color(0xFF2E7D32),
+        ),
+      );
+      await _loadLessons(_selectedClassroomSubject!.id);
+    }
   }
 
   Widget _buildStatusBadge(ClassroomSubjectLessonItem item) {

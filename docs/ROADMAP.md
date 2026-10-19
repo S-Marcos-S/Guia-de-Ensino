@@ -172,13 +172,17 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
   - **6.3 — Casos de Uso e Cálculo de Progresso**: **Concluído**
     - `RecordLessonExecutionUseCase`: Apontamento fático e retificação pedagógica com preservação estrita de `recordedAt`, atualização controlada de `updatedAt` e proteção das notas originais de planejamento.
     - `GetClassroomSubjectProgressUseCase`: Cálculo determinístico de indicadores com classificação mutuamente exclusiva e exaustiva de aulas, taxas percentuais documentadas e regra de conclusão de conteúdo por duração estimada.
-  - **6.4 — Interface de Acompanhamento e Diário de Aula**: Em andamento
+  - **6.4 — Interface de Acompanhamento e Diário de Aula**: **Concluído**
     - **6.4.1 — Consulta Cronológica de Aulas**: **Concluído**
       - `GetClassroomSubjectLessonsUseCase`: Agregação determinística com ordenação estrita em 3 níveis (data letiva, `orderInDay`, `id`), categorização temporal civil sem distorções de fuso e separação entre conteúdos planejados e ministrados.
       - `LessonsScreen`: Tela de acompanhamento com proteção assíncrona contra resultados obsoletos (`_activeLoadRequestId`), filtros temporais (Todas, Passadas, Hoje, Futuras), badges de status e destaque para pendências de apontamento.
       - Acessos contextuais integrados na `HomeScreen` (cartão de acesso rápido) e na `ClassroomsScreen` (botão de aulas no cartão da turma e no diálogo de disciplinas).
       - Testes automatizados unitários de domínio e de apresentação (9 novos testes cobrindo ordenação, fronteiras temporais, separação de conteúdos, concorrência assíncrona e fluxo de interface).
-    - **6.4.2 — Apontamento e Diário de Aula (Gravação e Edição)**: Planejado
+    - **6.4.2 — Apontamento e Diário de Aula (Gravação e Edição)**: **Concluído**
+      - `RecordLessonDialog`: Diálogo modal para diário de classe com seleção de status (`completed`, `partiallyCompleted`, `notHeld`), sugestão editável de conteúdos planejados, seleção de outros conteúdos da turma/disciplina, ações rápidas de marcação, justificativa de cancelamento padronizada com detalhes opcionais, anotações pedagógicas e sinalização de continuidade pedagógica.
+      - Ações contextuais integradas na `LessonsScreen` ("Apontar Aula" e "Retificar Apontamento") com recarregamento reativo, feedback visual (`SnackBar`) e preservação do filtro temporal ativo.
+      - Preservação estrita de integridade histórica e retificação pedagógica com garantia de monotonicidade temporal (`effectiveUpdatedAt >= recordedAt`).
+      - Testes automatizados abrangentes cobrindo invariantes de status, falha de persistência, prevenção de duplo envio, persistência Drift real e atualização de indicadores de progresso.
 - **Critérios de Aceitação Gerais**:
   1. [x] Modelo de domínio puro separando a aula planejada (`PlannedLesson`) do fato registrado (`LessonExecutionRecord`).
   2. [x] Registros históricos persistidos com data/hora e nunca apagados por alterações futuras (Schema v5 com `KeyAction.restrict`).

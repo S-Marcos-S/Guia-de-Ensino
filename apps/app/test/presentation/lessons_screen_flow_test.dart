@@ -528,5 +528,215 @@ void main() {
         expect(find.text(AppStrings.loadingLessonsError), findsNothing);
       },
     );
+
+    testWidgets(
+      '8 e 9. Novo apontamento e retificação com persistência Drift real e atualização do cartão',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1200);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        // Cria conteúdo
+        const content = CourseContent(
+          id: 'cnt-mat-1',
+          classroomSubjectId: 'cs-9a-mat',
+          title: 'Equações de 2º Grau',
+          orderIndex: 1,
+        );
+        await dependencies.courseContentRepository.save(content);
+
+        // Cria aula planejada sem registro
+        final planned = PlannedLesson(
+          id: 'l-flow-rec-1',
+          classroomSubjectId: 'cs-9a-mat',
+          date: DateTime.utc(2026, 3, 10),
+          orderInDay: 1,
+          contentIds: ['cnt-mat-1'],
+          status: LessonExecutionStatus.planned,
+        );
+        await dependencies.plannedLessonRepository.save(planned);
+
+        await tester.pumpWidget(
+          buildTestableScreen(
+            initialClassroomId: 'c-9a',
+            initialClassroomSubjectId: 'cs-9a-mat',
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Verifica presença do botão "Apontar Aula"
+        final recordBtn = find.text(AppStrings.recordLessonAction);
+        expect(recordBtn, findsOneWidget);
+
+        // 1. Abre o diálogo de apontamento
+        await tester.tap(recordBtn);
+        await tester.pumpAndSettle();
+
+        // Diálogo aberto: clica em "Salvar Apontamento" (conteúdo sugerido já marcado)
+        await tester.tap(find.text(AppStrings.saveRecordButton));
+        await tester.pumpAndSettle();
+
+        // Diálogo fechou, SnackBar exibido e botão mudou para "Retificar Apontamento"
+        expect(find.text(AppStrings.lessonRecordedSuccess), findsOneWidget);
+        expect(find.text(AppStrings.rectifyLessonAction), findsOneWidget);
+        expect(find.text(AppStrings.statusCompleted), findsOneWidget);
+
+        // Comprova persistência real no Drift
+        final savedRecord = await dependencies.lessonExecutionRepository
+            .findByPlannedLessonId('l-flow-rec-1');
+        expect(savedRecord, isNotNull);
+        expect(savedRecord!.status, equals(LessonExecutionStatus.completed));
+        expect(savedRecord.actualContentIds, equals(['cnt-mat-1']));
+        expect(savedRecord.updatedAt, isNull);
+
+        // 2. Retificação pedagógica: abre o diálogo novamente
+        await tester.tap(find.text(AppStrings.rectifyLessonAction));
+        await tester.pumpAndSettle();
+
+        // Altera para "Não Realizada", seleciona motivo e salva
+        await tester.tap(find.text(AppStrings.statusNotHeldOption));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byType(DropdownButtonFormField<LessonCancellationReason>),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Falta / Licença do Professor').last);
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(AppStrings.saveRecordButton));
+        await tester.pumpAndSettle();
+
+        // Diálogo fechou, SnackBar de retificação exibido e status mudou para "Não Realizada"
+        expect(find.text(AppStrings.lessonRectifiedSuccess), findsOneWidget);
+        expect(find.text(AppStrings.statusNotHeld), findsOneWidget);
+
+        // Comprova retificação real no Drift
+        final rectifiedRecord = await dependencies.lessonExecutionRepository
+            .findByPlannedLessonId('l-flow-rec-1');
+        expect(rectifiedRecord, isNotNull);
+        expect(rectifiedRecord!.id, equals(savedRecord.id));
+        expect(rectifiedRecord.recordedAt, equals(savedRecord.recordedAt));
+        expect(rectifiedRecord.updatedAt, isNotNull);
+        expect(rectifiedRecord.status, equals(LessonExecutionStatus.notHeld));
+        expect(
+          rectifiedRecord.cancellationReason,
+          equals(LessonCancellationReason.teacherAbsence),
+        );
+        expect(rectifiedRecord.actualContentIds, isEmpty);
+      },
+    );
+
+    testWidgets(
+      '10. Preservação do filtro temporal ativo após gravação e recarga',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1200);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        // Cria aula de hoje
+        final todayLesson = PlannedLesson(
+          id: 'l-filter-test-1',
+          classroomSubjectId: 'cs-9a-mat',
+          date: DateTime.now().toUtc(),
+          orderInDay: 1,
+          status: LessonExecutionStatus.planned,
+        );
+        await dependencies.plannedLessonRepository.save(todayLesson);
+
+        await tester.pumpWidget(
+          buildTestableScreen(
+            initialClassroomId: 'c-9a',
+            initialClassroomSubjectId: 'cs-9a-mat',
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Seleciona o filtro "Hoje"
+        await tester.tap(find.text(AppStrings.filterToday));
+        await tester.pumpAndSettle();
+
+        // Aponta a aula
+        await tester.tap(find.text(AppStrings.recordLessonAction));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(AppStrings.saveRecordButton));
+        await tester.pumpAndSettle();
+
+        // O filtro "Hoje" deve permanecer ativo e o cartão continua visível
+        final segmentedButton = tester.widget<SegmentedButton<LessonFilter>>(
+          find.byType(SegmentedButton<LessonFilter>),
+        );
+        expect(segmentedButton.selected, equals({LessonFilter.today}));
+        expect(find.text(AppStrings.statusCompleted), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      '12. Atualização dos indicadores de progresso após novo apontamento e retificação',
+      (tester) async {
+        // Conteúdo com 2 aulas estimadas
+        const content = CourseContent(
+          id: 'cnt-prog-1',
+          classroomSubjectId: 'cs-9a-mat',
+          title: 'Geometria Espacial',
+          estimatedLessons: 2,
+          orderIndex: 1,
+        );
+        await dependencies.courseContentRepository.save(content);
+
+        final lesson = PlannedLesson(
+          id: 'l-prog-test-1',
+          classroomSubjectId: 'cs-9a-mat',
+          date: DateTime.utc(2026, 3, 9),
+          orderInDay: 1,
+          contentIds: ['cnt-prog-1'],
+          status: LessonExecutionStatus.planned,
+        );
+        await dependencies.plannedLessonRepository.save(lesson);
+
+        // Progresso inicial: 0 aulas executadas
+        var progress = await dependencies.getClassroomSubjectProgressUseCase
+            .execute(classroomSubjectId: 'cs-9a-mat');
+        expect(progress.executedLessons, equals(0));
+        expect(progress.completedLessons, equals(0));
+
+        // Grava apontamento como realizada
+        await dependencies.recordLessonExecutionUseCase.execute(
+          RecordLessonExecutionParams(
+            plannedLessonId: 'l-prog-test-1',
+            classroomSubjectId: 'cs-9a-mat',
+            executionDate: DateTime.utc(2026, 3, 9),
+            status: LessonExecutionStatus.completed,
+            actualContentIds: ['cnt-prog-1'],
+          ),
+        );
+
+        // Progresso pós-gravação: 1 executada e 1 completada
+        progress = await dependencies.getClassroomSubjectProgressUseCase
+            .execute(classroomSubjectId: 'cs-9a-mat');
+        expect(progress.executedLessons, equals(1));
+        expect(progress.completedLessons, equals(1));
+        expect(progress.notHeldLessons, equals(0));
+
+        // Retifica para não realizada
+        await dependencies.recordLessonExecutionUseCase.execute(
+          RecordLessonExecutionParams(
+            plannedLessonId: 'l-prog-test-1',
+            classroomSubjectId: 'cs-9a-mat',
+            executionDate: DateTime.utc(2026, 3, 9),
+            status: LessonExecutionStatus.notHeld,
+            cancellationReason: LessonCancellationReason.schoolEvent,
+          ),
+        );
+
+        // Progresso pós-retificação: 1 executada, 0 completadas, 1 notHeld
+        progress = await dependencies.getClassroomSubjectProgressUseCase
+            .execute(classroomSubjectId: 'cs-9a-mat');
+        expect(progress.executedLessons, equals(1));
+        expect(progress.completedLessons, equals(0));
+        expect(progress.notHeldLessons, equals(1));
+      },
+    );
   });
 }

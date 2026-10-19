@@ -88,6 +88,55 @@ abstract final class AppStrings {
       'Erro ao carregar aulas do planejamento.';
   static const String retryButton = 'Tentar novamente';
 
+  // Apontamento e Diário de Aula (Etapa 6.4.2)
+  static const String recordLessonAction = 'Apontar Aula';
+  static const String rectifyLessonAction = 'Retificar Apontamento';
+  static const String recordLessonDialogTitle = 'Apontamento de Aula';
+  static const String rectifyLessonDialogTitle = 'Retificar Apontamento';
+  static const String lessonStatusSectionLabel = 'Situação da Aula';
+  static const String statusCompletedOption = 'Realizada';
+  static const String statusPartiallyCompletedOption = 'Parcial';
+  static const String statusNotHeldOption = 'Não Realizada';
+  static const String contentsTaughtSectionLabel = 'Conteúdos ministrados';
+  static const String selectPlannedContentsQuickAction = 'Marcar planejados';
+  static const String clearSelectedContentsQuickAction = 'Limpar seleção';
+  static const String plannedContentBadge = '(Planejado)';
+  static const String noContentsForClassroomSubject =
+      'Nenhum conteúdo curricular cadastrado para esta disciplina.';
+  static const String loadingContentsError =
+      'Erro ao carregar conteúdos curriculares da disciplina.';
+  static const String notHeldNoContentsNotice =
+      'Aulas não realizadas não possuem conteúdos ministrados.';
+  static const String cancellationReasonLabel = 'Motivo do cancelamento';
+  static const String selectCancellationReasonHint = 'Selecione o motivo';
+  static const String cancellationDetailsLabel =
+      'Detalhes do cancelamento (opcional)';
+  static const String cancellationDetailsHint =
+      'Informe detalhes adicionais sobre o cancelamento, se necessário';
+  static const String pedagogicalNotesLabel =
+      'Observações pedagógicas (opcional)';
+  static const String pedagogicalNotesHint =
+      'Descreva ocorrências pedagógicas, ritmo de aprendizagem ou observações';
+  static const String needsFollowUpLabel =
+      'Requer continuidade pedagógica na próxima aula';
+  static const String followUpNotesLabel =
+      'Orientações para continuidade (opcional)';
+  static const String followUpNotesHint =
+      'Descreva o ponto de retomada ou atividade complementar necessária';
+  static const String saveRecordButton = 'Salvar Apontamento';
+  static const String cancelButton = 'Cancelar';
+  static const String savingRecordIndicator = 'Salvando apontamento...';
+  static const String lessonRecordedSuccess =
+      'Apontamento de aula salvo com sucesso!';
+  static const String lessonRectifiedSuccess =
+      'Apontamento de aula retificado com sucesso!';
+  static const String validationNotHeldReasonRequired =
+      'Aulas não realizadas exigem a indicação de um motivo de cancelamento.';
+  static const String validationNotHeldContentsForbidden =
+      'Aulas não realizadas não podem conter conteúdos ministrados.';
+  static const String validationPartialLessonRequired =
+      'Aulas parciais devem conter ao menos um conteúdo ministrado, observações pedagógicas ou indicação de continuidade.';
+
   // Botões e Ações Globais
   static const String backButton = 'Voltar';
   static const String closeButton = 'Fechar';

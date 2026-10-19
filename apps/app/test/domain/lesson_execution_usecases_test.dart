@@ -321,6 +321,106 @@ void main() {
         );
       },
     );
+
+    test('deve garantir monotonicidade de updatedAt >= recordedAt na retificação mesmo se o relógio retroceder', () async {
+      // 1. Gravação inicial em T = 10:00
+      var currentTime = DateTime.utc(2026, 3, 10, 10, 0);
+      final useCase = RecordLessonExecutionUseCase(
+        lessonExecutionRepository: lessonExecutionRepo,
+        plannedLessonRepository: plannedLessonRepo,
+        clock: () => currentTime,
+      );
+
+      final plannedLesson = PlannedLesson(
+        id: 'l-time-skew-1',
+        classroomSubjectId: 'cs-test',
+        date: DateTime.utc(2026, 3, 9),
+        orderInDay: 1,
+        status: LessonExecutionStatus.planned,
+      );
+      await plannedLessonRepo.save(plannedLesson);
+
+      final initial = await useCase.execute(
+        RecordLessonExecutionParams(
+          plannedLessonId: 'l-time-skew-1',
+          classroomSubjectId: 'cs-test',
+          executionDate: DateTime.utc(2026, 3, 9),
+          status: LessonExecutionStatus.completed,
+        ),
+      );
+      expect(initial.recordedAt, equals(DateTime.utc(2026, 3, 10, 10, 0)));
+      expect(initial.updatedAt, isNull);
+
+      // 2. Simula retrocesso do relógio para 09:30 (ou skew de timezone/NTP)
+      currentTime = DateTime.utc(2026, 3, 10, 9, 30);
+      final rectified = await useCase.execute(
+        RecordLessonExecutionParams(
+          plannedLessonId: 'l-time-skew-1',
+          classroomSubjectId: 'cs-test',
+          executionDate: DateTime.utc(2026, 3, 9),
+          status: LessonExecutionStatus.completed,
+          pedagogicalNotes: 'Retificação sob retrocesso do relógio do sistema.',
+        ),
+      );
+
+      // updatedAt não deve ser anterior a recordedAt (clamped para recordedAt)
+      expect(rectified.id, equals(initial.id));
+      expect(rectified.recordedAt, equals(DateTime.utc(2026, 3, 10, 10, 0)));
+      expect(rectified.updatedAt, isNotNull);
+      expect(rectified.updatedAt!.isBefore(rectified.recordedAt), isFalse);
+      expect(rectified.updatedAt, equals(rectified.recordedAt));
+    });
+
+    test('deve rejeitar apontamento se os conteúdos pertencerem a outra disciplina/turma', () async {
+      final useCase = RecordLessonExecutionUseCase(
+        lessonExecutionRepository: lessonExecutionRepo,
+        plannedLessonRepository: plannedLessonRepo,
+        clock: testClock,
+      );
+
+      // Criar conteúdo de OUTRA disciplina
+      const foreignContent = CourseContent(
+        id: 'cnt-foreign-1',
+        classroomSubjectId: 'cs-outra-disc',
+        title: 'Conteúdo de Outra Turma',
+        orderIndex: 1,
+      );
+      // Criar primeiro a turma/disciplina estrangeira
+      await db
+          .into(db.classroomSubjectsTable)
+          .insert(
+            ClassroomSubjectsTableCompanion.insert(
+              id: 'cs-outra-disc',
+              classroomId: 'c-test',
+              subjectId: 's-test',
+              weeklyLessons: 2,
+              createdAt: DateTime.now(),
+            ),
+          );
+      await courseContentRepo.save(foreignContent);
+
+      final plannedLesson = PlannedLesson(
+        id: 'l-foreign-test-1',
+        classroomSubjectId: 'cs-test',
+        date: DateTime.utc(2026, 3, 9),
+        orderInDay: 1,
+        status: LessonExecutionStatus.planned,
+      );
+      await plannedLessonRepo.save(plannedLesson);
+
+      expect(
+        () async => await useCase.execute(
+          RecordLessonExecutionParams(
+            plannedLessonId: 'l-foreign-test-1',
+            classroomSubjectId: 'cs-test',
+            executionDate: DateTime.utc(2026, 3, 9),
+            status: LessonExecutionStatus.completed,
+            actualContentIds: ['cnt-foreign-1'],
+          ),
+        ),
+        throwsA(isA<LessonExecutionIntegrityException>()),
+      );
+    });
   });
 
   group('GetClassroomSubjectProgressUseCase Tests', () {
