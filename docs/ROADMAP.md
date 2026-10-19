@@ -156,7 +156,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 6 — Acompanhamento e Registro de Aulas
-- **Status**: **Em andamento** (Incrementos 6.1, 6.2 e 6.3 concluídos)
+- **Status**: **Concluída**
 - **Incrementos**:
   - **6.1 — Modelo de Domínio e Contratos**: **Concluído**
     - Entidade `LessonExecutionRecord` com validação de status, regras estritas de cancelamento e integridade de conteúdos ministrados.
