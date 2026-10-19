@@ -606,10 +606,7 @@ class _ContentsScreenState extends State<ContentsScreen> {
     }
   }
 
-  Future<void> _onReorder(int oldIndex, int newIndex) async {
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
-    }
+  Future<void> _onReorderItem(int oldIndex, int newIndex) async {
     final item = _contents.removeAt(oldIndex);
     _contents.insert(newIndex, item);
 
@@ -777,7 +774,7 @@ class _ContentsScreenState extends State<ContentsScreen> {
                       // Seletor de Turma
                       Expanded(
                         child: DropdownButtonFormField<Classroom>(
-                          value: _selectedClassroom,
+                          initialValue: _selectedClassroom,
                           isExpanded: true,
                           decoration: const InputDecoration(
                             labelText: 'Turma',
@@ -811,7 +808,7 @@ class _ContentsScreenState extends State<ContentsScreen> {
                       // Seletor de Disciplina da Turma
                       Expanded(
                         child: DropdownButtonFormField<ClassroomSubjectConfig>(
-                          value: _selectedClassroomSubject,
+                          initialValue: _selectedClassroomSubject,
                           isExpanded: true,
                           decoration: const InputDecoration(
                             labelText: 'Disciplina',
@@ -924,7 +921,7 @@ class _ContentsScreenState extends State<ContentsScreen> {
                       )
                     : ReorderableListView.builder(
                         itemCount: filteredContents.length,
-                        onReorder: _onReorder,
+                        onReorderItem: _onReorderItem,
                         itemBuilder: (ctx, index) {
                           final content = filteredContents[index];
                           final competency =

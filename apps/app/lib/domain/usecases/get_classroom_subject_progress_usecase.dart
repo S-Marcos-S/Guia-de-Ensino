@@ -176,7 +176,7 @@ class GetClassroomSubjectProgressUseCase {
     var futureCount = 0;
 
     final distinctContentsTaught = <String>{};
-    final contentTaughtCounts = <String, int>{};
+    final completedLessonCounts = <String, int>{};
     final followUpRecords = <LessonExecutionRecord>[];
 
     for (final lesson in plannedLessons) {
@@ -188,14 +188,14 @@ class GetClassroomSubjectProgressUseCase {
             completedCount++;
             for (final cid in record.actualContentIds) {
               distinctContentsTaught.add(cid);
-              contentTaughtCounts[cid] = (contentTaughtCounts[cid] ?? 0) + 1;
+              completedLessonCounts[cid] =
+                  (completedLessonCounts[cid] ?? 0) + 1;
             }
             break;
           case LessonExecutionStatus.partiallyCompleted:
             partiallyCompletedCount++;
             for (final cid in record.actualContentIds) {
               distinctContentsTaught.add(cid);
-              contentTaughtCounts[cid] = (contentTaughtCounts[cid] ?? 0) + 1;
             }
             break;
           case LessonExecutionStatus.notHeld:
@@ -228,15 +228,22 @@ class GetClassroomSubjectProgressUseCase {
     }
 
     // 6. Apuração da conclusão dos conteúdos programáticos com base na duração estimada
+    // Regra conservadora: apenas aulas integralmente concluídas (completed)
+    // acumulam carga horária para atingir a estimativa pedagógica (estimatedLessons).
+    // Aulas parcialmente concluídas (partiallyCompleted) marcam o conteúdo como abordado / em andamento,
+    // mas não comprovam por si sós sua conclusão integral.
     var completedContents = 0;
     var inProgressContents = 0;
     var notStartedContents = 0;
 
     for (final content in courseContents) {
-      final taughtCount = contentTaughtCounts[content.id] ?? 0;
-      if (taughtCount >= content.estimatedLessons) {
+      final completedLessons = completedLessonCounts[content.id] ?? 0;
+      final isAddressed = distinctContentsTaught.contains(content.id);
+
+      if (completedLessons >= content.estimatedLessons &&
+          content.estimatedLessons > 0) {
         completedContents++;
-      } else if (taughtCount > 0) {
+      } else if (isAddressed || completedLessons > 0) {
         inProgressContents++;
       } else {
         notStartedContents++;

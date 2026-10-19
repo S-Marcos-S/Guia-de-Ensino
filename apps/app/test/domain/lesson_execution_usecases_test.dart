@@ -505,6 +505,247 @@ void main() {
         expect(progress.contentCompletionRate, equals(0.0));
       },
     );
+
+    test('deve distinguir conclusão efetiva de abordagem parcial de conteúdos (regra conservadora)', () async {
+      final useCase = GetClassroomSubjectProgressUseCase(
+        plannedLessonRepository: plannedLessonRepo,
+        lessonExecutionRepository: lessonExecutionRepo,
+        courseContentRepository: courseContentRepo,
+        clock: testClock,
+      );
+
+      // c-single: estimatedLessons = 1 (será testado com aula parcial)
+      // c-done1: estimatedLessons = 1 (será testado com aula completed)
+      // c-two-mix: estimatedLessons = 2 (será testado com 1 parcial + 1 completed)
+      // c-two-done: estimatedLessons = 2 (será testado com 2 completed)
+      // c-not-held: estimatedLessons = 1 (será associado a aula notHeld)
+      // c-untouched: estimatedLessons = 1 (sem nenhuma aula)
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-single',
+          classroomSubjectId: 'cs-test',
+          title: 'Conteúdo Parcial Único',
+          estimatedLessons: 1,
+          orderIndex: 1,
+        ),
+      );
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-done1',
+          classroomSubjectId: 'cs-test',
+          title: 'Conteúdo Concluído 1',
+          estimatedLessons: 1,
+          orderIndex: 2,
+        ),
+      );
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-two-mix',
+          classroomSubjectId: 'cs-test',
+          title: 'Conteúdo Misto 2 Aulas',
+          estimatedLessons: 2,
+          orderIndex: 3,
+        ),
+      );
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-two-done',
+          classroomSubjectId: 'cs-test',
+          title: 'Conteúdo Concluído 2 Aulas',
+          estimatedLessons: 2,
+          orderIndex: 4,
+        ),
+      );
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-not-held',
+          classroomSubjectId: 'cs-test',
+          title: 'Conteúdo Aula Cancelada',
+          estimatedLessons: 1,
+          orderIndex: 5,
+        ),
+      );
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-untouched',
+          classroomSubjectId: 'cs-test',
+          title: 'Conteúdo Intocado',
+          estimatedLessons: 1,
+          orderIndex: 6,
+        ),
+      );
+
+      final l1 = PlannedLesson(
+        id: 'lp-1',
+        classroomSubjectId: 'cs-test',
+        date: DateTime.utc(2026, 3, 2),
+        orderInDay: 1,
+      );
+      final l2 = PlannedLesson(
+        id: 'lp-2',
+        classroomSubjectId: 'cs-test',
+        date: DateTime.utc(2026, 3, 3),
+        orderInDay: 1,
+      );
+      final l3 = PlannedLesson(
+        id: 'lp-3',
+        classroomSubjectId: 'cs-test',
+        date: DateTime.utc(2026, 3, 4),
+        orderInDay: 1,
+      );
+      final l4 = PlannedLesson(
+        id: 'lp-4',
+        classroomSubjectId: 'cs-test',
+        date: DateTime.utc(2026, 3, 5),
+        orderInDay: 1,
+      );
+      final l5 = PlannedLesson(
+        id: 'lp-5',
+        classroomSubjectId: 'cs-test',
+        date: DateTime.utc(2026, 3, 6),
+        orderInDay: 1,
+      );
+      final l6 = PlannedLesson(
+        id: 'lp-6',
+        classroomSubjectId: 'cs-test',
+        date: DateTime.utc(2026, 3, 7),
+        orderInDay: 1,
+      );
+      final l7 = PlannedLesson(
+        id: 'lp-7',
+        classroomSubjectId: 'cs-test',
+        date: DateTime.utc(2026, 3, 8),
+        orderInDay: 1,
+        contentIds: const ['c-not-held'],
+      );
+
+      await plannedLessonRepo.saveAll([l1, l2, l3, l4, l5, l6, l7]);
+
+      // 1. Aula partiallyCompleted ministrando 'c-single' (estimatedLessons = 1)
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-1',
+          plannedLessonId: 'lp-1',
+          classroomSubjectId: 'cs-test',
+          executionDate: DateTime.utc(2026, 3, 2),
+          status: LessonExecutionStatus.partiallyCompleted,
+          actualContentIds: ['c-single'],
+          recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
+        ),
+      );
+
+      // 2. Aula completed ministrando 'c-done1' (estimatedLessons = 1)
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-2',
+          plannedLessonId: 'lp-2',
+          classroomSubjectId: 'cs-test',
+          executionDate: DateTime.utc(2026, 3, 3),
+          status: LessonExecutionStatus.completed,
+          actualContentIds: ['c-done1'],
+          recordedAt: DateTime.utc(2026, 3, 3, 10, 0),
+        ),
+      );
+
+      // 3. Duas aulas para 'c-two-mix' (estimatedLessons = 2): 1 partiallyCompleted + 1 completed
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-3',
+          plannedLessonId: 'lp-3',
+          classroomSubjectId: 'cs-test',
+          executionDate: DateTime.utc(2026, 3, 4),
+          status: LessonExecutionStatus.partiallyCompleted,
+          actualContentIds: ['c-two-mix'],
+          recordedAt: DateTime.utc(2026, 3, 4, 10, 0),
+        ),
+      );
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-4',
+          plannedLessonId: 'lp-4',
+          classroomSubjectId: 'cs-test',
+          executionDate: DateTime.utc(2026, 3, 5),
+          status: LessonExecutionStatus.completed,
+          actualContentIds: ['c-two-mix'],
+          recordedAt: DateTime.utc(2026, 3, 5, 10, 0),
+        ),
+      );
+
+      // 4. Duas aulas para 'c-two-done' (estimatedLessons = 2): 2 completed
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-5',
+          plannedLessonId: 'lp-5',
+          classroomSubjectId: 'cs-test',
+          executionDate: DateTime.utc(2026, 3, 6),
+          status: LessonExecutionStatus.completed,
+          actualContentIds: ['c-two-done'],
+          recordedAt: DateTime.utc(2026, 3, 6, 10, 0),
+        ),
+      );
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-6',
+          plannedLessonId: 'lp-6',
+          classroomSubjectId: 'cs-test',
+          executionDate: DateTime.utc(2026, 3, 7),
+          status: LessonExecutionStatus.completed,
+          actualContentIds: ['c-two-done'],
+          recordedAt: DateTime.utc(2026, 3, 7, 10, 0),
+        ),
+      );
+
+      // 5. Aula notHeld (sem conteúdos ministrados, conforme validação de domínio)
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-7',
+          plannedLessonId: 'lp-7',
+          classroomSubjectId: 'cs-test',
+          executionDate: DateTime.utc(2026, 3, 8),
+          status: LessonExecutionStatus.notHeld,
+          actualContentIds: const [],
+          cancellationReason: LessonCancellationReason.teacherAbsence,
+          recordedAt: DateTime.utc(2026, 3, 8, 10, 0),
+        ),
+      );
+
+      final progress = await useCase.execute(classroomSubjectId: 'cs-test');
+
+      expect(progress.totalContentsPlannedCount, equals(6));
+
+      // Concluídos (completedContentsCount):
+      // 'c-done1' (1/1 completed) e 'c-two-done' (2/2 completed) = 2
+      // 'c-single' (0/1 completed, 1 partial) -> NÃO CONCLUÍDO!
+      // 'c-two-mix' (1/2 completed, 1 partial) -> NÃO CONCLUÍDO!
+      expect(progress.completedContentsCount, equals(2));
+
+      // Em andamento (inProgressContentsCount):
+      // 'c-single' e 'c-two-mix' = 2
+      expect(progress.inProgressContentsCount, equals(2));
+
+      // Não iniciados (notStartedContentsCount):
+      // 'c-not-held' (aula cancelada não conta) e 'c-untouched' = 2
+      expect(progress.notStartedContentsCount, equals(2));
+
+      // Invariante de integridade
+      expect(
+        progress.completedContentsCount +
+            progress.inProgressContentsCount +
+            progress.notStartedContentsCount,
+        equals(progress.totalContentsPlannedCount),
+      );
+
+      // Conteúdos efetivamente abordados (parciais ou completos)
+      expect(
+        progress.distinctContentsTaughtIds,
+        containsAll(['c-single', 'c-done1', 'c-two-mix', 'c-two-done']),
+      );
+      expect(progress.distinctContentsTaughtIds, isNot(contains('c-not-held')));
+      expect(
+        progress.distinctContentsTaughtIds,
+        isNot(contains('c-untouched')),
+      );
+    });
   });
 
   group('GetPendingLessonsUseCase Tests', () {

@@ -259,7 +259,7 @@ class _ReplanningScreenState extends State<ReplanningScreen> {
                       // Seletor de Turma
                       Expanded(
                         child: DropdownButtonFormField<Classroom>(
-                          value: _selectedClassroom,
+                          initialValue: _selectedClassroom,
                           isExpanded: true,
                           decoration: const InputDecoration(
                             labelText: 'Turma',
@@ -297,7 +297,7 @@ class _ReplanningScreenState extends State<ReplanningScreen> {
                       // Seletor de Disciplina da Turma
                       Expanded(
                         child: DropdownButtonFormField<ClassroomSubjectConfig>(
-                          value: _selectedClassroomSubject,
+                          initialValue: _selectedClassroomSubject,
                           isExpanded: true,
                           decoration: const InputDecoration(
                             labelText: 'Disciplina',

@@ -160,11 +160,14 @@ erDiagram
     - `strictCompletionRate`: $\frac{\text{completed}}{\text{totalLessonsPlanned}}$
     - `recordingRate`: $\frac{\text{totalLessonsRecorded}}{\text{totalLessonsPlanned}}$
     - `cancellationRate`: $\frac{\text{notHeld}}{\text{totalLessonsRecorded}}$ (quando $\text{totalLessonsRecorded} > 0$, senão 0.0)
-  - Regra de Conclusão Pedagógica de Conteúdos:
-    - A conclusão de um conteúdo não é inferida por mero registro. Cada conteúdo possui `estimatedLessons` (duração estimada em aulas).
-    - O conteúdo é considerado **concluído** (`completed`) quando a contagem de vezes em que foi ministrado em aulas realizadas/parciais for $\ge \text{estimatedLessons}$.
-    - Conteúdo **em andamento** (`inProgress`): ministrado ao menos uma vez, mas com carga inferior a `estimatedLessons`.
-    - Conteúdo **não iniciado** (`notStarted`): nunca ministrado em nenhuma aula.
+  - Regra de Conclusão Pedagógica de Conteúdos (Refinamento Conservador da Etapa 6.3):
+    - A conclusão de um conteúdo não é inferida por mero registro de presença. Cada conteúdo possui `estimatedLessons` (duração estimada em aulas).
+    - Para evitar que um conteúdo com `estimatedLessons = 1` seja prematuramente considerado concluído após uma única aula parcial, adota-se a regra conservadora: **somente aulas com status `completed` acumulam carga horária para a meta de conclusão (`estimatedLessons`)**.
+    - Aulas com status `partiallyCompleted` marcam o conteúdo como abordado e mantêm-no no estado **em andamento** (`inProgress`), não comprovando por si sós a conclusão integral.
+    - O conteúdo é considerado **concluído** (`completed`) se e somente se $\text{completedLessons} \ge \text{estimatedLessons}$ (com $\text{estimatedLessons} > 0$).
+    - Conteúdo **em andamento** (`inProgress`): abordado em ao menos uma aula (`completed` ou `partiallyCompleted`), porém ainda sem atingir a meta integral de aulas concluídas.
+    - Conteúdo **não iniciado** (`notStarted`): nunca abordado em aulas com aproveitamento pedagógico (aulas `notHeld` não computam conteúdos).
+    - Invariante estrita: $\text{completedContentsCount} + \text{inProgressContentsCount} + \text{notStartedContentsCount} = \text{totalContentsPlannedCount}$.
     - `contentCompletionRate`: $\frac{\text{completedContentsCount}}{\text{totalContentsPlannedCount}}$
   - Continuidade Pedagógica:
     - `pendingFollowUpsCount`: contagem de registros com `needsFollowUp == true`.
