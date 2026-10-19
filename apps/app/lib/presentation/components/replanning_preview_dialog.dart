@@ -121,16 +121,16 @@ class _ReplanningPreviewDialogState extends State<ReplanningPreviewDialog> {
                                 ),
                               )
                             else if (prop.isIdenticalToCurrentPlan)
-                              StatusBadge.custom(
+                              const StatusBadge.custom(
                                 label: 'Em Dia',
-                                background: const Color(0xFFE8F5E9),
-                                foreground: const Color(0xFF2E7D32),
+                                background: Color(0xFFE8F5E9),
+                                foreground: Color(0xFF2E7D32),
                               )
                             else
-                              StatusBadge.custom(
+                              const StatusBadge.custom(
                                 label: 'Ajuste Necessário',
-                                background: const Color(0xFFFFF3E0),
-                                foreground: const Color(0xFFE65100),
+                                background: Color(0xFFFFF3E0),
+                                foreground: Color(0xFFE65100),
                               ),
                           ],
                         ),

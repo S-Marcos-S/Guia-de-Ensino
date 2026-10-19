@@ -54,9 +54,9 @@ class ApplyReplanningProposalUseCase {
 
     if (!isAlreadyApplied) {
       // Verificar se novos apontamentos foram feitos após a geração da proposta
-      final hasNewRecords = !currentRecordIds
+      final hasNewRecords = currentRecordIds
           .difference(proposal.sourceExecutionRecordIds)
-          .isEmpty;
+          .isNotEmpty;
 
       // Verificar se aulas foram modificadas ou excluídas externamente
       final hasDivergentLessons = currentLessonIds

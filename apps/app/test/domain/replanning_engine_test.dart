@@ -19,7 +19,6 @@ void main() {
     startDate: DateTime(2026, 2, 2),
     endDate: DateTime(2026, 12, 18),
     totalMandatoryDays: 200,
-    createdAt: DateTime(2026, 1, 10),
   );
 
   // Helper para criar slots de horário (ex: Segunda e Quarta aula 1)
@@ -761,7 +760,7 @@ void main() {
           teachingDays: [DateTime(2026, 2, 2)],
           scheduleSlots: [makeSlot('sA', 1, 1, subject: csId)],
           contents: [makeContent(id: 'cA', title: 'Matemática', subject: csId)],
-          existingLessons: [lessonA], // Não inclui lessonB!
+          existingLessons: [lessonA, lessonB],
           executionRecords: const [],
         );
 

@@ -858,7 +858,7 @@ class ReplanningEngineService {
     switch (viabilityStatus) {
       case CurricularViabilityStatus.viable:
         summary =
-            'Currículo viável. Restam $totalFutureAvailableSlots vaga(s) para uma demanda de $totalRemainingDemand aula(s) (margem de $safetyMarginLessons aula(s)). Conclusão estimada em ${_formatDate(estimatedCompletionDate!)}.';
+            'Currículo viável. Restam $totalFutureAvailableSlots vaga(s) para uma demanda de $totalRemainingDemand aula(s) (margem de $safetyMarginLessons aula(s)). Conclusão estimada em ${_formatDate(estimatedCompletionDate)}.';
         break;
       case CurricularViabilityStatus.atRisk:
         summary =
@@ -870,7 +870,7 @@ class ReplanningEngineService {
         break;
       case CurricularViabilityStatus.unfeasible:
         summary =
-            'Planejamento inviável: faltam $mandatoryCapacityDeficit aula(s) obrigatória(s) ($capacityDeficit no total). Conclusão estimada transborda o ano letivo para ${_formatDate(estimatedCompletionDate!)}.';
+            'Planejamento inviável: faltam $mandatoryCapacityDeficit aula(s) obrigatória(s) ($capacityDeficit no total). Conclusão estimada transborda o ano letivo para ${_formatDate(estimatedCompletionDate)}.';
         break;
       case CurricularViabilityStatus.indeterminate:
         summary = 'Não foi possível projetar a viabilidade: grade horária semanal ou calendário letivo insuficientes.';
@@ -1135,7 +1135,7 @@ class ReplanningEngineService {
       final current = available.removeAt(0);
       result.add(current);
 
-      for (final neighborId in adjacency[current.id] ?? const []) {
+      for (final neighborId in adjacency[current.id] ?? const <String>[]) {
         inDegree[neighborId] = (inDegree[neighborId] ?? 1) - 1;
         if (inDegree[neighborId] == 0) {
           final neighbor = contentMap[neighborId];

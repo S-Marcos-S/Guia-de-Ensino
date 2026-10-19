@@ -1,4 +1,5 @@
 import 'package:app/core/di/app_dependencies.dart';
+import 'package:app/domain/models/academic_year.dart';
 import 'package:app/domain/models/planned_lesson.dart';
 import 'package:app/domain/models/planning_engine_contracts.dart';
 import 'package:app/domain/models/replanning_models.dart';
@@ -185,7 +186,7 @@ void main() {
             child: Builder(
               builder: (ctx) => ElevatedButton(
                 onPressed: () {
-                  showDialog(
+                  showDialog<void>(
                     context: ctx,
                     builder: (_) => ReplanningPreviewDialog(
                       classroomName: '6º Ano A',
@@ -222,7 +223,7 @@ void main() {
     testWidgets(
       'exibe aviso explícito de déficit de carga horária quando houver capacidade insuficiente',
       (tester) async {
-        final planningResult = PlanningEngineResult(
+        const planningResult = PlanningEngineResult(
           classroomSubjectId: 'cs1',
           isSuccessful: false,
           plannedLessons: const [],
@@ -378,7 +379,6 @@ void main() {
             title: 'Ano 2026',
             startDate: DateTime(2026, 2, 2),
             endDate: DateTime(2026, 12, 18),
-            createdAt: DateTime.now(),
           ),
         );
 
@@ -401,7 +401,6 @@ void main() {
             title: 'Ano 2026',
             startDate: DateTime(2026, 2, 2),
             endDate: DateTime(2026, 12, 18),
-            createdAt: DateTime.now(),
           ),
         );
 

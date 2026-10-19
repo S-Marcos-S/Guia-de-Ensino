@@ -131,14 +131,14 @@ void main() {
         );
 
     // Grade semanal: Segundas-feiras aula 1
-    await scheduleSlotRepo.save(
-      const ScheduleSlot(
+    await scheduleSlotRepo.saveSlots('cs-test', const [
+      ScheduleSlot(
         id: 'slot-seg-1',
         classroomSubjectId: 'cs-test',
         weekday: 1, // Segunda
         orderIndex: 1,
       ),
-    );
+    ]);
 
     // Conteúdos da disciplina
     await courseContentRepo.save(

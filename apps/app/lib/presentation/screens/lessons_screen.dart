@@ -426,7 +426,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
+                            MaterialPageRoute<void>(
                               builder: (_) => const ReplanningScreen(),
                             ),
                           );
