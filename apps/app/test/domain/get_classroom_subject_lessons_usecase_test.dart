@@ -33,8 +33,9 @@ class FakePlannedLessonRepository implements PlannedLessonRepository {
   @override
   Future<PlannedLesson?> findById(String id) async => null;
   @override
+  Future<List<PlannedLesson>> getByDate(DateTime date) async => [];
+  @override
   Future<List<PlannedLesson>> getByDateRange(
-    String classroomSubjectId,
     DateTime start,
     DateTime end,
   ) async => [];

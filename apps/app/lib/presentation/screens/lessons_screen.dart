@@ -269,7 +269,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
                       Expanded(
                         child: DropdownButtonFormField<Classroom>(
                           key: ValueKey(_selectedClassroom?.id),
-                          value: _selectedClassroom,
+                          initialValue: _selectedClassroom,
                           isExpanded: true,
                           decoration: const InputDecoration(
                             labelText: AppStrings.classroomSelectorLabel,
@@ -312,7 +312,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
                           key: ValueKey(
                             '${_selectedClassroom?.id}_${_selectedClassroomSubject?.id}',
                           ),
-                          value: _selectedClassroomSubject,
+                          initialValue: _selectedClassroomSubject,
                           isExpanded: true,
                           decoration: const InputDecoration(
                             labelText: AppStrings.subjectSelectorLabel,
