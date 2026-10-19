@@ -226,18 +226,18 @@ void main() {
         const planningResult = PlanningEngineResult(
           classroomSubjectId: 'cs1',
           isSuccessful: false,
-          plannedLessons: const [],
-          preservedLessons: const [],
-          contentAllocations: const [],
+          plannedLessons: [],
+          preservedLessons: [],
+          contentAllocations: [],
           availableLessonOccurrences: 2,
           usedLessonOccurrences: 2,
-          conflicts: const [
+          conflicts: [
             PlanningConflict(
               type: PlanningConflictType.insufficientCapacity,
               message: 'Capacidade letiva esgotada: faltam 3 aula(s) para cobrir o conteúdo.',
             ),
           ],
-          warnings: const [],
+          warnings: [],
         );
 
         final proposal = ReplanningProposal(
