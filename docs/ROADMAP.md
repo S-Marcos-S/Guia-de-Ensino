@@ -16,9 +16,9 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 | **Etapa 3** | Cadastro e Configuração Pedagógica | **Concluída** | Etapa 2 |
 | **Etapa 3.1** | Automação de Git, CI/CD e Releases | **Concluída** | Etapa 3 |
 | **Etapa 4** | Conteúdos Programáticos e Base Curricular | **Concluída** | Etapa 3.1 |
-| **Etapa 5** | Motor Determinístico de Planejamento | Planejada | Etapa 4 |
-| **Etapa 6** | Acompanhamento e Registro de Aulas | Planejada | Etapa 5 |
-| **Etapa 7** | Replanejamento Automático Determinístico | Planejada | Etapa 6 |
+| **Etapa 5** | Motor Determinístico de Planejamento | **Concluída** | Etapa 4 |
+| **Etapa 6** | Acompanhamento e Registro de Aulas | **Concluída** | Etapa 5 |
+| **Etapa 7** | Replanejamento Automático Determinístico e Viabilidade Curricular | **Concluída** | Etapa 6 |
 | **Etapa 8** | Integração com Inteligência Artificial | Planejada | Etapa 7 |
 | **Etapa 9** | Sincronização e Gestão de Contas | Planejada | Etapa 8 |
 | **Etapa 10** | Experiência Multiplataforma e Acessibilidade | Planejada | Etapa 9 |
@@ -192,18 +192,34 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 
 ---
 
-### Etapa 7 — Replanejamento Automático Determinístico
-- **Status**: Planejada
-- **Objetivos**:
-  - Fluxo de replanejamento com gatilhos automáticos ou manuais (aula perdida, atraso de conteúdo).
-  - Motor determinístico que calcula capacidade restante, preserva histórico e compromissos fixos e propõe reorganização.
-  - Interface de comparação de versões ("Antes" vs. "Depois") com justificativas claras.
-  - Fluxo de aprovação, edição ou rejeição pelo professor.
-  - Controle e restauração de versões anteriores do planejamento.
-- **Critérios de Aceitação**:
-  1. Aprovação obrigatória do professor antes de gravar a nova versão.
-  2. Execução dos 12 cenários de teste obrigatórios descritos na regra de replanejamento.
-  3. Preservação total do histórico de aulas já executadas.
+### Etapa 7 — Replanejamento Automático Determinístico e Viabilidade Curricular
+- **Status**: **Concluída**
+- **Incrementos**:
+  - **7.1 — Modelos de Domínio e Contratos**: **Concluído**
+    - Value Objects e Modelos: `ReplanningProposal`, `LessonReplanningShift`, `LessonReplanningShiftType`, `ScheduleDelayDetectionResult`, `CurricularCapacityAnalysis`, `CurricularViabilityStatus`, `ContentViabilityRisk`, `TeachingPaceAnalysis`, `RecoveryScenario`, `RecoveryScenarioType`.
+    - Critérios determinísticos de viabilidade: vagas livres calculadas sobre a grade horária semanal, demanda curricular restante descontando conteúdos concluídos e pendências, margem de segurança de vagas e projeção de transbordo do término do ano letivo.
+    - Análise de ritmo real de ensino docente baseada no histórico de aulas ministradas versus estimativas pedagógicas originais.
+    - 4 cenários comparáveis de recuperação curricular (Cenário A — Planejamento Vigente, Cenário B — Capacidade Adicional, Cenário C — Priorização de Obrigatórios, Cenário D — Revisão das Estimativas Pedagógicas).
+  - **7.2 — Motor Determinístico e Projeção de Viabilidade**: **Concluído**
+    - `ReplanningEngineService`: Implementação pura e determinística com preservação sagrada de registros históricos factuais (`completed`, `partiallyCompleted`, `notHeld`) e compromissos fixos (`isLocked`).
+    - Detecção antecipada de divergências fáticas, atrasos e déficits de carga horária (`detectDelay`).
+    - Análise de capacidade curricular e ritmo de ensino (`analyzeCurricularCapacity` e `analyzeTeachingPace`).
+    - Geração determinística de proposta de replanejamento (`generateProposal`) e cenários comparáveis de recuperação (`generateRecoveryScenarios`).
+    - Prevenção de dupla contagem de demanda curricular e respeito irrestrito a pré-requisitos pedagógicos.
+  - **7.3 — Casos de Uso e Aplicação Transacional**: **Concluído**
+    - `DetectScheduleDelayUseCase`: Identificação automática e manual de atrasos, cancelamentos e déficits de capacidade.
+    - `GenerateReplanningProposalUseCase`: Orquestração da proposta de replanejamento com análise de viabilidade e cenários.
+    - `ApplyReplanningProposalUseCase`: Aplicação transacional, atômica e segura no banco de dados SQLite Drift, garantindo que o plano só é gravado após aprovação explícita do professor.
+  - **7.4 — Interface de Usuário e Diálogo Comparativo ("Antes" vs. "Depois")**: **Concluído**
+    - `ReplanningScreen`: Visão geral das turmas e disciplinas com alertas em tempo real de viabilidade (Viável, Viável com Ajustes, Risco Crítico), métricas de progresso e botões de replanejamento.
+    - `ReplanningPreviewDialog`: Modal de visualização prévia adaptável com resumo de viabilidade curricular, métricas de capacidade e ritmo, seletor de cenários de recuperação, explicações pedagógicas estruturadas e comparativo detalhado de aulas ("Antes" vs. "Depois") com rolagem fluida e botões de ação explícita ("Rejeitar e Descartar" vs. "Homologar e Aplicar").
+    - Acesso contextual na `LessonsScreen` com badge e botão de atalho para replanejamento quando atraso for detectado.
+- **Critérios de Aceitação Gerais**:
+  1. [x] Aprovação obrigatória do professor antes de gravar a nova versão (nenhuma alteração é persistida antes da homologação explícita).
+  2. [x] Execução de todos os cenários de teste obrigatórios (15 cenários de replanejamento + 18 testes de viabilidade curricular + 5 testes de casos de uso + 4 testes de interface).
+  3. [x] Preservação total do histórico factual de aulas já executadas (`completed`, `partiallyCompleted`, `notHeld`) e de aulas bloqueadas (`isLocked`).
+  4. [x] Prevenção de dupla contagem de demanda curricular e de conteúdos de continuidade.
+  5. [x] Suíte completa de 194 testes automatizados 100% aprovada no CI sem nenhuma advertência ou falha.
 
 ---
 
