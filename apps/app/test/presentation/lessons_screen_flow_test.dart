@@ -1,3 +1,5 @@
+import 'dart:async' show Completer;
+
 import 'package:app/core/di/app_dependencies.dart';
 import 'package:app/core/localization/app_strings.dart';
 import 'package:app/domain/models/academic_year.dart';
