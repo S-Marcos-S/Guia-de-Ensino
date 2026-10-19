@@ -240,8 +240,9 @@ class ReplanningEngineService {
       final isLocked = lesson.isLocked;
 
       if (isHistoric || isLocked) {
-        final preservedLesson = (isHistoric && !lesson.hasExecutionRecord)
-            ? lesson.copyWith(hasExecutionRecord: true)
+        final preservedLesson =
+            (record != null && lesson.status == LessonExecutionStatus.planned)
+            ? lesson.copyWith(status: record.status)
             : lesson;
         preservedLessons.add(preservedLesson);
         preservedIds.add(lesson.id);
