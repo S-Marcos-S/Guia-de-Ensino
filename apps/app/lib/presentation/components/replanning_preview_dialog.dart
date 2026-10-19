@@ -238,8 +238,10 @@ class _ReplanningPreviewDialogState extends State<ReplanningPreviewDialog> {
               const SizedBox(height: 12),
 
               // Rodapé com ações explícitas (Rejeitar vs Homologar)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 12,
+                runSpacing: 8,
                 children: [
                   OutlinedButton(
                     onPressed: _isApplying
@@ -247,7 +249,6 @@ class _ReplanningPreviewDialogState extends State<ReplanningPreviewDialog> {
                         : () => Navigator.pop(context),
                     child: const Text('Rejeitar e Descartar'),
                   ),
-                  const SizedBox(width: 12),
                   AppButton(
                     label: _isApplying
                         ? 'Aplicando Replanejamento...'

@@ -223,19 +223,27 @@ class ReplanningEngineService {
     final recordMap = {for (final r in executionRecords) r.plannedLessonId: r};
     final contentTitleMap = {for (final c in contents) c.id: c.title};
 
+    // Filtro estrito: considerar somente aulas da turma/disciplina em replanejamento
+    final subjectExistingLessons = existingLessons
+        .where((l) => l.classroomSubjectId == classroomSubjectId)
+        .toList();
+
     // 1. Identificar aulas preservadas (históricas e bloqueadas)
     final preservedLessons = <PlannedLesson>[];
     final preservedIds = <String>{};
     final completedCountPerContent = <String, int>{};
     final followUpContentIds = <String>{};
 
-    for (final lesson in existingLessons) {
+    for (final lesson in subjectExistingLessons) {
       final record = recordMap[lesson.id];
       final isHistoric = record != null || lesson.hasExecutionRecord;
       final isLocked = lesson.isLocked;
 
       if (isHistoric || isLocked) {
-        preservedLessons.add(lesson);
+        final preservedLesson = (isHistoric && !lesson.hasExecutionRecord)
+            ? lesson.copyWith(hasExecutionRecord: true)
+            : lesson;
+        preservedLessons.add(preservedLesson);
         preservedIds.add(lesson.id);
 
         if (record != null) {
@@ -303,7 +311,7 @@ class ReplanningEngineService {
     final planningResult = planningEngineService.generatePlan(engineRequest);
 
     // 4. Mapear o cronograma vigente para o comparativo "Antes vs. Depois"
-    final sortedExisting = List<PlannedLesson>.from(existingLessons)
+    final sortedExisting = List<PlannedLesson>.from(subjectExistingLessons)
       ..sort((a, b) {
         final dComp = a.date.compareTo(b.date);
         if (dComp != 0) return dComp;
@@ -562,7 +570,7 @@ class ReplanningEngineService {
       }
     }
 
-    final sourcePlannedIds = existingLessons.map((l) => l.id).toSet();
+    final sourcePlannedIds = subjectExistingLessons.map((l) => l.id).toSet();
     final sourceExecutionIds = executionRecords.map((r) => r.id).toSet();
 
     return ReplanningProposal(
@@ -656,7 +664,11 @@ class ReplanningEngineService {
     final followUpContentIds = <String>{};
     var lockedFutureLessonsCount = 0;
 
-    for (final lesson in existingLessons) {
+    final subjectExistingLessons = existingLessons
+        .where((l) => l.classroomSubjectId == classroomSubjectId)
+        .toList();
+
+    for (final lesson in subjectExistingLessons) {
       final lessonDate = DateTime(
         lesson.date.year,
         lesson.date.month,
