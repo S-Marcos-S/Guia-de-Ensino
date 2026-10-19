@@ -67,8 +67,7 @@ abstract final class AppStrings {
   static const String actualContentsSectionLabel = 'Conteúdos ministrados:';
   static const String noPlannedContents =
       'Nenhum conteúdo planejado associado.';
-  static const String noActualContents =
-      'Nenhum conteúdo fático registrado.';
+  static const String noActualContents = 'Nenhum conteúdo fático registrado.';
   static const String statusPlanned = 'Prevista';
   static const String statusCompleted = 'Realizada';
   static const String statusPartiallyCompleted = 'Parcial';
@@ -96,4 +95,3 @@ abstract final class AppStrings {
   static const String actionNotImplemented =
       'Funcionalidade em desenvolvimento nas próximas etapas do projeto.';
 }
-

@@ -47,7 +47,8 @@ class ClassroomSubjectLessonItem {
 
   /// Identifica se é uma aula de data passada que continua sem apontamento docente.
   bool get isPastUnrecorded =>
-      temporalCategory == LessonTemporalCategory.past && executionRecord == null;
+      temporalCategory == LessonTemporalCategory.past &&
+      executionRecord == null;
 
   /// Status de execução fático se houver registro; caso contrário, status do planejamento.
   LessonExecutionStatus get effectiveStatus =>
@@ -76,23 +77,17 @@ class GetClassroomSubjectLessonsUseCase {
     final plannedLessons = await plannedLessonRepository.getByClassroomSubject(
       classroomSubjectId,
     );
-    final executionRecords =
-        await lessonExecutionRepository.getByClassroomSubject(
-          classroomSubjectId,
-        );
+    final executionRecords = await lessonExecutionRepository
+        .getByClassroomSubject(classroomSubjectId);
     final courseContents = await courseContentRepository.getByClassroomSubject(
       classroomSubjectId,
     );
 
     // 2. Mapeamento de títulos dos conteúdos por ID para resolução O(1)
-    final contentTitleMap = {
-      for (final c in courseContents) c.id: c.title,
-    };
+    final contentTitleMap = {for (final c in courseContents) c.id: c.title};
 
     // 3. Mapeamento de registros fáticos por plannedLessonId
-    final recordMap = {
-      for (final r in executionRecords) r.plannedLessonId: r,
-    };
+    final recordMap = {for (final r in executionRecords) r.plannedLessonId: r};
 
     // 4. Normalização estrita da data civil de referência ("Hoje")
     // Extrai ano, mês e dia da hora local/injetada para evitar deslocamento de fuso
@@ -103,15 +98,16 @@ class GetClassroomSubjectLessonsUseCase {
     //    1º: Data da aula em ordem crescente
     //    2º: orderInDay em ordem crescente
     //    3º: PlannedLesson.id em ordem lexicográfica crescente
-    final sortedLessons = List<PlannedLesson>.from(plannedLessons)..sort((a, b) {
-      final dateComp = a.date.compareTo(b.date);
-      if (dateComp != 0) return dateComp;
+    final sortedLessons = List<PlannedLesson>.from(plannedLessons)
+      ..sort((a, b) {
+        final dateComp = a.date.compareTo(b.date);
+        if (dateComp != 0) return dateComp;
 
-      final orderComp = a.orderInDay.compareTo(b.orderInDay);
-      if (orderComp != 0) return orderComp;
+        final orderComp = a.orderInDay.compareTo(b.orderInDay);
+        if (orderComp != 0) return orderComp;
 
-      return a.id.compareTo(b.id);
-    });
+        return a.id.compareTo(b.id);
+      });
 
     // 6. Construção da coleção agregada de leitura
     final items = <ClassroomSubjectLessonItem>[];
@@ -143,8 +139,8 @@ class GetClassroomSubjectLessonsUseCase {
       // Resolução dos títulos dos conteúdos efetivamente abordados
       final actualTitles = record != null
           ? record.actualContentIds
-              .map((id) => contentTitleMap[id] ?? id)
-              .toList()
+                .map((id) => contentTitleMap[id] ?? id)
+                .toList()
           : const <String>[];
 
       items.add(

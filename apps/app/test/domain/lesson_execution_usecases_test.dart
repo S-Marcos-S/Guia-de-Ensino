@@ -747,376 +747,358 @@ void main() {
       );
     });
 
-    test(
-      'conteúdo com estimatedLessons = 1 abordado somente em aula partiallyCompleted não é concluído e permanece em andamento',
-      () async {
-        final useCase = GetClassroomSubjectProgressUseCase(
-          plannedLessonRepository: plannedLessonRepo,
-          lessonExecutionRepository: lessonExecutionRepo,
-          courseContentRepository: courseContentRepo,
-          clock: testClock,
-        );
+    test('conteúdo com estimatedLessons = 1 abordado somente em aula partiallyCompleted não é concluído e permanece em andamento', () async {
+      final useCase = GetClassroomSubjectProgressUseCase(
+        plannedLessonRepository: plannedLessonRepo,
+        lessonExecutionRepository: lessonExecutionRepo,
+        courseContentRepository: courseContentRepo,
+        clock: testClock,
+      );
 
-        await courseContentRepo.save(
-          const CourseContent(
-            id: 'c-partial-only',
-            classroomSubjectId: 'cs-iso-1',
-            title: 'Conteúdo Parcial',
-            estimatedLessons: 1,
-            orderIndex: 1,
-          ),
-        );
-
-        final lesson = PlannedLesson(
-          id: 'lp-iso-1',
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-partial-only',
           classroomSubjectId: 'cs-iso-1',
-          date: DateTime.utc(2026, 3, 2),
-          orderInDay: 1,
-        );
-        await plannedLessonRepo.save(lesson);
+          title: 'Conteúdo Parcial',
+          estimatedLessons: 1,
+          orderIndex: 1,
+        ),
+      );
 
-        await lessonExecutionRepo.save(
-          LessonExecutionRecord(
-            id: 'rec-iso-1',
-            plannedLessonId: 'lp-iso-1',
-            classroomSubjectId: 'cs-iso-1',
-            executionDate: DateTime.utc(2026, 3, 2),
-            status: LessonExecutionStatus.partiallyCompleted,
-            actualContentIds: const ['c-partial-only'],
-            recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
-          ),
-        );
+      final lesson = PlannedLesson(
+        id: 'lp-iso-1',
+        classroomSubjectId: 'cs-iso-1',
+        date: DateTime.utc(2026, 3, 2),
+        orderInDay: 1,
+      );
+      await plannedLessonRepo.save(lesson);
 
-        final progress = await useCase.execute(classroomSubjectId: 'cs-iso-1');
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-iso-1',
+          plannedLessonId: 'lp-iso-1',
+          classroomSubjectId: 'cs-iso-1',
+          executionDate: DateTime.utc(2026, 3, 2),
+          status: LessonExecutionStatus.partiallyCompleted,
+          actualContentIds: const ['c-partial-only'],
+          recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
+        ),
+      );
 
-        expect(progress.totalContentsPlannedCount, equals(1));
-        expect(progress.completedContentsCount, equals(0));
-        expect(progress.inProgressContentsCount, equals(1));
-        expect(progress.notStartedContentsCount, equals(0));
-        expect(progress.distinctContentsTaughtIds, equals(['c-partial-only']));
-      },
-    );
+      final progress = await useCase.execute(classroomSubjectId: 'cs-iso-1');
 
-    test(
-      'conteúdo abordado em aula completed atingindo a carga estimada é considerado concluído',
-      () async {
-        final useCase = GetClassroomSubjectProgressUseCase(
-          plannedLessonRepository: plannedLessonRepo,
-          lessonExecutionRepository: lessonExecutionRepo,
-          courseContentRepository: courseContentRepo,
-          clock: testClock,
-        );
+      expect(progress.totalContentsPlannedCount, equals(1));
+      expect(progress.completedContentsCount, equals(0));
+      expect(progress.inProgressContentsCount, equals(1));
+      expect(progress.notStartedContentsCount, equals(0));
+      expect(progress.distinctContentsTaughtIds, equals(['c-partial-only']));
+    });
 
-        await courseContentRepo.save(
-          const CourseContent(
-            id: 'c-completed-single',
-            classroomSubjectId: 'cs-iso-2',
-            title: 'Conteúdo Completo',
-            estimatedLessons: 1,
-            orderIndex: 1,
-          ),
-        );
+    test('conteúdo abordado em aula completed atingindo a carga estimada é considerado concluído', () async {
+      final useCase = GetClassroomSubjectProgressUseCase(
+        plannedLessonRepository: plannedLessonRepo,
+        lessonExecutionRepository: lessonExecutionRepo,
+        courseContentRepository: courseContentRepo,
+        clock: testClock,
+      );
 
-        final lesson = PlannedLesson(
-          id: 'lp-iso-2',
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-completed-single',
           classroomSubjectId: 'cs-iso-2',
-          date: DateTime.utc(2026, 3, 2),
-          orderInDay: 1,
-        );
-        await plannedLessonRepo.save(lesson);
+          title: 'Conteúdo Completo',
+          estimatedLessons: 1,
+          orderIndex: 1,
+        ),
+      );
 
-        await lessonExecutionRepo.save(
-          LessonExecutionRecord(
-            id: 'rec-iso-2',
-            plannedLessonId: 'lp-iso-2',
-            classroomSubjectId: 'cs-iso-2',
-            executionDate: DateTime.utc(2026, 3, 2),
-            status: LessonExecutionStatus.completed,
-            actualContentIds: const ['c-completed-single'],
-            recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
-          ),
-        );
+      final lesson = PlannedLesson(
+        id: 'lp-iso-2',
+        classroomSubjectId: 'cs-iso-2',
+        date: DateTime.utc(2026, 3, 2),
+        orderInDay: 1,
+      );
+      await plannedLessonRepo.save(lesson);
 
-        final progress = await useCase.execute(classroomSubjectId: 'cs-iso-2');
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-iso-2',
+          plannedLessonId: 'lp-iso-2',
+          classroomSubjectId: 'cs-iso-2',
+          executionDate: DateTime.utc(2026, 3, 2),
+          status: LessonExecutionStatus.completed,
+          actualContentIds: const ['c-completed-single'],
+          recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
+        ),
+      );
 
-        expect(progress.totalContentsPlannedCount, equals(1));
-        expect(progress.completedContentsCount, equals(1));
-        expect(progress.inProgressContentsCount, equals(0));
-        expect(progress.notStartedContentsCount, equals(0));
-        expect(
-          progress.distinctContentsTaughtIds,
-          equals(['c-completed-single']),
-        );
-      },
-    );
+      final progress = await useCase.execute(classroomSubjectId: 'cs-iso-2');
 
-    test(
-      'conteúdo abordado em aula parcial e posteriormente em aula completa conclui apenas ao atingir a carga estimada por aulas completas',
-      () async {
-        final useCase = GetClassroomSubjectProgressUseCase(
-          plannedLessonRepository: plannedLessonRepo,
-          lessonExecutionRepository: lessonExecutionRepo,
-          courseContentRepository: courseContentRepo,
-          clock: testClock,
-        );
+      expect(progress.totalContentsPlannedCount, equals(1));
+      expect(progress.completedContentsCount, equals(1));
+      expect(progress.inProgressContentsCount, equals(0));
+      expect(progress.notStartedContentsCount, equals(0));
+      expect(
+        progress.distinctContentsTaughtIds,
+        equals(['c-completed-single']),
+      );
+    });
 
-        // Exige 2 aulas estimadas
-        await courseContentRepo.save(
-          const CourseContent(
-            id: 'c-partial-then-complete',
-            classroomSubjectId: 'cs-iso-3',
-            title: 'Conteúdo Misto',
-            estimatedLessons: 2,
-            orderIndex: 1,
-          ),
-        );
+    test('conteúdo abordado em aula parcial e posteriormente em aula completa conclui apenas ao atingir a carga estimada por aulas completas', () async {
+      final useCase = GetClassroomSubjectProgressUseCase(
+        plannedLessonRepository: plannedLessonRepo,
+        lessonExecutionRepository: lessonExecutionRepo,
+        courseContentRepository: courseContentRepo,
+        clock: testClock,
+      );
 
-        final l1 = PlannedLesson(
-          id: 'lp-iso-3a',
+      // Exige 2 aulas estimadas
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-partial-then-complete',
           classroomSubjectId: 'cs-iso-3',
-          date: DateTime.utc(2026, 3, 2),
-          orderInDay: 1,
-        );
-        final l2 = PlannedLesson(
-          id: 'lp-iso-3b',
+          title: 'Conteúdo Misto',
+          estimatedLessons: 2,
+          orderIndex: 1,
+        ),
+      );
+
+      final l1 = PlannedLesson(
+        id: 'lp-iso-3a',
+        classroomSubjectId: 'cs-iso-3',
+        date: DateTime.utc(2026, 3, 2),
+        orderInDay: 1,
+      );
+      final l2 = PlannedLesson(
+        id: 'lp-iso-3b',
+        classroomSubjectId: 'cs-iso-3',
+        date: DateTime.utc(2026, 3, 3),
+        orderInDay: 1,
+      );
+      final l3 = PlannedLesson(
+        id: 'lp-iso-3c',
+        classroomSubjectId: 'cs-iso-3',
+        date: DateTime.utc(2026, 3, 4),
+        orderInDay: 1,
+      );
+      await plannedLessonRepo.saveAll([l1, l2, l3]);
+
+      // 1ª aula: partiallyCompleted -> ainda inProgress
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-iso-3a',
+          plannedLessonId: 'lp-iso-3a',
           classroomSubjectId: 'cs-iso-3',
-          date: DateTime.utc(2026, 3, 3),
-          orderInDay: 1,
-        );
-        final l3 = PlannedLesson(
-          id: 'lp-iso-3c',
+          executionDate: DateTime.utc(2026, 3, 2),
+          status: LessonExecutionStatus.partiallyCompleted,
+          actualContentIds: const ['c-partial-then-complete'],
+          recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
+        ),
+      );
+
+      var p = await useCase.execute(classroomSubjectId: 'cs-iso-3');
+      expect(p.completedContentsCount, equals(0));
+      expect(p.inProgressContentsCount, equals(1));
+
+      // 2ª aula: completed (1ª aula completa de 2 necessárias) -> ainda inProgress!
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-iso-3b',
+          plannedLessonId: 'lp-iso-3b',
           classroomSubjectId: 'cs-iso-3',
-          date: DateTime.utc(2026, 3, 4),
-          orderInDay: 1,
-        );
-        await plannedLessonRepo.saveAll([l1, l2, l3]);
+          executionDate: DateTime.utc(2026, 3, 3),
+          status: LessonExecutionStatus.completed,
+          actualContentIds: const ['c-partial-then-complete'],
+          recordedAt: DateTime.utc(2026, 3, 3, 10, 0),
+        ),
+      );
 
-        // 1ª aula: partiallyCompleted -> ainda inProgress
-        await lessonExecutionRepo.save(
-          LessonExecutionRecord(
-            id: 'rec-iso-3a',
-            plannedLessonId: 'lp-iso-3a',
-            classroomSubjectId: 'cs-iso-3',
-            executionDate: DateTime.utc(2026, 3, 2),
-            status: LessonExecutionStatus.partiallyCompleted,
-            actualContentIds: const ['c-partial-then-complete'],
-            recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
-          ),
-        );
+      p = await useCase.execute(classroomSubjectId: 'cs-iso-3');
+      expect(p.completedContentsCount, equals(0));
+      expect(p.inProgressContentsCount, equals(1));
 
-        var p = await useCase.execute(classroomSubjectId: 'cs-iso-3');
-        expect(p.completedContentsCount, equals(0));
-        expect(p.inProgressContentsCount, equals(1));
+      // 3ª aula: completed (2ª aula completa de 2 necessárias) -> agora sim concluído!
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-iso-3c',
+          plannedLessonId: 'lp-iso-3c',
+          classroomSubjectId: 'cs-iso-3',
+          executionDate: DateTime.utc(2026, 3, 4),
+          status: LessonExecutionStatus.completed,
+          actualContentIds: const ['c-partial-then-complete'],
+          recordedAt: DateTime.utc(2026, 3, 4, 10, 0),
+        ),
+      );
 
-        // 2ª aula: completed (1ª aula completa de 2 necessárias) -> ainda inProgress!
-        await lessonExecutionRepo.save(
-          LessonExecutionRecord(
-            id: 'rec-iso-3b',
-            plannedLessonId: 'lp-iso-3b',
-            classroomSubjectId: 'cs-iso-3',
-            executionDate: DateTime.utc(2026, 3, 3),
-            status: LessonExecutionStatus.completed,
-            actualContentIds: const ['c-partial-then-complete'],
-            recordedAt: DateTime.utc(2026, 3, 3, 10, 0),
-          ),
-        );
+      p = await useCase.execute(classroomSubjectId: 'cs-iso-3');
+      expect(p.completedContentsCount, equals(1));
+      expect(p.inProgressContentsCount, equals(0));
+      expect(p.notStartedContentsCount, equals(0));
+    });
 
-        p = await useCase.execute(classroomSubjectId: 'cs-iso-3');
-        expect(p.completedContentsCount, equals(0));
-        expect(p.inProgressContentsCount, equals(1));
+    test('conteúdo que exige múltiplas aulas completas conclui somente ao atingir a carga estimada', () async {
+      final useCase = GetClassroomSubjectProgressUseCase(
+        plannedLessonRepository: plannedLessonRepo,
+        lessonExecutionRepository: lessonExecutionRepo,
+        courseContentRepository: courseContentRepo,
+        clock: testClock,
+      );
 
-        // 3ª aula: completed (2ª aula completa de 2 necessárias) -> agora sim concluído!
-        await lessonExecutionRepo.save(
-          LessonExecutionRecord(
-            id: 'rec-iso-3c',
-            plannedLessonId: 'lp-iso-3c',
-            classroomSubjectId: 'cs-iso-3',
-            executionDate: DateTime.utc(2026, 3, 4),
-            status: LessonExecutionStatus.completed,
-            actualContentIds: const ['c-partial-then-complete'],
-            recordedAt: DateTime.utc(2026, 3, 4, 10, 0),
-          ),
-        );
-
-        p = await useCase.execute(classroomSubjectId: 'cs-iso-3');
-        expect(p.completedContentsCount, equals(1));
-        expect(p.inProgressContentsCount, equals(0));
-        expect(p.notStartedContentsCount, equals(0));
-      },
-    );
-
-    test(
-      'conteúdo que exige múltiplas aulas completas conclui somente ao atingir a carga estimada',
-      () async {
-        final useCase = GetClassroomSubjectProgressUseCase(
-          plannedLessonRepository: plannedLessonRepo,
-          lessonExecutionRepository: lessonExecutionRepo,
-          courseContentRepository: courseContentRepo,
-          clock: testClock,
-        );
-
-        await courseContentRepo.save(
-          const CourseContent(
-            id: 'c-multi-complete',
-            classroomSubjectId: 'cs-iso-4',
-            title: 'Conteúdo Múltiplo',
-            estimatedLessons: 3,
-            orderIndex: 1,
-          ),
-        );
-
-        final l1 = PlannedLesson(
-          id: 'lp-iso-4a',
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-multi-complete',
           classroomSubjectId: 'cs-iso-4',
-          date: DateTime.utc(2026, 3, 2),
-          orderInDay: 1,
-        );
-        final l2 = PlannedLesson(
-          id: 'lp-iso-4b',
+          title: 'Conteúdo Múltiplo',
+          estimatedLessons: 3,
+          orderIndex: 1,
+        ),
+      );
+
+      final l1 = PlannedLesson(
+        id: 'lp-iso-4a',
+        classroomSubjectId: 'cs-iso-4',
+        date: DateTime.utc(2026, 3, 2),
+        orderInDay: 1,
+      );
+      final l2 = PlannedLesson(
+        id: 'lp-iso-4b',
+        classroomSubjectId: 'cs-iso-4',
+        date: DateTime.utc(2026, 3, 3),
+        orderInDay: 1,
+      );
+      final l3 = PlannedLesson(
+        id: 'lp-iso-4c',
+        classroomSubjectId: 'cs-iso-4',
+        date: DateTime.utc(2026, 3, 4),
+        orderInDay: 1,
+      );
+      await plannedLessonRepo.saveAll([l1, l2, l3]);
+
+      // Aula 1 completed: 1/3 -> inProgress
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-iso-4a',
+          plannedLessonId: 'lp-iso-4a',
           classroomSubjectId: 'cs-iso-4',
-          date: DateTime.utc(2026, 3, 3),
-          orderInDay: 1,
-        );
-        final l3 = PlannedLesson(
-          id: 'lp-iso-4c',
+          executionDate: DateTime.utc(2026, 3, 2),
+          status: LessonExecutionStatus.completed,
+          actualContentIds: const ['c-multi-complete'],
+          recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
+        ),
+      );
+      var p = await useCase.execute(classroomSubjectId: 'cs-iso-4');
+      expect(p.completedContentsCount, equals(0));
+      expect(p.inProgressContentsCount, equals(1));
+
+      // Aula 2 completed: 2/3 -> inProgress
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-iso-4b',
+          plannedLessonId: 'lp-iso-4b',
           classroomSubjectId: 'cs-iso-4',
-          date: DateTime.utc(2026, 3, 4),
-          orderInDay: 1,
-        );
-        await plannedLessonRepo.saveAll([l1, l2, l3]);
+          executionDate: DateTime.utc(2026, 3, 3),
+          status: LessonExecutionStatus.completed,
+          actualContentIds: const ['c-multi-complete'],
+          recordedAt: DateTime.utc(2026, 3, 3, 10, 0),
+        ),
+      );
+      p = await useCase.execute(classroomSubjectId: 'cs-iso-4');
+      expect(p.completedContentsCount, equals(0));
+      expect(p.inProgressContentsCount, equals(1));
 
-        // Aula 1 completed: 1/3 -> inProgress
-        await lessonExecutionRepo.save(
-          LessonExecutionRecord(
-            id: 'rec-iso-4a',
-            plannedLessonId: 'lp-iso-4a',
-            classroomSubjectId: 'cs-iso-4',
-            executionDate: DateTime.utc(2026, 3, 2),
-            status: LessonExecutionStatus.completed,
-            actualContentIds: const ['c-multi-complete'],
-            recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
-          ),
-        );
-        var p = await useCase.execute(classroomSubjectId: 'cs-iso-4');
-        expect(p.completedContentsCount, equals(0));
-        expect(p.inProgressContentsCount, equals(1));
+      // Aula 3 completed: 3/3 -> concluído!
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-iso-4c',
+          plannedLessonId: 'lp-iso-4c',
+          classroomSubjectId: 'cs-iso-4',
+          executionDate: DateTime.utc(2026, 3, 4),
+          status: LessonExecutionStatus.completed,
+          actualContentIds: const ['c-multi-complete'],
+          recordedAt: DateTime.utc(2026, 3, 4, 10, 0),
+        ),
+      );
+      p = await useCase.execute(classroomSubjectId: 'cs-iso-4');
+      expect(p.completedContentsCount, equals(1));
+      expect(p.inProgressContentsCount, equals(0));
+      expect(p.notStartedContentsCount, equals(0));
+    });
 
-        // Aula 2 completed: 2/3 -> inProgress
-        await lessonExecutionRepo.save(
-          LessonExecutionRecord(
-            id: 'rec-iso-4b',
-            plannedLessonId: 'lp-iso-4b',
-            classroomSubjectId: 'cs-iso-4',
-            executionDate: DateTime.utc(2026, 3, 3),
-            status: LessonExecutionStatus.completed,
-            actualContentIds: const ['c-multi-complete'],
-            recordedAt: DateTime.utc(2026, 3, 3, 10, 0),
-          ),
-        );
-        p = await useCase.execute(classroomSubjectId: 'cs-iso-4');
-        expect(p.completedContentsCount, equals(0));
-        expect(p.inProgressContentsCount, equals(1));
+    test('aula notHeld não incrementa a carga ministrada nem marca conteúdo como abordado', () async {
+      final useCase = GetClassroomSubjectProgressUseCase(
+        plannedLessonRepository: plannedLessonRepo,
+        lessonExecutionRepository: lessonExecutionRepo,
+        courseContentRepository: courseContentRepo,
+        clock: testClock,
+      );
 
-        // Aula 3 completed: 3/3 -> concluído!
-        await lessonExecutionRepo.save(
-          LessonExecutionRecord(
-            id: 'rec-iso-4c',
-            plannedLessonId: 'lp-iso-4c',
-            classroomSubjectId: 'cs-iso-4',
-            executionDate: DateTime.utc(2026, 3, 4),
-            status: LessonExecutionStatus.completed,
-            actualContentIds: const ['c-multi-complete'],
-            recordedAt: DateTime.utc(2026, 3, 4, 10, 0),
-          ),
-        );
-        p = await useCase.execute(classroomSubjectId: 'cs-iso-4');
-        expect(p.completedContentsCount, equals(1));
-        expect(p.inProgressContentsCount, equals(0));
-        expect(p.notStartedContentsCount, equals(0));
-      },
-    );
-
-    test(
-      'aula notHeld não incrementa a carga ministrada nem marca conteúdo como abordado',
-      () async {
-        final useCase = GetClassroomSubjectProgressUseCase(
-          plannedLessonRepository: plannedLessonRepo,
-          lessonExecutionRepository: lessonExecutionRepo,
-          courseContentRepository: courseContentRepo,
-          clock: testClock,
-        );
-
-        await courseContentRepo.save(
-          const CourseContent(
-            id: 'c-cancelled-content',
-            classroomSubjectId: 'cs-iso-5',
-            title: 'Conteúdo Aula Cancelada',
-            estimatedLessons: 1,
-            orderIndex: 1,
-          ),
-        );
-
-        final lesson = PlannedLesson(
-          id: 'lp-iso-5',
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-cancelled-content',
           classroomSubjectId: 'cs-iso-5',
-          date: DateTime.utc(2026, 3, 2),
-          orderInDay: 1,
-          contentIds: const ['c-cancelled-content'],
-        );
-        await plannedLessonRepo.save(lesson);
+          title: 'Conteúdo Aula Cancelada',
+          estimatedLessons: 1,
+          orderIndex: 1,
+        ),
+      );
 
-        // Aula cancelada por motivo de força maior
-        await lessonExecutionRepo.save(
-          LessonExecutionRecord(
-            id: 'rec-iso-5',
-            plannedLessonId: 'lp-iso-5',
-            classroomSubjectId: 'cs-iso-5',
-            executionDate: DateTime.utc(2026, 3, 2),
-            status: LessonExecutionStatus.notHeld,
-            actualContentIds: const [],
-            cancellationReason: LessonCancellationReason.weatherEvent,
-            recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
-          ),
-        );
+      final lesson = PlannedLesson(
+        id: 'lp-iso-5',
+        classroomSubjectId: 'cs-iso-5',
+        date: DateTime.utc(2026, 3, 2),
+        orderInDay: 1,
+        contentIds: const ['c-cancelled-content'],
+      );
+      await plannedLessonRepo.save(lesson);
 
-        final progress = await useCase.execute(classroomSubjectId: 'cs-iso-5');
+      // Aula cancelada por motivo de força maior
+      await lessonExecutionRepo.save(
+        LessonExecutionRecord(
+          id: 'rec-iso-5',
+          plannedLessonId: 'lp-iso-5',
+          classroomSubjectId: 'cs-iso-5',
+          executionDate: DateTime.utc(2026, 3, 2),
+          status: LessonExecutionStatus.notHeld,
+          actualContentIds: const [],
+          cancellationReason: LessonCancellationReason.weatherEvent,
+          recordedAt: DateTime.utc(2026, 3, 2, 10, 0),
+        ),
+      );
 
-        expect(progress.completedContentsCount, equals(0));
-        expect(progress.inProgressContentsCount, equals(0));
-        expect(progress.notStartedContentsCount, equals(1));
-        expect(progress.distinctContentsTaughtIds, isEmpty);
-      },
-    );
+      final progress = await useCase.execute(classroomSubjectId: 'cs-iso-5');
 
-    test(
-      'conteúdo não abordado permanece notStarted',
-      () async {
-        final useCase = GetClassroomSubjectProgressUseCase(
-          plannedLessonRepository: plannedLessonRepo,
-          lessonExecutionRepository: lessonExecutionRepo,
-          courseContentRepository: courseContentRepo,
-          clock: testClock,
-        );
+      expect(progress.completedContentsCount, equals(0));
+      expect(progress.inProgressContentsCount, equals(0));
+      expect(progress.notStartedContentsCount, equals(1));
+      expect(progress.distinctContentsTaughtIds, isEmpty);
+    });
 
-        await courseContentRepo.save(
-          const CourseContent(
-            id: 'c-never-touched',
-            classroomSubjectId: 'cs-iso-6',
-            title: 'Conteúdo Não Abordado',
-            estimatedLessons: 2,
-            orderIndex: 1,
-          ),
-        );
+    test('conteúdo não abordado permanece notStarted', () async {
+      final useCase = GetClassroomSubjectProgressUseCase(
+        plannedLessonRepository: plannedLessonRepo,
+        lessonExecutionRepository: lessonExecutionRepo,
+        courseContentRepository: courseContentRepo,
+        clock: testClock,
+      );
 
-        final progress = await useCase.execute(classroomSubjectId: 'cs-iso-6');
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'c-never-touched',
+          classroomSubjectId: 'cs-iso-6',
+          title: 'Conteúdo Não Abordado',
+          estimatedLessons: 2,
+          orderIndex: 1,
+        ),
+      );
 
-        expect(progress.totalContentsPlannedCount, equals(1));
-        expect(progress.completedContentsCount, equals(0));
-        expect(progress.inProgressContentsCount, equals(0));
-        expect(progress.notStartedContentsCount, equals(1));
-        expect(progress.distinctContentsTaughtIds, isEmpty);
-      },
-    );
+      final progress = await useCase.execute(classroomSubjectId: 'cs-iso-6');
+
+      expect(progress.totalContentsPlannedCount, equals(1));
+      expect(progress.completedContentsCount, equals(0));
+      expect(progress.inProgressContentsCount, equals(0));
+      expect(progress.notStartedContentsCount, equals(1));
+      expect(progress.distinctContentsTaughtIds, isEmpty);
+    });
   });
 
   group('GetPendingLessonsUseCase Tests', () {

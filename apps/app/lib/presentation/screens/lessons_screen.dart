@@ -75,19 +75,20 @@ class _LessonsScreenState extends State<LessonsScreen> {
     // Resolução da turma inicial
     Classroom? defaultClassroom;
     if (widget.initialClassroomId != null) {
-      defaultClassroom = classrooms.where(
-        (c) => c.id == widget.initialClassroomId,
-      ).firstOrNull;
+      defaultClassroom = classrooms
+          .where((c) => c.id == widget.initialClassroomId)
+          .firstOrNull;
     }
     defaultClassroom ??= classrooms.isNotEmpty ? classrooms.first : null;
 
     // Resolução da disciplina da turma inicial
     ClassroomSubjectConfig? defaultClassroomSubject;
-    if (defaultClassroom != null && defaultClassroom.subjectConfigs.isNotEmpty) {
+    if (defaultClassroom != null &&
+        defaultClassroom.subjectConfigs.isNotEmpty) {
       if (widget.initialClassroomSubjectId != null) {
-        defaultClassroomSubject = defaultClassroom.subjectConfigs.where(
-          (cs) => cs.id == widget.initialClassroomSubjectId,
-        ).firstOrNull;
+        defaultClassroomSubject = defaultClassroom.subjectConfigs
+            .where((cs) => cs.id == widget.initialClassroomSubjectId)
+            .firstOrNull;
       }
       defaultClassroomSubject ??= defaultClassroom.subjectConfigs.first;
     }
@@ -213,8 +214,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: EmptyStateView(
               title: 'Ano Letivo Necessário',
-              description:
-                  'Antes de consultar aulas, configure o Ano Letivo na aba Calendário.',
+              description: 'Antes de consultar aulas, configure o Ano Letivo na aba Calendário.',
               icon: Icons.calendar_month,
             ),
           ),
@@ -230,8 +230,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: EmptyStateView(
               title: 'Nenhuma Turma Cadastrada',
-              description:
-                  'Cadastre turmas e vincule disciplinas para consultar o cronograma de aulas.',
+              description: 'Cadastre turmas e vincule disciplinas para consultar o cronograma de aulas.',
               icon: Icons.people_outline,
             ),
           ),
@@ -242,9 +241,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
     final filtered = _filteredLessons;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.lessonsScreenTitle),
-      ),
+      appBar: AppBar(title: const Text(AppStrings.lessonsScreenTitle)),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -391,9 +388,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
               const SizedBox(height: 12),
 
               // Conteúdo principal (Carregando, Erro, Vazio ou Lista de Aulas)
-              Expanded(
-                child: _buildContent(context, filtered),
-              ),
+              Expanded(child: _buildContent(context, filtered)),
             ],
           ),
         ),
@@ -510,7 +505,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
               Icon(
                 isToday ? Icons.today : Icons.calendar_today_outlined,
                 size: 18,
-                color: isToday ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                color: isToday
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 8),
               Expanded(

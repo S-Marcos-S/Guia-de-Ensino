@@ -105,19 +105,11 @@ void main() {
     );
 
     await dependencies.subjectRepository.save(
-      const Subject(
-        id: 'subj-mat',
-        name: 'Matemática',
-        colorHex: '#2196F3',
-      ),
+      const Subject(id: 'subj-mat', name: 'Matemática', colorHex: '#2196F3'),
     );
 
     await dependencies.subjectRepository.save(
-      const Subject(
-        id: 'subj-cie',
-        name: 'Ciências',
-        colorHex: '#4CAF50',
-      ),
+      const Subject(id: 'subj-cie', name: 'Ciências', colorHex: '#4CAF50'),
     );
 
     await dependencies.classroomRepository.save(
@@ -220,7 +212,8 @@ void main() {
             executionDate: DateTime.utc(today.year, today.month, today.day),
             status: LessonExecutionStatus.completed,
             actualContentIds: const ['cnt-geometria'],
-            pedagogicalNotes: 'Alunos resolveram exercícios de triângulos retângulos.',
+            pedagogicalNotes:
+                'Alunos resolveram exercícios de triângulos retângulos.',
             recordedAt: DateTime.now(),
           ),
         );
@@ -242,7 +235,9 @@ void main() {
         expect(find.text('• Frações e Números Decimais'), findsOneWidget);
         expect(find.text('• Teorema de Pitágoras'), findsWidgets);
         expect(
-          find.textContaining('Alunos resolveram exercícios de triângulos retângulos.'),
+          find.textContaining(
+            'Alunos resolveram exercícios de triângulos retângulos.',
+          ),
           findsOneWidget,
         );
       },
@@ -356,10 +351,7 @@ void main() {
         // VALIDAÇÃO CRÍTICA: O conteúdo rápido de Física CONTINUA na tela!
         // O resultado obsoleto de História Lenta foi descartado e NÃO sobrescreveu a interface!
         expect(find.text('Conteúdo Rápido de Física'), findsOneWidget);
-        expect(
-          find.text('Conteúdo Lento Obsoleto de História'),
-          findsNothing,
-        );
+        expect(find.text('Conteúdo Lento Obsoleto de História'), findsNothing);
       },
     );
 
@@ -424,7 +416,11 @@ void main() {
           PlannedLesson(
             id: 'l-future-filt',
             classroomSubjectId: 'cs-9a-mat',
-            date: DateTime.utc(futureDate.year, futureDate.month, futureDate.day),
+            date: DateTime.utc(
+              futureDate.year,
+              futureDate.month,
+              futureDate.day,
+            ),
             orderInDay: 1,
             contentIds: const ['c-future'],
           ),
