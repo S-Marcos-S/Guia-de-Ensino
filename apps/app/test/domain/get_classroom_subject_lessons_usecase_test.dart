@@ -106,12 +106,23 @@ void main() {
         );
 
     await db
+        .into(db.subjectsTable)
+        .insert(
+          SubjectsTableCompanion.insert(
+            id: 's-other',
+            name: 'Outra Disciplina',
+            colorHex: '#9C27B0',
+            createdAt: DateTime.now(),
+          ),
+        );
+
+    await db
         .into(db.classroomSubjectsTable)
         .insert(
           ClassroomSubjectsTableCompanion.insert(
             id: 'cs-other',
             classroomId: 'c-test',
-            subjectId: 's-test',
+            subjectId: 's-other',
             weeklyLessons: 1,
             createdAt: DateTime.now(),
           ),

@@ -339,7 +339,10 @@ void main() {
         await tester.pumpAndSettle();
 
         // A consulta rápida completou imediatamente e a tela exibe seus dados
-        expect(find.text('Conteúdo Rápido de Física'), findsOneWidget);
+        expect(
+          find.textContaining('Conteúdo Rápido de Física'),
+          findsOneWidget,
+        );
 
         // Agora, com atraso, a consulta antiga LENTA finalmente termina
         slowCompleter.complete([
@@ -360,15 +363,21 @@ void main() {
 
         // VALIDAÇÃO CRÍTICA: O conteúdo rápido de Física CONTINUA na tela!
         // O resultado obsoleto de História Lenta foi descartado e NÃO sobrescreveu a interface!
-        expect(find.text('Conteúdo Rápido de Física'), findsOneWidget);
-        expect(find.text('Conteúdo Lento Obsoleto de História'), findsNothing);
+        expect(
+          find.textContaining('Conteúdo Rápido de Física'),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('Conteúdo Lento Obsoleto de História'),
+          findsNothing,
+        );
       },
     );
 
     testWidgets(
       'deve filtrar aulas por Todas, Passadas, Hoje e Futuras ao acionar os segmentos temporais',
       (tester) async {
-        tester.view.physicalSize = const Size(600, 1000);
+        tester.view.physicalSize = const Size(800, 1000);
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.resetPhysicalSize);
 
@@ -464,6 +473,7 @@ void main() {
         expect(find.text('• Conteúdo Futuro'), findsNothing);
 
         // Filtra por Futuras
+        await tester.ensureVisible(find.text(AppStrings.filterFuture));
         await tester.tap(find.text(AppStrings.filterFuture));
         await tester.pumpAndSettle();
         expect(find.text('• Conteúdo Passado'), findsNothing);

@@ -83,12 +83,22 @@ void main() {
     // Registros de turmas/disciplinas isoladas para os testes unitários específicos
     for (var i = 1; i <= 6; i++) {
       await db
+          .into(db.subjectsTable)
+          .insert(
+            SubjectsTableCompanion.insert(
+              id: 's-iso-$i',
+              name: 'Matemática Isolada $i',
+              colorHex: '#2196F3',
+              createdAt: DateTime.now(),
+            ),
+          );
+      await db
           .into(db.classroomSubjectsTable)
           .insert(
             ClassroomSubjectsTableCompanion.insert(
               id: 'cs-iso-$i',
               classroomId: 'c-test',
-              subjectId: 's-test',
+              subjectId: 's-iso-$i',
               weeklyLessons: 4,
               createdAt: DateTime.now(),
             ),
