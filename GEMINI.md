@@ -217,5 +217,6 @@ Uma tarefa somente pode ser considerada concluída quando:
 - Usar mensagens padronizadas seguindo Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `ci:`, `chore:`) de maneira consistente em português.
 - Não incluir arquivos secretos, credenciais, keystores, tokens, arquivos temporários ou artefatos de build no repositório.
 - Não executar `git push`, publicar releases, reescrever histórico remoto ou alterar configurações do GitHub sem autorização explícita do usuário.
+- Sempre acompanhar o progresso e o resultado do workflow de CI/CD (GitHub Actions) após lançar/enviar commits ao repositório remoto, monitorando a execução até o término (`gh run list` / `gh run watch` ou equivalente) para certificar-se de que a validação remota passou com sucesso. Se houver falha, inspecionar os logs imediatamente e providenciar a correção.
 - Se houver alterações pré-existentes do usuário, preservá-las e não incluí-las automaticamente em um commit de etapa sem autorização.
 - Toda release e tag (`v*`) deve passar pela validação de CI e ter suas limitações de assinatura explicitamente documentadas (conforme `docs/CI_CD.md`).
