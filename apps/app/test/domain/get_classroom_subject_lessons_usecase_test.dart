@@ -1,6 +1,7 @@
 import 'package:app/domain/models/course_content.dart';
 import 'package:app/domain/models/lesson_execution_record.dart';
 import 'package:app/domain/models/planned_lesson.dart';
+import 'package:app/domain/repositories/planned_lesson_repository.dart';
 import 'package:app/domain/usecases/get_classroom_subject_lessons_usecase.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_course_content_repository.dart';
@@ -9,6 +10,35 @@ import 'package:app/infrastructure/persistence/repositories/drift_planned_lesson
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class FakePlannedLessonRepository implements PlannedLessonRepository {
+  FakePlannedLessonRepository(this.lessons);
+  final List<PlannedLesson> lessons;
+
+  @override
+  Future<List<PlannedLesson>> getByClassroomSubject(
+    String classroomSubjectId,
+  ) async {
+    return lessons
+        .where((l) => l.classroomSubjectId == classroomSubjectId)
+        .toList();
+  }
+
+  @override
+  Future<void> save(PlannedLesson lesson) async {}
+  @override
+  Future<void> saveAll(List<PlannedLesson> list) async {}
+  @override
+  Future<void> delete(String id) async {}
+  @override
+  Future<PlannedLesson?> findById(String id) async => null;
+  @override
+  Future<List<PlannedLesson>> getByDateRange(
+    String classroomSubjectId,
+    DateTime start,
+    DateTime end,
+  ) async => [];
+}
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -73,6 +103,18 @@ void main() {
             createdAt: DateTime.now(),
           ),
         );
+
+    await db
+        .into(db.classroomSubjectsTable)
+        .insert(
+          ClassroomSubjectsTableCompanion.insert(
+            id: 'cs-other',
+            classroomId: 'c-test',
+            subjectId: 's-test',
+            weeklyLessons: 1,
+            createdAt: DateTime.now(),
+          ),
+        );
   });
 
   tearDown(() async {
@@ -120,12 +162,10 @@ void main() {
         ),
       ];
 
-      for (final l in lessons) {
-        await plannedLessonRepo.save(l);
-      }
+      final fakeRepo = FakePlannedLessonRepository(lessons);
 
       final useCase = GetClassroomSubjectLessonsUseCase(
-        plannedLessonRepository: plannedLessonRepo,
+        plannedLessonRepository: fakeRepo,
         lessonExecutionRepository: lessonExecutionRepo,
         courseContentRepository: courseContentRepo,
         clock: () => DateTime.utc(2026, 3, 10, 12, 0),
@@ -230,7 +270,18 @@ void main() {
         ),
       );
 
-      // Aula planejada com cnt-1 e cnt-2
+      // Cadastrar cnt-inexistente em outra disciplina para satisfazer integridade referencial do SQLite,
+      // mas permanecer ausente da consulta da disciplina atual ('cs-test') para testar fallback de título.
+      await courseContentRepo.save(
+        const CourseContent(
+          id: 'cnt-inexistente',
+          classroomSubjectId: 'cs-other',
+          title: 'Conteúdo de Outra Disciplina',
+          orderIndex: 1,
+        ),
+      );
+
+      // Aula planejada com cnt-1, cnt-2 e cnt-inexistente (não cadastrado em cs-test)
       await plannedLessonRepo.save(
         PlannedLesson(
           id: 'l-diff-contents',

@@ -79,6 +79,21 @@ void main() {
             createdAt: DateTime.now(),
           ),
         );
+
+    // Registros de turmas/disciplinas isoladas para os testes unitários específicos
+    for (var i = 1; i <= 6; i++) {
+      await db
+          .into(db.classroomSubjectsTable)
+          .insert(
+            ClassroomSubjectsTableCompanion.insert(
+              id: 'cs-iso-$i',
+              classroomId: 'c-test',
+              subjectId: 's-test',
+              weeklyLessons: 4,
+              createdAt: DateTime.now(),
+            ),
+          );
+    }
   });
 
   tearDown(() async {

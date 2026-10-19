@@ -220,7 +220,12 @@ void main() {
           ),
         );
 
-        await tester.pumpWidget(buildTestableScreen());
+        await tester.pumpWidget(
+          buildTestableScreen(
+            initialClassroomId: 'c-9a',
+            initialClassroomSubjectId: 'cs-9a-mat',
+          ),
+        );
         await tester.pumpAndSettle();
 
         // 1. Cabeçalho e seletores
@@ -325,7 +330,8 @@ void main() {
         );
         expect(subjectDropdown, findsOneWidget);
         await tester.tap(subjectDropdown);
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         // Toca na opção Física Rápida no menu suspenso
         final fastMenuItem = find.text('Física Rápida').last;
@@ -430,7 +436,12 @@ void main() {
           ),
         );
 
-        await tester.pumpWidget(buildTestableScreen());
+        await tester.pumpWidget(
+          buildTestableScreen(
+            initialClassroomId: 'c-9a',
+            initialClassroomSubjectId: 'cs-9a-mat',
+          ),
+        );
         await tester.pumpAndSettle();
 
         // Inicialmente no filtro Todas: todas as 3 aulas aparecem

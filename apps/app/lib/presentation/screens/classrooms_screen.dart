@@ -869,8 +869,11 @@ class _ClassroomsScreenState extends State<ClassroomsScreen> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
+                            Wrap(
+                              alignment: WrapAlignment.end,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 8,
+                              runSpacing: 8,
                               children: [
                                 OutlinedButton.icon(
                                   icon: const Icon(Icons.assignment_outlined),
@@ -885,14 +888,12 @@ class _ClassroomsScreenState extends State<ClassroomsScreen> {
                                     );
                                   },
                                 ),
-                                const SizedBox(width: 8),
                                 OutlinedButton.icon(
                                   icon: const Icon(Icons.settings),
                                   label: const Text('Disciplinas e Grade'),
                                   onPressed: () =>
                                       _manageSubjectsDialog(classroom),
                                 ),
-                                const SizedBox(width: 8),
                                 IconButton(
                                   tooltip: 'Excluir Turma',
                                   icon: const Icon(
