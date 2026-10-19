@@ -747,7 +747,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
 
     if (result == true && mounted) {
       final isRectification = item.executionRecord != null;
-      ScaffoldMessenger.of(context).showSnackBar(
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.clearSnackBars();
+      messenger.showSnackBar(
         SnackBar(
           content: Text(
             isRectification
