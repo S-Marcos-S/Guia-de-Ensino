@@ -11,7 +11,7 @@ void main() {
       'deve executar onCreate criando todas as tabelas na versão 3',
       () async {
         final db = AppDatabase.forTesting(NativeDatabase.memory());
-        expect(db.schemaVersion, equals(4));
+        expect(db.schemaVersion, equals(5));
 
         // As novas tabelas v3 devem aceitar inserções sem erro
         await db

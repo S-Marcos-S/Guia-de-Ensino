@@ -232,3 +232,84 @@ class LessonContentAllocationsTable extends Table {
   @override
   Set<Column> get primaryKey => {lessonId, contentId};
 }
+
+/// Tabela de Registros Históricos de Execução de Aulas (Diário de Classe - Schema v5).
+class LessonExecutionRecordsTable extends Table {
+  TextColumn get id => text()();
+
+  /// Vínculo direto à aula planejada correspondente.
+  /// onDelete: KeyAction.restrict impede categoricamente a exclusão da aula planejada
+  /// caso ela possua um registro histórico registrado no banco.
+  TextColumn get plannedLessonId => text().references(
+    PlannedLessonsTable,
+    #id,
+    onDelete: KeyAction.restrict,
+  )();
+
+  /// Vínculo direto à disciplina e turma correspondente.
+  /// onDelete: KeyAction.restrict protege a disciplina da turma contra exclusão acidental.
+  TextColumn get classroomSubjectId => text().references(
+    ClassroomSubjectsTable,
+    #id,
+    onDelete: KeyAction.restrict,
+  )();
+
+  /// Data de realização fática normalizada sem fuso horário.
+  TextColumn get executionDate => text().map(const CalendarDateConverter())();
+
+  /// Status de realização (completed, partiallyCompleted, notHeld).
+  TextColumn get status => text()();
+
+  /// Motivo padronizado para aula não realizada.
+  TextColumn get cancellationReason => text().nullable()();
+
+  /// Detalhes adicionais da justificativa de não realização.
+  TextColumn get cancellationDetails => text().nullable()();
+
+  /// Anotações pedagógicas do docente sobre a aula.
+  TextColumn get pedagogicalNotes => text().nullable()();
+
+  /// Indicador de necessidade de continuidade pedagógica.
+  BoolColumn get needsFollowUp =>
+      boolean().withDefault(const Constant(false))();
+
+  /// Detalhes da continuidade a retomar em aulas futuras.
+  TextColumn get followUpNotes => text().nullable()();
+
+  /// Timestamp da criação original do registro.
+  DateTimeColumn get recordedAt => dateTime()();
+
+  /// Timestamp da última retificação do registro.
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    // Garante que cada aula planejada pode possuir no máximo um registro de execução
+    {plannedLessonId},
+  ];
+}
+
+/// Tabela associativa entre Registro de Execução e Conteúdos Efetivamente Ministrados (Schema v5).
+class ExecutionContentAllocationsTable extends Table {
+  @ReferenceName('executionAllocations')
+  TextColumn get recordId => text().references(
+    LessonExecutionRecordsTable,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
+
+  @ReferenceName('executedLessonsForContent')
+  TextColumn get contentId => text().references(
+    CourseContentsTable,
+    #id,
+    onDelete: KeyAction.restrict,
+  )();
+
+  IntColumn get orderIndex => integer().withDefault(const Constant(1))();
+
+  @override
+  Set<Column> get primaryKey => {recordId, contentId};
+}

@@ -60,6 +60,7 @@ O Guia de Ensino adota uma **Arquitetura em Camadas Orientada ao Domínio (Clean
   - **Schema v2**: `school_calendar_events`, `schedule_slots` (grade horária semanal).
   - **Schema v3**: `curriculum_competencies` (BNCC oficial), `course_contents`, `content_prerequisites`.
   - **Schema v4**: `lesson_content_allocations` (tabela associativa com cascata na exclusão da aula e restrição na exclusão do conteúdo para assegurar integridade referencial).
+  - **Schema v5**: `lesson_execution_records` (diário fático de aula com unicidade por aula planejada e `KeyAction.restrict` para impedir exclusão da aula com histórico registrado) e `execution_content_allocations` (tabela associativa com conteúdos efetivamente ministrados e `KeyAction.restrict` para proteger conteúdos ministrados contra remoção acidental).
 - **Sincronização**: Cliente de sincronização HTTP para comunicação com o backend NestJS quando online.
 - **Serviço de IA**: Implementação da interface `AiServiceProvider`, intermediando chamadas à API Gemini com proteção de segredos, esquemas JSON validados e tratamento de falhas.
 

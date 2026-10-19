@@ -5108,6 +5108,1110 @@ class LessonContentAllocationsTableCompanion
   }
 }
 
+class $LessonExecutionRecordsTableTable extends LessonExecutionRecordsTable
+    with
+        TableInfo<
+          $LessonExecutionRecordsTableTable,
+          LessonExecutionRecordsTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LessonExecutionRecordsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _plannedLessonIdMeta = const VerificationMeta(
+    'plannedLessonId',
+  );
+  @override
+  late final GeneratedColumn<String> plannedLessonId = GeneratedColumn<String>(
+    'planned_lesson_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES planned_lessons_table (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _classroomSubjectIdMeta =
+      const VerificationMeta('classroomSubjectId');
+  @override
+  late final GeneratedColumn<String> classroomSubjectId =
+      GeneratedColumn<String>(
+        'classroom_subject_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES classroom_subjects_table (id) ON DELETE RESTRICT',
+        ),
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<DateTime, String> executionDate =
+      GeneratedColumn<String>(
+        'execution_date',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<DateTime>(
+        $LessonExecutionRecordsTableTable.$converterexecutionDate,
+      );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cancellationReasonMeta =
+      const VerificationMeta('cancellationReason');
+  @override
+  late final GeneratedColumn<String> cancellationReason =
+      GeneratedColumn<String>(
+        'cancellation_reason',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _cancellationDetailsMeta =
+      const VerificationMeta('cancellationDetails');
+  @override
+  late final GeneratedColumn<String> cancellationDetails =
+      GeneratedColumn<String>(
+        'cancellation_details',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _pedagogicalNotesMeta = const VerificationMeta(
+    'pedagogicalNotes',
+  );
+  @override
+  late final GeneratedColumn<String> pedagogicalNotes = GeneratedColumn<String>(
+    'pedagogical_notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _needsFollowUpMeta = const VerificationMeta(
+    'needsFollowUp',
+  );
+  @override
+  late final GeneratedColumn<bool> needsFollowUp = GeneratedColumn<bool>(
+    'needs_follow_up',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("needs_follow_up" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _followUpNotesMeta = const VerificationMeta(
+    'followUpNotes',
+  );
+  @override
+  late final GeneratedColumn<String> followUpNotes = GeneratedColumn<String>(
+    'follow_up_notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _recordedAtMeta = const VerificationMeta(
+    'recordedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> recordedAt = GeneratedColumn<DateTime>(
+    'recorded_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    plannedLessonId,
+    classroomSubjectId,
+    executionDate,
+    status,
+    cancellationReason,
+    cancellationDetails,
+    pedagogicalNotes,
+    needsFollowUp,
+    followUpNotes,
+    recordedAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'lesson_execution_records_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LessonExecutionRecordsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('planned_lesson_id')) {
+      context.handle(
+        _plannedLessonIdMeta,
+        plannedLessonId.isAcceptableOrUnknown(
+          data['planned_lesson_id']!,
+          _plannedLessonIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_plannedLessonIdMeta);
+    }
+    if (data.containsKey('classroom_subject_id')) {
+      context.handle(
+        _classroomSubjectIdMeta,
+        classroomSubjectId.isAcceptableOrUnknown(
+          data['classroom_subject_id']!,
+          _classroomSubjectIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_classroomSubjectIdMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('cancellation_reason')) {
+      context.handle(
+        _cancellationReasonMeta,
+        cancellationReason.isAcceptableOrUnknown(
+          data['cancellation_reason']!,
+          _cancellationReasonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cancellation_details')) {
+      context.handle(
+        _cancellationDetailsMeta,
+        cancellationDetails.isAcceptableOrUnknown(
+          data['cancellation_details']!,
+          _cancellationDetailsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pedagogical_notes')) {
+      context.handle(
+        _pedagogicalNotesMeta,
+        pedagogicalNotes.isAcceptableOrUnknown(
+          data['pedagogical_notes']!,
+          _pedagogicalNotesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('needs_follow_up')) {
+      context.handle(
+        _needsFollowUpMeta,
+        needsFollowUp.isAcceptableOrUnknown(
+          data['needs_follow_up']!,
+          _needsFollowUpMeta,
+        ),
+      );
+    }
+    if (data.containsKey('follow_up_notes')) {
+      context.handle(
+        _followUpNotesMeta,
+        followUpNotes.isAcceptableOrUnknown(
+          data['follow_up_notes']!,
+          _followUpNotesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('recorded_at')) {
+      context.handle(
+        _recordedAtMeta,
+        recordedAt.isAcceptableOrUnknown(data['recorded_at']!, _recordedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordedAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {plannedLessonId},
+  ];
+  @override
+  LessonExecutionRecordsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LessonExecutionRecordsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      plannedLessonId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}planned_lesson_id'],
+      )!,
+      classroomSubjectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}classroom_subject_id'],
+      )!,
+      executionDate: $LessonExecutionRecordsTableTable.$converterexecutionDate
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}execution_date'],
+            )!,
+          ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      cancellationReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cancellation_reason'],
+      ),
+      cancellationDetails: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cancellation_details'],
+      ),
+      pedagogicalNotes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pedagogical_notes'],
+      ),
+      needsFollowUp: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}needs_follow_up'],
+      )!,
+      followUpNotes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}follow_up_notes'],
+      ),
+      recordedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}recorded_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+    );
+  }
+
+  @override
+  $LessonExecutionRecordsTableTable createAlias(String alias) {
+    return $LessonExecutionRecordsTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, String> $converterexecutionDate =
+      const CalendarDateConverter();
+}
+
+class LessonExecutionRecordsTableData extends DataClass
+    implements Insertable<LessonExecutionRecordsTableData> {
+  final String id;
+
+  /// Vínculo direto à aula planejada correspondente.
+  /// onDelete: KeyAction.restrict impede categoricamente a exclusão da aula planejada
+  /// caso ela possua um registro histórico registrado no banco.
+  final String plannedLessonId;
+
+  /// Vínculo direto à disciplina e turma correspondente.
+  /// onDelete: KeyAction.restrict protege a disciplina da turma contra exclusão acidental.
+  final String classroomSubjectId;
+
+  /// Data de realização fática normalizada sem fuso horário.
+  final DateTime executionDate;
+
+  /// Status de realização (completed, partiallyCompleted, notHeld).
+  final String status;
+
+  /// Motivo padronizado para aula não realizada.
+  final String? cancellationReason;
+
+  /// Detalhes adicionais da justificativa de não realização.
+  final String? cancellationDetails;
+
+  /// Anotações pedagógicas do docente sobre a aula.
+  final String? pedagogicalNotes;
+
+  /// Indicador de necessidade de continuidade pedagógica.
+  final bool needsFollowUp;
+
+  /// Detalhes da continuidade a retomar em aulas futuras.
+  final String? followUpNotes;
+
+  /// Timestamp da criação original do registro.
+  final DateTime recordedAt;
+
+  /// Timestamp da última retificação do registro.
+  final DateTime? updatedAt;
+  const LessonExecutionRecordsTableData({
+    required this.id,
+    required this.plannedLessonId,
+    required this.classroomSubjectId,
+    required this.executionDate,
+    required this.status,
+    this.cancellationReason,
+    this.cancellationDetails,
+    this.pedagogicalNotes,
+    required this.needsFollowUp,
+    this.followUpNotes,
+    required this.recordedAt,
+    this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['planned_lesson_id'] = Variable<String>(plannedLessonId);
+    map['classroom_subject_id'] = Variable<String>(classroomSubjectId);
+    {
+      map['execution_date'] = Variable<String>(
+        $LessonExecutionRecordsTableTable.$converterexecutionDate.toSql(
+          executionDate,
+        ),
+      );
+    }
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || cancellationReason != null) {
+      map['cancellation_reason'] = Variable<String>(cancellationReason);
+    }
+    if (!nullToAbsent || cancellationDetails != null) {
+      map['cancellation_details'] = Variable<String>(cancellationDetails);
+    }
+    if (!nullToAbsent || pedagogicalNotes != null) {
+      map['pedagogical_notes'] = Variable<String>(pedagogicalNotes);
+    }
+    map['needs_follow_up'] = Variable<bool>(needsFollowUp);
+    if (!nullToAbsent || followUpNotes != null) {
+      map['follow_up_notes'] = Variable<String>(followUpNotes);
+    }
+    map['recorded_at'] = Variable<DateTime>(recordedAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    return map;
+  }
+
+  LessonExecutionRecordsTableCompanion toCompanion(bool nullToAbsent) {
+    return LessonExecutionRecordsTableCompanion(
+      id: Value(id),
+      plannedLessonId: Value(plannedLessonId),
+      classroomSubjectId: Value(classroomSubjectId),
+      executionDate: Value(executionDate),
+      status: Value(status),
+      cancellationReason: cancellationReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancellationReason),
+      cancellationDetails: cancellationDetails == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancellationDetails),
+      pedagogicalNotes: pedagogicalNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pedagogicalNotes),
+      needsFollowUp: Value(needsFollowUp),
+      followUpNotes: followUpNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(followUpNotes),
+      recordedAt: Value(recordedAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory LessonExecutionRecordsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LessonExecutionRecordsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      plannedLessonId: serializer.fromJson<String>(json['plannedLessonId']),
+      classroomSubjectId: serializer.fromJson<String>(
+        json['classroomSubjectId'],
+      ),
+      executionDate: serializer.fromJson<DateTime>(json['executionDate']),
+      status: serializer.fromJson<String>(json['status']),
+      cancellationReason: serializer.fromJson<String?>(
+        json['cancellationReason'],
+      ),
+      cancellationDetails: serializer.fromJson<String?>(
+        json['cancellationDetails'],
+      ),
+      pedagogicalNotes: serializer.fromJson<String?>(json['pedagogicalNotes']),
+      needsFollowUp: serializer.fromJson<bool>(json['needsFollowUp']),
+      followUpNotes: serializer.fromJson<String?>(json['followUpNotes']),
+      recordedAt: serializer.fromJson<DateTime>(json['recordedAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'plannedLessonId': serializer.toJson<String>(plannedLessonId),
+      'classroomSubjectId': serializer.toJson<String>(classroomSubjectId),
+      'executionDate': serializer.toJson<DateTime>(executionDate),
+      'status': serializer.toJson<String>(status),
+      'cancellationReason': serializer.toJson<String?>(cancellationReason),
+      'cancellationDetails': serializer.toJson<String?>(cancellationDetails),
+      'pedagogicalNotes': serializer.toJson<String?>(pedagogicalNotes),
+      'needsFollowUp': serializer.toJson<bool>(needsFollowUp),
+      'followUpNotes': serializer.toJson<String?>(followUpNotes),
+      'recordedAt': serializer.toJson<DateTime>(recordedAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+    };
+  }
+
+  LessonExecutionRecordsTableData copyWith({
+    String? id,
+    String? plannedLessonId,
+    String? classroomSubjectId,
+    DateTime? executionDate,
+    String? status,
+    Value<String?> cancellationReason = const Value.absent(),
+    Value<String?> cancellationDetails = const Value.absent(),
+    Value<String?> pedagogicalNotes = const Value.absent(),
+    bool? needsFollowUp,
+    Value<String?> followUpNotes = const Value.absent(),
+    DateTime? recordedAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
+  }) => LessonExecutionRecordsTableData(
+    id: id ?? this.id,
+    plannedLessonId: plannedLessonId ?? this.plannedLessonId,
+    classroomSubjectId: classroomSubjectId ?? this.classroomSubjectId,
+    executionDate: executionDate ?? this.executionDate,
+    status: status ?? this.status,
+    cancellationReason: cancellationReason.present
+        ? cancellationReason.value
+        : this.cancellationReason,
+    cancellationDetails: cancellationDetails.present
+        ? cancellationDetails.value
+        : this.cancellationDetails,
+    pedagogicalNotes: pedagogicalNotes.present
+        ? pedagogicalNotes.value
+        : this.pedagogicalNotes,
+    needsFollowUp: needsFollowUp ?? this.needsFollowUp,
+    followUpNotes: followUpNotes.present
+        ? followUpNotes.value
+        : this.followUpNotes,
+    recordedAt: recordedAt ?? this.recordedAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+  );
+  LessonExecutionRecordsTableData copyWithCompanion(
+    LessonExecutionRecordsTableCompanion data,
+  ) {
+    return LessonExecutionRecordsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      plannedLessonId: data.plannedLessonId.present
+          ? data.plannedLessonId.value
+          : this.plannedLessonId,
+      classroomSubjectId: data.classroomSubjectId.present
+          ? data.classroomSubjectId.value
+          : this.classroomSubjectId,
+      executionDate: data.executionDate.present
+          ? data.executionDate.value
+          : this.executionDate,
+      status: data.status.present ? data.status.value : this.status,
+      cancellationReason: data.cancellationReason.present
+          ? data.cancellationReason.value
+          : this.cancellationReason,
+      cancellationDetails: data.cancellationDetails.present
+          ? data.cancellationDetails.value
+          : this.cancellationDetails,
+      pedagogicalNotes: data.pedagogicalNotes.present
+          ? data.pedagogicalNotes.value
+          : this.pedagogicalNotes,
+      needsFollowUp: data.needsFollowUp.present
+          ? data.needsFollowUp.value
+          : this.needsFollowUp,
+      followUpNotes: data.followUpNotes.present
+          ? data.followUpNotes.value
+          : this.followUpNotes,
+      recordedAt: data.recordedAt.present
+          ? data.recordedAt.value
+          : this.recordedAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LessonExecutionRecordsTableData(')
+          ..write('id: $id, ')
+          ..write('plannedLessonId: $plannedLessonId, ')
+          ..write('classroomSubjectId: $classroomSubjectId, ')
+          ..write('executionDate: $executionDate, ')
+          ..write('status: $status, ')
+          ..write('cancellationReason: $cancellationReason, ')
+          ..write('cancellationDetails: $cancellationDetails, ')
+          ..write('pedagogicalNotes: $pedagogicalNotes, ')
+          ..write('needsFollowUp: $needsFollowUp, ')
+          ..write('followUpNotes: $followUpNotes, ')
+          ..write('recordedAt: $recordedAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    plannedLessonId,
+    classroomSubjectId,
+    executionDate,
+    status,
+    cancellationReason,
+    cancellationDetails,
+    pedagogicalNotes,
+    needsFollowUp,
+    followUpNotes,
+    recordedAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LessonExecutionRecordsTableData &&
+          other.id == this.id &&
+          other.plannedLessonId == this.plannedLessonId &&
+          other.classroomSubjectId == this.classroomSubjectId &&
+          other.executionDate == this.executionDate &&
+          other.status == this.status &&
+          other.cancellationReason == this.cancellationReason &&
+          other.cancellationDetails == this.cancellationDetails &&
+          other.pedagogicalNotes == this.pedagogicalNotes &&
+          other.needsFollowUp == this.needsFollowUp &&
+          other.followUpNotes == this.followUpNotes &&
+          other.recordedAt == this.recordedAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class LessonExecutionRecordsTableCompanion
+    extends UpdateCompanion<LessonExecutionRecordsTableData> {
+  final Value<String> id;
+  final Value<String> plannedLessonId;
+  final Value<String> classroomSubjectId;
+  final Value<DateTime> executionDate;
+  final Value<String> status;
+  final Value<String?> cancellationReason;
+  final Value<String?> cancellationDetails;
+  final Value<String?> pedagogicalNotes;
+  final Value<bool> needsFollowUp;
+  final Value<String?> followUpNotes;
+  final Value<DateTime> recordedAt;
+  final Value<DateTime?> updatedAt;
+  final Value<int> rowid;
+  const LessonExecutionRecordsTableCompanion({
+    this.id = const Value.absent(),
+    this.plannedLessonId = const Value.absent(),
+    this.classroomSubjectId = const Value.absent(),
+    this.executionDate = const Value.absent(),
+    this.status = const Value.absent(),
+    this.cancellationReason = const Value.absent(),
+    this.cancellationDetails = const Value.absent(),
+    this.pedagogicalNotes = const Value.absent(),
+    this.needsFollowUp = const Value.absent(),
+    this.followUpNotes = const Value.absent(),
+    this.recordedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LessonExecutionRecordsTableCompanion.insert({
+    required String id,
+    required String plannedLessonId,
+    required String classroomSubjectId,
+    required DateTime executionDate,
+    required String status,
+    this.cancellationReason = const Value.absent(),
+    this.cancellationDetails = const Value.absent(),
+    this.pedagogicalNotes = const Value.absent(),
+    this.needsFollowUp = const Value.absent(),
+    this.followUpNotes = const Value.absent(),
+    required DateTime recordedAt,
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       plannedLessonId = Value(plannedLessonId),
+       classroomSubjectId = Value(classroomSubjectId),
+       executionDate = Value(executionDate),
+       status = Value(status),
+       recordedAt = Value(recordedAt);
+  static Insertable<LessonExecutionRecordsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? plannedLessonId,
+    Expression<String>? classroomSubjectId,
+    Expression<String>? executionDate,
+    Expression<String>? status,
+    Expression<String>? cancellationReason,
+    Expression<String>? cancellationDetails,
+    Expression<String>? pedagogicalNotes,
+    Expression<bool>? needsFollowUp,
+    Expression<String>? followUpNotes,
+    Expression<DateTime>? recordedAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (plannedLessonId != null) 'planned_lesson_id': plannedLessonId,
+      if (classroomSubjectId != null)
+        'classroom_subject_id': classroomSubjectId,
+      if (executionDate != null) 'execution_date': executionDate,
+      if (status != null) 'status': status,
+      if (cancellationReason != null) 'cancellation_reason': cancellationReason,
+      if (cancellationDetails != null)
+        'cancellation_details': cancellationDetails,
+      if (pedagogicalNotes != null) 'pedagogical_notes': pedagogicalNotes,
+      if (needsFollowUp != null) 'needs_follow_up': needsFollowUp,
+      if (followUpNotes != null) 'follow_up_notes': followUpNotes,
+      if (recordedAt != null) 'recorded_at': recordedAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LessonExecutionRecordsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? plannedLessonId,
+    Value<String>? classroomSubjectId,
+    Value<DateTime>? executionDate,
+    Value<String>? status,
+    Value<String?>? cancellationReason,
+    Value<String?>? cancellationDetails,
+    Value<String?>? pedagogicalNotes,
+    Value<bool>? needsFollowUp,
+    Value<String?>? followUpNotes,
+    Value<DateTime>? recordedAt,
+    Value<DateTime?>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return LessonExecutionRecordsTableCompanion(
+      id: id ?? this.id,
+      plannedLessonId: plannedLessonId ?? this.plannedLessonId,
+      classroomSubjectId: classroomSubjectId ?? this.classroomSubjectId,
+      executionDate: executionDate ?? this.executionDate,
+      status: status ?? this.status,
+      cancellationReason: cancellationReason ?? this.cancellationReason,
+      cancellationDetails: cancellationDetails ?? this.cancellationDetails,
+      pedagogicalNotes: pedagogicalNotes ?? this.pedagogicalNotes,
+      needsFollowUp: needsFollowUp ?? this.needsFollowUp,
+      followUpNotes: followUpNotes ?? this.followUpNotes,
+      recordedAt: recordedAt ?? this.recordedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (plannedLessonId.present) {
+      map['planned_lesson_id'] = Variable<String>(plannedLessonId.value);
+    }
+    if (classroomSubjectId.present) {
+      map['classroom_subject_id'] = Variable<String>(classroomSubjectId.value);
+    }
+    if (executionDate.present) {
+      map['execution_date'] = Variable<String>(
+        $LessonExecutionRecordsTableTable.$converterexecutionDate.toSql(
+          executionDate.value,
+        ),
+      );
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (cancellationReason.present) {
+      map['cancellation_reason'] = Variable<String>(cancellationReason.value);
+    }
+    if (cancellationDetails.present) {
+      map['cancellation_details'] = Variable<String>(cancellationDetails.value);
+    }
+    if (pedagogicalNotes.present) {
+      map['pedagogical_notes'] = Variable<String>(pedagogicalNotes.value);
+    }
+    if (needsFollowUp.present) {
+      map['needs_follow_up'] = Variable<bool>(needsFollowUp.value);
+    }
+    if (followUpNotes.present) {
+      map['follow_up_notes'] = Variable<String>(followUpNotes.value);
+    }
+    if (recordedAt.present) {
+      map['recorded_at'] = Variable<DateTime>(recordedAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LessonExecutionRecordsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('plannedLessonId: $plannedLessonId, ')
+          ..write('classroomSubjectId: $classroomSubjectId, ')
+          ..write('executionDate: $executionDate, ')
+          ..write('status: $status, ')
+          ..write('cancellationReason: $cancellationReason, ')
+          ..write('cancellationDetails: $cancellationDetails, ')
+          ..write('pedagogicalNotes: $pedagogicalNotes, ')
+          ..write('needsFollowUp: $needsFollowUp, ')
+          ..write('followUpNotes: $followUpNotes, ')
+          ..write('recordedAt: $recordedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ExecutionContentAllocationsTableTable
+    extends ExecutionContentAllocationsTable
+    with
+        TableInfo<
+          $ExecutionContentAllocationsTableTable,
+          ExecutionContentAllocationsTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExecutionContentAllocationsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _recordIdMeta = const VerificationMeta(
+    'recordId',
+  );
+  @override
+  late final GeneratedColumn<String> recordId = GeneratedColumn<String>(
+    'record_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES lesson_execution_records_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _contentIdMeta = const VerificationMeta(
+    'contentId',
+  );
+  @override
+  late final GeneratedColumn<String> contentId = GeneratedColumn<String>(
+    'content_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES course_contents_table (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _orderIndexMeta = const VerificationMeta(
+    'orderIndex',
+  );
+  @override
+  late final GeneratedColumn<int> orderIndex = GeneratedColumn<int>(
+    'order_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [recordId, contentId, orderIndex];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'execution_content_allocations_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExecutionContentAllocationsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('record_id')) {
+      context.handle(
+        _recordIdMeta,
+        recordId.isAcceptableOrUnknown(data['record_id']!, _recordIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordIdMeta);
+    }
+    if (data.containsKey('content_id')) {
+      context.handle(
+        _contentIdMeta,
+        contentId.isAcceptableOrUnknown(data['content_id']!, _contentIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentIdMeta);
+    }
+    if (data.containsKey('order_index')) {
+      context.handle(
+        _orderIndexMeta,
+        orderIndex.isAcceptableOrUnknown(data['order_index']!, _orderIndexMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {recordId, contentId};
+  @override
+  ExecutionContentAllocationsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExecutionContentAllocationsTableData(
+      recordId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}record_id'],
+      )!,
+      contentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_id'],
+      )!,
+      orderIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order_index'],
+      )!,
+    );
+  }
+
+  @override
+  $ExecutionContentAllocationsTableTable createAlias(String alias) {
+    return $ExecutionContentAllocationsTableTable(attachedDatabase, alias);
+  }
+}
+
+class ExecutionContentAllocationsTableData extends DataClass
+    implements Insertable<ExecutionContentAllocationsTableData> {
+  final String recordId;
+  final String contentId;
+  final int orderIndex;
+  const ExecutionContentAllocationsTableData({
+    required this.recordId,
+    required this.contentId,
+    required this.orderIndex,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['record_id'] = Variable<String>(recordId);
+    map['content_id'] = Variable<String>(contentId);
+    map['order_index'] = Variable<int>(orderIndex);
+    return map;
+  }
+
+  ExecutionContentAllocationsTableCompanion toCompanion(bool nullToAbsent) {
+    return ExecutionContentAllocationsTableCompanion(
+      recordId: Value(recordId),
+      contentId: Value(contentId),
+      orderIndex: Value(orderIndex),
+    );
+  }
+
+  factory ExecutionContentAllocationsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExecutionContentAllocationsTableData(
+      recordId: serializer.fromJson<String>(json['recordId']),
+      contentId: serializer.fromJson<String>(json['contentId']),
+      orderIndex: serializer.fromJson<int>(json['orderIndex']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'recordId': serializer.toJson<String>(recordId),
+      'contentId': serializer.toJson<String>(contentId),
+      'orderIndex': serializer.toJson<int>(orderIndex),
+    };
+  }
+
+  ExecutionContentAllocationsTableData copyWith({
+    String? recordId,
+    String? contentId,
+    int? orderIndex,
+  }) => ExecutionContentAllocationsTableData(
+    recordId: recordId ?? this.recordId,
+    contentId: contentId ?? this.contentId,
+    orderIndex: orderIndex ?? this.orderIndex,
+  );
+  ExecutionContentAllocationsTableData copyWithCompanion(
+    ExecutionContentAllocationsTableCompanion data,
+  ) {
+    return ExecutionContentAllocationsTableData(
+      recordId: data.recordId.present ? data.recordId.value : this.recordId,
+      contentId: data.contentId.present ? data.contentId.value : this.contentId,
+      orderIndex: data.orderIndex.present
+          ? data.orderIndex.value
+          : this.orderIndex,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExecutionContentAllocationsTableData(')
+          ..write('recordId: $recordId, ')
+          ..write('contentId: $contentId, ')
+          ..write('orderIndex: $orderIndex')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(recordId, contentId, orderIndex);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExecutionContentAllocationsTableData &&
+          other.recordId == this.recordId &&
+          other.contentId == this.contentId &&
+          other.orderIndex == this.orderIndex);
+}
+
+class ExecutionContentAllocationsTableCompanion
+    extends UpdateCompanion<ExecutionContentAllocationsTableData> {
+  final Value<String> recordId;
+  final Value<String> contentId;
+  final Value<int> orderIndex;
+  final Value<int> rowid;
+  const ExecutionContentAllocationsTableCompanion({
+    this.recordId = const Value.absent(),
+    this.contentId = const Value.absent(),
+    this.orderIndex = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExecutionContentAllocationsTableCompanion.insert({
+    required String recordId,
+    required String contentId,
+    this.orderIndex = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : recordId = Value(recordId),
+       contentId = Value(contentId);
+  static Insertable<ExecutionContentAllocationsTableData> custom({
+    Expression<String>? recordId,
+    Expression<String>? contentId,
+    Expression<int>? orderIndex,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (recordId != null) 'record_id': recordId,
+      if (contentId != null) 'content_id': contentId,
+      if (orderIndex != null) 'order_index': orderIndex,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExecutionContentAllocationsTableCompanion copyWith({
+    Value<String>? recordId,
+    Value<String>? contentId,
+    Value<int>? orderIndex,
+    Value<int>? rowid,
+  }) {
+    return ExecutionContentAllocationsTableCompanion(
+      recordId: recordId ?? this.recordId,
+      contentId: contentId ?? this.contentId,
+      orderIndex: orderIndex ?? this.orderIndex,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (recordId.present) {
+      map['record_id'] = Variable<String>(recordId.value);
+    }
+    if (contentId.present) {
+      map['content_id'] = Variable<String>(contentId.value);
+    }
+    if (orderIndex.present) {
+      map['order_index'] = Variable<int>(orderIndex.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExecutionContentAllocationsTableCompanion(')
+          ..write('recordId: $recordId, ')
+          ..write('contentId: $contentId, ')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5133,6 +6237,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ContentPrerequisitesTableTable(this);
   late final $LessonContentAllocationsTableTable lessonContentAllocationsTable =
       $LessonContentAllocationsTableTable(this);
+  late final $LessonExecutionRecordsTableTable lessonExecutionRecordsTable =
+      $LessonExecutionRecordsTableTable(this);
+  late final $ExecutionContentAllocationsTableTable
+  executionContentAllocationsTable = $ExecutionContentAllocationsTableTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5149,6 +6259,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     courseContentsTable,
     contentPrerequisitesTable,
     lessonContentAllocationsTable,
+    lessonExecutionRecordsTable,
+    executionContentAllocationsTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -5201,6 +6313,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       result: [
         TableUpdate(
           'lesson_content_allocations_table',
+          kind: UpdateKind.delete,
+        ),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'lesson_execution_records_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate(
+          'execution_content_allocations_table',
           kind: UpdateKind.delete,
         ),
       ],
@@ -6593,6 +7717,34 @@ final class $$ClassroomSubjectsTableTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $LessonExecutionRecordsTableTable,
+    List<LessonExecutionRecordsTableData>
+  >
+  _lessonExecutionRecordsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.lessonExecutionRecordsTable,
+        aliasName: 'classroom_subjects_table__id__lesson_execution_records_table__classroom_subject_id',
+      );
+
+  $$LessonExecutionRecordsTableTableProcessedTableManager
+  get lessonExecutionRecordsTableRefs {
+    final manager =
+        $$LessonExecutionRecordsTableTableTableManager(
+          $_db,
+          $_db.lessonExecutionRecordsTable,
+        ).filter(
+          (f) => f.classroomSubjectId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _lessonExecutionRecordsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ClassroomSubjectsTableTableFilterComposer
@@ -6737,6 +7889,35 @@ class $$ClassroomSubjectsTableTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> lessonExecutionRecordsTableRefs(
+    Expression<bool> Function(
+      $$LessonExecutionRecordsTableTableFilterComposer f,
+    )
+    f,
+  ) {
+    final $$LessonExecutionRecordsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.lessonExecutionRecordsTable,
+          getReferencedColumn: (t) => t.classroomSubjectId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LessonExecutionRecordsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.lessonExecutionRecordsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -6955,6 +8136,35 @@ class $$ClassroomSubjectsTableTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> lessonExecutionRecordsTableRefs<T extends Object>(
+    Expression<T> Function(
+      $$LessonExecutionRecordsTableTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$LessonExecutionRecordsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.lessonExecutionRecordsTable,
+          getReferencedColumn: (t) => t.classroomSubjectId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LessonExecutionRecordsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.lessonExecutionRecordsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$ClassroomSubjectsTableTableTableManager
@@ -6976,6 +8186,7 @@ class $$ClassroomSubjectsTableTableTableManager
             bool plannedLessonsTableRefs,
             bool scheduleSlotsTableRefs,
             bool courseContentsTableRefs,
+            bool lessonExecutionRecordsTableRefs,
           })
         > {
   $$ClassroomSubjectsTableTableTableManager(
@@ -7050,6 +8261,7 @@ class $$ClassroomSubjectsTableTableTableManager
                 plannedLessonsTableRefs = false,
                 scheduleSlotsTableRefs = false,
                 courseContentsTableRefs = false,
+                lessonExecutionRecordsTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -7057,6 +8269,8 @@ class $$ClassroomSubjectsTableTableTableManager
                     if (plannedLessonsTableRefs) db.plannedLessonsTable,
                     if (scheduleSlotsTableRefs) db.scheduleSlotsTable,
                     if (courseContentsTableRefs) db.courseContentsTable,
+                    if (lessonExecutionRecordsTableRefs)
+                      db.lessonExecutionRecordsTable,
                   ],
                   addJoins:
                       <
@@ -7171,6 +8385,28 @@ class $$ClassroomSubjectsTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (lessonExecutionRecordsTableRefs)
+                        await $_getPrefetchedData<
+                          ClassroomSubjectsTableData,
+                          $ClassroomSubjectsTableTable,
+                          LessonExecutionRecordsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$ClassroomSubjectsTableTableReferences
+                                  ._lessonExecutionRecordsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ClassroomSubjectsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).lessonExecutionRecordsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.classroomSubjectId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -7197,6 +8433,7 @@ typedef $$ClassroomSubjectsTableTableProcessedTableManager =
         bool plannedLessonsTableRefs,
         bool scheduleSlotsTableRefs,
         bool courseContentsTableRefs,
+        bool lessonExecutionRecordsTableRefs,
       })
     >;
 typedef $$PlannedLessonsTableTableCreateCompanionBuilder =
@@ -7274,6 +8511,34 @@ final class $$PlannedLessonsTableTableReferences
     ).filter((f) => f.lessonId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_lessonAllocationsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $LessonExecutionRecordsTableTable,
+    List<LessonExecutionRecordsTableData>
+  >
+  _lessonExecutionRecordsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.lessonExecutionRecordsTable,
+        aliasName: 'planned_lessons_table__id__lesson_execution_records_table__planned_lesson_id',
+      );
+
+  $$LessonExecutionRecordsTableTableProcessedTableManager
+  get lessonExecutionRecordsTableRefs {
+    final manager =
+        $$LessonExecutionRecordsTableTableTableManager(
+          $_db,
+          $_db.lessonExecutionRecordsTable,
+        ).filter(
+          (f) => f.plannedLessonId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _lessonExecutionRecordsTableRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -7369,6 +8634,35 @@ class $$PlannedLessonsTableTableFilterComposer
               }) => $$LessonContentAllocationsTableTableFilterComposer(
                 $db: $db,
                 $table: $db.lessonContentAllocationsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> lessonExecutionRecordsTableRefs(
+    Expression<bool> Function(
+      $$LessonExecutionRecordsTableTableFilterComposer f,
+    )
+    f,
+  ) {
+    final $$LessonExecutionRecordsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.lessonExecutionRecordsTable,
+          getReferencedColumn: (t) => t.plannedLessonId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LessonExecutionRecordsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.lessonExecutionRecordsTable,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -7535,6 +8829,35 @@ class $$PlannedLessonsTableTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> lessonExecutionRecordsTableRefs<T extends Object>(
+    Expression<T> Function(
+      $$LessonExecutionRecordsTableTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$LessonExecutionRecordsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.lessonExecutionRecordsTable,
+          getReferencedColumn: (t) => t.plannedLessonId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LessonExecutionRecordsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.lessonExecutionRecordsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$PlannedLessonsTableTableTableManager
@@ -7553,6 +8876,7 @@ class $$PlannedLessonsTableTableTableManager
           PrefetchHooks Function({
             bool classroomSubjectId,
             bool lessonAllocations,
+            bool lessonExecutionRecordsTableRefs,
           })
         > {
   $$PlannedLessonsTableTableTableManager(
@@ -7630,11 +8954,17 @@ class $$PlannedLessonsTableTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({classroomSubjectId = false, lessonAllocations = false}) {
+              ({
+                classroomSubjectId = false,
+                lessonAllocations = false,
+                lessonExecutionRecordsTableRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (lessonAllocations) db.lessonContentAllocationsTable,
+                    if (lessonExecutionRecordsTableRefs)
+                      db.lessonExecutionRecordsTable,
                   ],
                   addJoins:
                       <
@@ -7691,6 +9021,27 @@ class $$PlannedLessonsTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (lessonExecutionRecordsTableRefs)
+                        await $_getPrefetchedData<
+                          PlannedLessonsTableData,
+                          $PlannedLessonsTableTable,
+                          LessonExecutionRecordsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PlannedLessonsTableTableReferences
+                              ._lessonExecutionRecordsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PlannedLessonsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).lessonExecutionRecordsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.plannedLessonId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -7711,7 +9062,11 @@ typedef $$PlannedLessonsTableTableProcessedTableManager =
       $$PlannedLessonsTableTableUpdateCompanionBuilder,
       (PlannedLessonsTableData, $$PlannedLessonsTableTableReferences),
       PlannedLessonsTableData,
-      PrefetchHooks Function({bool classroomSubjectId, bool lessonAllocations})
+      PrefetchHooks Function({
+        bool classroomSubjectId,
+        bool lessonAllocations,
+        bool lessonExecutionRecordsTableRefs,
+      })
     >;
 typedef $$SchoolCalendarEventsTableTableCreateCompanionBuilder =
     SchoolCalendarEventsTableCompanion Function({
@@ -9135,6 +10490,31 @@ final class $$CourseContentsTableTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $ExecutionContentAllocationsTableTable,
+    List<ExecutionContentAllocationsTableData>
+  >
+  _executedLessonsForContentTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.executionContentAllocationsTable,
+        aliasName: 'course_contents_table__id__execution_content_allocations_table__content_id',
+      );
+
+  $$ExecutionContentAllocationsTableTableProcessedTableManager
+  get executedLessonsForContent {
+    final manager = $$ExecutionContentAllocationsTableTableTableManager(
+      $_db,
+      $_db.executionContentAllocationsTable,
+    ).filter((f) => f.contentId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _executedLessonsForContentTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CourseContentsTableTableFilterComposer
@@ -9313,6 +10693,35 @@ class $$CourseContentsTableTableFilterComposer
               }) => $$LessonContentAllocationsTableTableFilterComposer(
                 $db: $db,
                 $table: $db.lessonContentAllocationsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> executedLessonsForContent(
+    Expression<bool> Function(
+      $$ExecutionContentAllocationsTableTableFilterComposer f,
+    )
+    f,
+  ) {
+    final $$ExecutionContentAllocationsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.executionContentAllocationsTable,
+          getReferencedColumn: (t) => t.contentId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExecutionContentAllocationsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.executionContentAllocationsTable,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -9604,6 +11013,35 @@ class $$CourseContentsTableTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> executedLessonsForContent<T extends Object>(
+    Expression<T> Function(
+      $$ExecutionContentAllocationsTableTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$ExecutionContentAllocationsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.executionContentAllocationsTable,
+          getReferencedColumn: (t) => t.contentId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExecutionContentAllocationsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.executionContentAllocationsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$CourseContentsTableTableTableManager
@@ -9625,6 +11063,7 @@ class $$CourseContentsTableTableTableManager
             bool requiredPrerequisites,
             bool prerequisiteFor,
             bool contentLessons,
+            bool executedLessonsForContent,
           })
         > {
   $$CourseContentsTableTableTableManager(
@@ -9720,6 +11159,7 @@ class $$CourseContentsTableTableTableManager
                 requiredPrerequisites = false,
                 prerequisiteFor = false,
                 contentLessons = false,
+                executedLessonsForContent = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -9727,6 +11167,8 @@ class $$CourseContentsTableTableTableManager
                     if (requiredPrerequisites) db.contentPrerequisitesTable,
                     if (prerequisiteFor) db.contentPrerequisitesTable,
                     if (contentLessons) db.lessonContentAllocationsTable,
+                    if (executedLessonsForContent)
+                      db.executionContentAllocationsTable,
                   ],
                   addJoins:
                       <
@@ -9838,6 +11280,27 @@ class $$CourseContentsTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (executedLessonsForContent)
+                        await $_getPrefetchedData<
+                          CourseContentsTableData,
+                          $CourseContentsTableTable,
+                          ExecutionContentAllocationsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CourseContentsTableTableReferences
+                              ._executedLessonsForContentTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CourseContentsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).executedLessonsForContent,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contentId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -9864,6 +11327,7 @@ typedef $$CourseContentsTableTableProcessedTableManager =
         bool requiredPrerequisites,
         bool prerequisiteFor,
         bool contentLessons,
+        bool executedLessonsForContent,
       })
     >;
 typedef $$ContentPrerequisitesTableTableCreateCompanionBuilder =
@@ -10659,6 +12123,1127 @@ typedef $$LessonContentAllocationsTableTableProcessedTableManager =
       LessonContentAllocationsTableData,
       PrefetchHooks Function({bool lessonId, bool contentId})
     >;
+typedef $$LessonExecutionRecordsTableTableCreateCompanionBuilder =
+    LessonExecutionRecordsTableCompanion Function({
+      required String id,
+      required String plannedLessonId,
+      required String classroomSubjectId,
+      required DateTime executionDate,
+      required String status,
+      Value<String?> cancellationReason,
+      Value<String?> cancellationDetails,
+      Value<String?> pedagogicalNotes,
+      Value<bool> needsFollowUp,
+      Value<String?> followUpNotes,
+      required DateTime recordedAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$LessonExecutionRecordsTableTableUpdateCompanionBuilder =
+    LessonExecutionRecordsTableCompanion Function({
+      Value<String> id,
+      Value<String> plannedLessonId,
+      Value<String> classroomSubjectId,
+      Value<DateTime> executionDate,
+      Value<String> status,
+      Value<String?> cancellationReason,
+      Value<String?> cancellationDetails,
+      Value<String?> pedagogicalNotes,
+      Value<bool> needsFollowUp,
+      Value<String?> followUpNotes,
+      Value<DateTime> recordedAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$LessonExecutionRecordsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $LessonExecutionRecordsTableTable,
+          LessonExecutionRecordsTableData
+        > {
+  $$LessonExecutionRecordsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PlannedLessonsTableTable _plannedLessonIdTable(_$AppDatabase db) =>
+      db.plannedLessonsTable.createAlias(
+        'lesson_execution_records_table__planned_lesson_id__planned_lessons_table__id',
+      );
+
+  $$PlannedLessonsTableTableProcessedTableManager get plannedLessonId {
+    final $_column = $_itemColumn<String>('planned_lesson_id')!;
+
+    final manager = $$PlannedLessonsTableTableTableManager(
+      $_db,
+      $_db.plannedLessonsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_plannedLessonIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ClassroomSubjectsTableTable _classroomSubjectIdTable(
+    _$AppDatabase db,
+  ) => db.classroomSubjectsTable.createAlias(
+    'lesson_execution_records_table__classroom_subject_id__classroom_subjects_table__id',
+  );
+
+  $$ClassroomSubjectsTableTableProcessedTableManager get classroomSubjectId {
+    final $_column = $_itemColumn<String>('classroom_subject_id')!;
+
+    final manager = $$ClassroomSubjectsTableTableTableManager(
+      $_db,
+      $_db.classroomSubjectsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_classroomSubjectIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ExecutionContentAllocationsTableTable,
+    List<ExecutionContentAllocationsTableData>
+  >
+  _executionAllocationsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.executionContentAllocationsTable,
+    aliasName: 'lesson_execution_records_table__id__execution_content_allocations_table__record_id',
+  );
+
+  $$ExecutionContentAllocationsTableTableProcessedTableManager
+  get executionAllocations {
+    final manager = $$ExecutionContentAllocationsTableTableTableManager(
+      $_db,
+      $_db.executionContentAllocationsTable,
+    ).filter((f) => f.recordId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _executionAllocationsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$LessonExecutionRecordsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $LessonExecutionRecordsTableTable> {
+  $$LessonExecutionRecordsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, String>
+  get executionDate => $composableBuilder(
+    column: $table.executionDate,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cancellationReason => $composableBuilder(
+    column: $table.cancellationReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cancellationDetails => $composableBuilder(
+    column: $table.cancellationDetails,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pedagogicalNotes => $composableBuilder(
+    column: $table.pedagogicalNotes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get needsFollowUp => $composableBuilder(
+    column: $table.needsFollowUp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get followUpNotes => $composableBuilder(
+    column: $table.followUpNotes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PlannedLessonsTableTableFilterComposer get plannedLessonId {
+    final $$PlannedLessonsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.plannedLessonId,
+      referencedTable: $db.plannedLessonsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlannedLessonsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.plannedLessonsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ClassroomSubjectsTableTableFilterComposer get classroomSubjectId {
+    final $$ClassroomSubjectsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.classroomSubjectId,
+          referencedTable: $db.classroomSubjectsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ClassroomSubjectsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.classroomSubjectsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<bool> executionAllocations(
+    Expression<bool> Function(
+      $$ExecutionContentAllocationsTableTableFilterComposer f,
+    )
+    f,
+  ) {
+    final $$ExecutionContentAllocationsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.executionContentAllocationsTable,
+          getReferencedColumn: (t) => t.recordId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExecutionContentAllocationsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.executionContentAllocationsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$LessonExecutionRecordsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $LessonExecutionRecordsTableTable> {
+  $$LessonExecutionRecordsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get executionDate => $composableBuilder(
+    column: $table.executionDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cancellationReason => $composableBuilder(
+    column: $table.cancellationReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cancellationDetails => $composableBuilder(
+    column: $table.cancellationDetails,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pedagogicalNotes => $composableBuilder(
+    column: $table.pedagogicalNotes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get needsFollowUp => $composableBuilder(
+    column: $table.needsFollowUp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get followUpNotes => $composableBuilder(
+    column: $table.followUpNotes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PlannedLessonsTableTableOrderingComposer get plannedLessonId {
+    final $$PlannedLessonsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.plannedLessonId,
+          referencedTable: $db.plannedLessonsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PlannedLessonsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.plannedLessonsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$ClassroomSubjectsTableTableOrderingComposer get classroomSubjectId {
+    final $$ClassroomSubjectsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.classroomSubjectId,
+          referencedTable: $db.classroomSubjectsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ClassroomSubjectsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.classroomSubjectsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LessonExecutionRecordsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LessonExecutionRecordsTableTable> {
+  $$LessonExecutionRecordsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime, String> get executionDate =>
+      $composableBuilder(
+        column: $table.executionDate,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get cancellationReason => $composableBuilder(
+    column: $table.cancellationReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get cancellationDetails => $composableBuilder(
+    column: $table.cancellationDetails,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pedagogicalNotes => $composableBuilder(
+    column: $table.pedagogicalNotes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get needsFollowUp => $composableBuilder(
+    column: $table.needsFollowUp,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get followUpNotes => $composableBuilder(
+    column: $table.followUpNotes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$PlannedLessonsTableTableAnnotationComposer get plannedLessonId {
+    final $$PlannedLessonsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.plannedLessonId,
+          referencedTable: $db.plannedLessonsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PlannedLessonsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.plannedLessonsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$ClassroomSubjectsTableTableAnnotationComposer get classroomSubjectId {
+    final $$ClassroomSubjectsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.classroomSubjectId,
+          referencedTable: $db.classroomSubjectsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ClassroomSubjectsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.classroomSubjectsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<T> executionAllocations<T extends Object>(
+    Expression<T> Function(
+      $$ExecutionContentAllocationsTableTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$ExecutionContentAllocationsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.executionContentAllocationsTable,
+          getReferencedColumn: (t) => t.recordId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExecutionContentAllocationsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.executionContentAllocationsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$LessonExecutionRecordsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LessonExecutionRecordsTableTable,
+          LessonExecutionRecordsTableData,
+          $$LessonExecutionRecordsTableTableFilterComposer,
+          $$LessonExecutionRecordsTableTableOrderingComposer,
+          $$LessonExecutionRecordsTableTableAnnotationComposer,
+          $$LessonExecutionRecordsTableTableCreateCompanionBuilder,
+          $$LessonExecutionRecordsTableTableUpdateCompanionBuilder,
+          (
+            LessonExecutionRecordsTableData,
+            $$LessonExecutionRecordsTableTableReferences,
+          ),
+          LessonExecutionRecordsTableData,
+          PrefetchHooks Function({
+            bool plannedLessonId,
+            bool classroomSubjectId,
+            bool executionAllocations,
+          })
+        > {
+  $$LessonExecutionRecordsTableTableTableManager(
+    _$AppDatabase db,
+    $LessonExecutionRecordsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LessonExecutionRecordsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LessonExecutionRecordsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LessonExecutionRecordsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> plannedLessonId = const Value.absent(),
+                Value<String> classroomSubjectId = const Value.absent(),
+                Value<DateTime> executionDate = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> cancellationReason = const Value.absent(),
+                Value<String?> cancellationDetails = const Value.absent(),
+                Value<String?> pedagogicalNotes = const Value.absent(),
+                Value<bool> needsFollowUp = const Value.absent(),
+                Value<String?> followUpNotes = const Value.absent(),
+                Value<DateTime> recordedAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LessonExecutionRecordsTableCompanion(
+                id: id,
+                plannedLessonId: plannedLessonId,
+                classroomSubjectId: classroomSubjectId,
+                executionDate: executionDate,
+                status: status,
+                cancellationReason: cancellationReason,
+                cancellationDetails: cancellationDetails,
+                pedagogicalNotes: pedagogicalNotes,
+                needsFollowUp: needsFollowUp,
+                followUpNotes: followUpNotes,
+                recordedAt: recordedAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String plannedLessonId,
+                required String classroomSubjectId,
+                required DateTime executionDate,
+                required String status,
+                Value<String?> cancellationReason = const Value.absent(),
+                Value<String?> cancellationDetails = const Value.absent(),
+                Value<String?> pedagogicalNotes = const Value.absent(),
+                Value<bool> needsFollowUp = const Value.absent(),
+                Value<String?> followUpNotes = const Value.absent(),
+                required DateTime recordedAt,
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LessonExecutionRecordsTableCompanion.insert(
+                id: id,
+                plannedLessonId: plannedLessonId,
+                classroomSubjectId: classroomSubjectId,
+                executionDate: executionDate,
+                status: status,
+                cancellationReason: cancellationReason,
+                cancellationDetails: cancellationDetails,
+                pedagogicalNotes: pedagogicalNotes,
+                needsFollowUp: needsFollowUp,
+                followUpNotes: followUpNotes,
+                recordedAt: recordedAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $LessonExecutionRecordsTableTable,
+                    LessonExecutionRecordsTableData
+                  >(table),
+                  $$LessonExecutionRecordsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                plannedLessonId = false,
+                classroomSubjectId = false,
+                executionAllocations = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (executionAllocations)
+                      db.executionContentAllocationsTable,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (plannedLessonId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.plannedLessonId,
+                            referencedTable:
+                                $$LessonExecutionRecordsTableTableReferences
+                                    ._plannedLessonIdTable(db),
+                            referencedColumn:
+                                $$LessonExecutionRecordsTableTableReferences
+                                    ._plannedLessonIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+                        if (classroomSubjectId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.classroomSubjectId,
+                            referencedTable:
+                                $$LessonExecutionRecordsTableTableReferences
+                                    ._classroomSubjectIdTable(db),
+                            referencedColumn:
+                                $$LessonExecutionRecordsTableTableReferences
+                                    ._classroomSubjectIdTable(db)
+                                    .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (executionAllocations)
+                        await $_getPrefetchedData<
+                          LessonExecutionRecordsTableData,
+                          $LessonExecutionRecordsTableTable,
+                          ExecutionContentAllocationsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$LessonExecutionRecordsTableTableReferences
+                                  ._executionAllocationsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LessonExecutionRecordsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).executionAllocations,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.recordId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$LessonExecutionRecordsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LessonExecutionRecordsTableTable,
+      LessonExecutionRecordsTableData,
+      $$LessonExecutionRecordsTableTableFilterComposer,
+      $$LessonExecutionRecordsTableTableOrderingComposer,
+      $$LessonExecutionRecordsTableTableAnnotationComposer,
+      $$LessonExecutionRecordsTableTableCreateCompanionBuilder,
+      $$LessonExecutionRecordsTableTableUpdateCompanionBuilder,
+      (
+        LessonExecutionRecordsTableData,
+        $$LessonExecutionRecordsTableTableReferences,
+      ),
+      LessonExecutionRecordsTableData,
+      PrefetchHooks Function({
+        bool plannedLessonId,
+        bool classroomSubjectId,
+        bool executionAllocations,
+      })
+    >;
+typedef $$ExecutionContentAllocationsTableTableCreateCompanionBuilder =
+    ExecutionContentAllocationsTableCompanion Function({
+      required String recordId,
+      required String contentId,
+      Value<int> orderIndex,
+      Value<int> rowid,
+    });
+typedef $$ExecutionContentAllocationsTableTableUpdateCompanionBuilder =
+    ExecutionContentAllocationsTableCompanion Function({
+      Value<String> recordId,
+      Value<String> contentId,
+      Value<int> orderIndex,
+      Value<int> rowid,
+    });
+
+final class $$ExecutionContentAllocationsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ExecutionContentAllocationsTableTable,
+          ExecutionContentAllocationsTableData
+        > {
+  $$ExecutionContentAllocationsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $LessonExecutionRecordsTableTable _recordIdTable(_$AppDatabase db) =>
+      db.lessonExecutionRecordsTable.createAlias(
+        'execution_content_allocations_table__record_id__lesson_execution_records_table__id',
+      );
+
+  $$LessonExecutionRecordsTableTableProcessedTableManager get recordId {
+    final $_column = $_itemColumn<String>('record_id')!;
+
+    final manager = $$LessonExecutionRecordsTableTableTableManager(
+      $_db,
+      $_db.lessonExecutionRecordsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_recordIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CourseContentsTableTable _contentIdTable(_$AppDatabase db) =>
+      db.courseContentsTable.createAlias(
+        'execution_content_allocations_table__content_id__course_contents_table__id',
+      );
+
+  $$CourseContentsTableTableProcessedTableManager get contentId {
+    final $_column = $_itemColumn<String>('content_id')!;
+
+    final manager = $$CourseContentsTableTableTableManager(
+      $_db,
+      $_db.courseContentsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ExecutionContentAllocationsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ExecutionContentAllocationsTableTable> {
+  $$ExecutionContentAllocationsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$LessonExecutionRecordsTableTableFilterComposer get recordId {
+    final $$LessonExecutionRecordsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.recordId,
+          referencedTable: $db.lessonExecutionRecordsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LessonExecutionRecordsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.lessonExecutionRecordsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$CourseContentsTableTableFilterComposer get contentId {
+    final $$CourseContentsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contentId,
+      referencedTable: $db.courseContentsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseContentsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.courseContentsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExecutionContentAllocationsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExecutionContentAllocationsTableTable> {
+  $$ExecutionContentAllocationsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$LessonExecutionRecordsTableTableOrderingComposer get recordId {
+    final $$LessonExecutionRecordsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.recordId,
+          referencedTable: $db.lessonExecutionRecordsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LessonExecutionRecordsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.lessonExecutionRecordsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$CourseContentsTableTableOrderingComposer get contentId {
+    final $$CourseContentsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contentId,
+          referencedTable: $db.courseContentsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CourseContentsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.courseContentsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ExecutionContentAllocationsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExecutionContentAllocationsTableTable> {
+  $$ExecutionContentAllocationsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => column,
+  );
+
+  $$LessonExecutionRecordsTableTableAnnotationComposer get recordId {
+    final $$LessonExecutionRecordsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.recordId,
+          referencedTable: $db.lessonExecutionRecordsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LessonExecutionRecordsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.lessonExecutionRecordsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$CourseContentsTableTableAnnotationComposer get contentId {
+    final $$CourseContentsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.contentId,
+          referencedTable: $db.courseContentsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CourseContentsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.courseContentsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ExecutionContentAllocationsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExecutionContentAllocationsTableTable,
+          ExecutionContentAllocationsTableData,
+          $$ExecutionContentAllocationsTableTableFilterComposer,
+          $$ExecutionContentAllocationsTableTableOrderingComposer,
+          $$ExecutionContentAllocationsTableTableAnnotationComposer,
+          $$ExecutionContentAllocationsTableTableCreateCompanionBuilder,
+          $$ExecutionContentAllocationsTableTableUpdateCompanionBuilder,
+          (
+            ExecutionContentAllocationsTableData,
+            $$ExecutionContentAllocationsTableTableReferences,
+          ),
+          ExecutionContentAllocationsTableData,
+          PrefetchHooks Function({bool recordId, bool contentId})
+        > {
+  $$ExecutionContentAllocationsTableTableTableManager(
+    _$AppDatabase db,
+    $ExecutionContentAllocationsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExecutionContentAllocationsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ExecutionContentAllocationsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ExecutionContentAllocationsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> recordId = const Value.absent(),
+                Value<String> contentId = const Value.absent(),
+                Value<int> orderIndex = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExecutionContentAllocationsTableCompanion(
+                recordId: recordId,
+                contentId: contentId,
+                orderIndex: orderIndex,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String recordId,
+                required String contentId,
+                Value<int> orderIndex = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExecutionContentAllocationsTableCompanion.insert(
+                recordId: recordId,
+                contentId: contentId,
+                orderIndex: orderIndex,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $ExecutionContentAllocationsTableTable,
+                    ExecutionContentAllocationsTableData
+                  >(table),
+                  $$ExecutionContentAllocationsTableTableReferences(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({recordId = false, contentId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (recordId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.recordId,
+                        referencedTable:
+                            $$ExecutionContentAllocationsTableTableReferences
+                                ._recordIdTable(db),
+                        referencedColumn:
+                            $$ExecutionContentAllocationsTableTableReferences
+                                ._recordIdTable(db)
+                                .id,
+                      ) as T;
+                    }
+                    if (contentId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.contentId,
+                        referencedTable:
+                            $$ExecutionContentAllocationsTableTableReferences
+                                ._contentIdTable(db),
+                        referencedColumn:
+                            $$ExecutionContentAllocationsTableTableReferences
+                                ._contentIdTable(db)
+                                .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ExecutionContentAllocationsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExecutionContentAllocationsTableTable,
+      ExecutionContentAllocationsTableData,
+      $$ExecutionContentAllocationsTableTableFilterComposer,
+      $$ExecutionContentAllocationsTableTableOrderingComposer,
+      $$ExecutionContentAllocationsTableTableAnnotationComposer,
+      $$ExecutionContentAllocationsTableTableCreateCompanionBuilder,
+      $$ExecutionContentAllocationsTableTableUpdateCompanionBuilder,
+      (
+        ExecutionContentAllocationsTableData,
+        $$ExecutionContentAllocationsTableTableReferences,
+      ),
+      ExecutionContentAllocationsTableData,
+      PrefetchHooks Function({bool recordId, bool contentId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -10701,5 +13286,17 @@ class $AppDatabaseManager {
       $$LessonContentAllocationsTableTableTableManager(
         _db,
         _db.lessonContentAllocationsTable,
+      );
+  $$LessonExecutionRecordsTableTableTableManager
+  get lessonExecutionRecordsTable =>
+      $$LessonExecutionRecordsTableTableTableManager(
+        _db,
+        _db.lessonExecutionRecordsTable,
+      );
+  $$ExecutionContentAllocationsTableTableTableManager
+  get executionContentAllocationsTable =>
+      $$ExecutionContentAllocationsTableTableTableManager(
+        _db,
+        _db.executionContentAllocationsTable,
       );
 }

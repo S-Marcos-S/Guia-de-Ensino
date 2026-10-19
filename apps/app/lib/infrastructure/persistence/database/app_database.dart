@@ -23,6 +23,8 @@ part 'app_database.g.dart';
     CourseContentsTable,
     ContentPrerequisitesTable,
     LessonContentAllocationsTable,
+    LessonExecutionRecordsTable,
+    ExecutionContentAllocationsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -32,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -51,6 +53,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 4) {
         await m.createTable(lessonContentAllocationsTable);
+      }
+      if (from < 5) {
+        await m.createTable(lessonExecutionRecordsTable);
+        await m.createTable(executionContentAllocationsTable);
       }
     },
     beforeOpen: (details) async {

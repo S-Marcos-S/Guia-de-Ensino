@@ -3,6 +3,7 @@ import 'package:app/domain/repositories/calendar_event_repository.dart';
 import 'package:app/domain/repositories/classroom_repository.dart';
 import 'package:app/domain/repositories/course_content_repository.dart';
 import 'package:app/domain/repositories/curriculum_competency_repository.dart';
+import 'package:app/domain/repositories/lesson_execution_repository.dart';
 import 'package:app/domain/repositories/planned_lesson_repository.dart';
 import 'package:app/domain/repositories/schedule_slot_repository.dart';
 import 'package:app/domain/repositories/subject_repository.dart';
@@ -17,6 +18,7 @@ import 'package:app/infrastructure/persistence/repositories/drift_calendar_event
 import 'package:app/infrastructure/persistence/repositories/drift_classroom_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_course_content_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_curriculum_competency_repository.dart';
+import 'package:app/infrastructure/persistence/repositories/drift_lesson_execution_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_planned_lesson_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_schedule_slot_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_subject_repository.dart';
@@ -32,6 +34,7 @@ class AppDependencies {
     CalendarEventRepository? calendarEventRepository,
     ScheduleSlotRepository? scheduleSlotRepository,
     PlannedLessonRepository? plannedLessonRepository,
+    LessonExecutionRepository? lessonExecutionRepository,
     CalendarCalculationService? calendarCalculationService,
     CurriculumCompetencyRepository? curriculumCompetencyRepository,
     CourseContentRepository? courseContentRepository,
@@ -51,6 +54,9 @@ class AppDependencies {
            scheduleSlotRepository ?? DriftScheduleSlotRepository(database),
        plannedLessonRepository =
            plannedLessonRepository ?? DriftPlannedLessonRepository(database),
+       lessonExecutionRepository =
+           lessonExecutionRepository ??
+           DriftLessonExecutionRepository(database),
        calendarCalculationService =
            calendarCalculationService ?? const CalendarCalculationService(),
        curriculumCompetencyRepository =
@@ -113,6 +119,7 @@ class AppDependencies {
   final CalendarEventRepository calendarEventRepository;
   final ScheduleSlotRepository scheduleSlotRepository;
   final PlannedLessonRepository plannedLessonRepository;
+  final LessonExecutionRepository lessonExecutionRepository;
   final CalendarCalculationService calendarCalculationService;
   final CurriculumCompetencyRepository curriculumCompetencyRepository;
   final CourseContentRepository courseContentRepository;

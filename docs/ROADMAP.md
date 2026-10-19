@@ -156,20 +156,24 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 6 — Acompanhamento e Registro de Aulas
-- **Status**: **Em andamento** (Incremento 6.1 concluído)
+- **Status**: **Em andamento** (Incrementos 6.1 e 6.2 concluídos)
 - **Incrementos**:
   - **6.1 — Modelo de Domínio e Contratos**: **Concluído**
     - Entidade `LessonExecutionRecord` com validação de status, regras estritas de cancelamento e integridade de conteúdos ministrados.
     - Enum `LessonCancellationReason` com categorias semânticas e rótulos/descrições em português.
     - Value Object `ClassroomSubjectProgress` com métricas determinísticas e invariantes de contagem de aulas.
-    - Contrato `LessonExecutionRepository` puro de domínio.
+    - Contrato `LessonExecutionRepository` puro de domínio sem operações de exclusão física arbitrária.
     - 24 testes unitários de domínio implementados e 100% aprovados (totalizando 100 testes na suíte).
-  - **6.2 — Persistência Drift e Migração v5**: Planejado
+  - **6.2 — Persistência Drift e Migração v5**: **Concluído**
+    - Tabelas `LessonExecutionRecordsTable` e `ExecutionContentAllocationsTable` criadas com chaves estrangeiras protetivas (`KeyAction.restrict`) e unicidade de 1 registro por aula planejada.
+    - Elevação do `schemaVersion` para 5 com estratégia de migração incremental de v1, v2, v3 e v4 para v5.
+    - Implementação de `DriftLessonExecutionRepository` com validação transacional e atômica de correspondência de vínculos (aula planejada, disciplina da turma e conteúdos).
+    - 9 testes automatizados de migração, integridade referencial, unicidade e persistência aprovados (totalizando 109 testes na suíte geral).
   - **6.3 — Casos de Uso e Cálculo de Progresso**: Planejado
   - **6.4 — Interface de Acompanhamento e Diário de Aula**: Planejado
 - **Critérios de Aceitação Gerais**:
   1. [x] Modelo de domínio puro separando a aula planejada (`PlannedLesson`) do fato registrado (`LessonExecutionRecord`).
-  2. [ ] Registros históricos persistidos com data/hora e nunca apagados por alterações futuras (Schema v5).
+  2. [x] Registros históricos persistidos com data/hora e nunca apagados por alterações futuras (Schema v5 com `KeyAction.restrict`).
   3. [ ] Indicadores de progresso atualizados em tempo real por turma e disciplina.
   4. [ ] Testes cobrindo registros com falha, cancelamento, aula parcial e continuidade pedagógica.
 
