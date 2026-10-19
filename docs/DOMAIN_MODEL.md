@@ -162,12 +162,14 @@ erDiagram
     - `cancellationRate`: $\frac{\text{notHeld}}{\text{totalLessonsRecorded}}$ (quando $\text{totalLessonsRecorded} > 0$, senão 0.0)
   - Regra de Conclusão Pedagógica de Conteúdos (Refinamento Conservador da Etapa 6.3):
     - A conclusão de um conteúdo não é inferida por mero registro de presença. Cada conteúdo possui `estimatedLessons` (duração estimada em aulas).
-    - Para evitar que um conteúdo com `estimatedLessons = 1` seja prematuramente considerado concluído após uma única aula parcial, adota-se a regra conservadora: **somente aulas com status `completed` acumulam carga horária para a meta de conclusão (`estimatedLessons`)**.
-    - Aulas com status `partiallyCompleted` marcam o conteúdo como abordado e mantêm-no no estado **em andamento** (`inProgress`), não comprovando por si sós a conclusão integral.
-    - O conteúdo é considerado **concluído** (`completed`) se e somente se $\text{completedLessons} \ge \text{estimatedLessons}$ (com $\text{estimatedLessons} > 0$).
-    - Conteúdo **em andamento** (`inProgress`): abordado em ao menos uma aula (`completed` ou `partiallyCompleted`), porém ainda sem atingir a meta integral de aulas concluídas.
-    - Conteúdo **não iniciado** (`notStarted`): nunca abordado em aulas com aproveitamento pedagógico (aulas `notHeld` não computam conteúdos).
-    - Invariante estrita: $\text{completedContentsCount} + \text{inProgressContentsCount} + \text{notStartedContentsCount} = \text{totalContentsPlannedCount}$.
+    - **Diferenciação Conceitual Rigorosa**:
+      - **Conteúdo Abordado**: Conteúdo presente na lista `actualContentIds` de ao menos uma aula com aproveitamento fático (`completed` ou `partiallyCompleted`). Consta em `distinctContentsTaughtIds`. Aulas `notHeld` nunca computam conteúdos abordados.
+      - **Conteúdo em Andamento (`inProgress`)**: Conteúdo abordado em uma ou mais aulas (`completed` ou `partiallyCompleted`), mas cuja quantidade acumulada de aulas `completed` ainda é estritamente inferior a `estimatedLessons`. Um conteúdo de 1 aula ministrado apenas em aula parcial permanece em andamento.
+      - **Conteúdo Concluído (`completed`)**: Conteúdo cuja carga horária ministrada em aulas com status `completed` atingiu ou superou `estimatedLessons` ($\text{completedLessons} \ge \text{estimatedLessons}$, com $\text{estimatedLessons} > 0$).
+      - **Conteúdo Não Iniciado (`notStarted`)**: Conteúdo nunca abordado em nenhuma aula realizada ou parcial.
+    - **Regra Conservadora**: Para impedir que um conteúdo com `estimatedLessons = 1` seja prematuramente considerado concluído após uma única aula parcial, adota-se a política conservadora: **somente aulas com status `completed` acumulam carga horária para a meta de conclusão (`estimatedLessons`)**. Aulas com status `partiallyCompleted` mantêm o conteúdo abordado no estado `inProgress`, não comprovando por si sós sua conclusão integral.
+    - **Limitação Conhecida Desta Regra Conservadora**: O modelo de dados atual associa uma lista de conteúdos (`actualContentIds`) à aula como um todo, sem representar a fração ou conclusão individual de cada conteúdo dentro de uma aula parcial. Assim, em uma aula parcial onde múltiplos conteúdos foram trabalhados, o sistema não presume que nenhum deles tenha sido finalizado, exigindo posterior aula completa para formalizar a conclusão pedagógica.
+    - **Invariante Estrita de Integridade**: $\text{completedContentsCount} + \text{inProgressContentsCount} + \text{notStartedContentsCount} = \text{totalContentsPlannedCount}$.
     - `contentCompletionRate`: $\frac{\text{completedContentsCount}}{\text{totalContentsPlannedCount}}$
   - Continuidade Pedagógica:
     - `pendingFollowUpsCount`: contagem de registros com `needsFollowUp == true`.

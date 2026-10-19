@@ -228,10 +228,14 @@ class GetClassroomSubjectProgressUseCase {
     }
 
     // 6. Apuração da conclusão dos conteúdos programáticos com base na duração estimada
-    // Regra conservadora: apenas aulas integralmente concluídas (completed)
-    // acumulam carga horária para atingir a estimativa pedagógica (estimatedLessons).
-    // Aulas parcialmente concluídas (partiallyCompleted) marcam o conteúdo como abordado / em andamento,
-    // mas não comprovam por si sós sua conclusão integral.
+    // Regra conservadora (Etapa 6.3):
+    // - Conteúdo Abordado: presente em actualContentIds de aula completed ou partiallyCompleted.
+    // - Conteúdo em Andamento (inProgress): abordado, porém com completedLessons < estimatedLessons.
+    // - Conteúdo Concluído (completed): completedLessons >= estimatedLessons (com estimatedLessons > 0).
+    // - Conteúdo Não Iniciado (notStarted): nunca abordado em aulas com aproveitamento fático.
+    // Limitação pedagógica conhecida: o modelo atual vincula uma lista de conteúdos à aula inteira,
+    // sem fracionamento individual por item em aulas parciais. Assim, aulas partiallyCompleted
+    // mantêm o conteúdo em andamento, mas não comprovam por si sós sua conclusão integral.
     var completedContents = 0;
     var inProgressContents = 0;
     var notStartedContents = 0;
