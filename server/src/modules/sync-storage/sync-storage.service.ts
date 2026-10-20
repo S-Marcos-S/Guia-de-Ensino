@@ -42,6 +42,28 @@ export interface PullStorageResult {
   hasMore: boolean;
 }
 
+export interface SnapshotEntities {
+  academic_years: Record<string, unknown>[];
+  classrooms: Record<string, unknown>[];
+  subjects: Record<string, unknown>[];
+  classroom_subjects: Record<string, unknown>[];
+  school_calendar_events: Record<string, unknown>[];
+  schedule_slots: Record<string, unknown>[];
+  curriculum_competencies: Record<string, unknown>[];
+  course_contents: Record<string, unknown>[];
+  content_prerequisites: Record<string, unknown>[];
+  planned_lessons: Record<string, unknown>[];
+  lesson_content_allocations: Record<string, unknown>[];
+  lesson_execution_records: Record<string, unknown>[];
+  execution_content_allocations: Record<string, unknown>[];
+}
+
+export interface SnapshotStorageResult {
+  snapshotSeq: bigint;
+  epoch: bigint;
+  entities: SnapshotEntities;
+}
+
 /**
  * Serviço central de persistência e orquestração transacional de sincronização.
  *
@@ -335,6 +357,119 @@ export class SyncStorageService {
       await queryRunner.rollbackTransaction();
       this.logger.error(
         `[SyncStorage] Falha ao consultar alterações para usuário ${userId}: ${(error as Error).message}`,
+      );
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  /**
+   * Extrai o snapshot consistente de todas as 13 entidades pedagógicas do usuário.
+   * Executa sob transação de leitura com nível de isolamento REPEATABLE READ.
+   *
+   * Invariante de consistência:
+   * - No PostgreSQL, o snapshot temporal de visibilidade é fixado no momento do primeiro SELECT.
+   * - O snapshotSeq é lido de user_sync_version.
+   * - Qualquer mutação concorrente subsequente receberá server_seq > snapshotSeq e NÃO
+   *   aparecerá neste snapshot. O cliente recuperará tais mutações via Pull com cursor `${snapshotSeq}:0`.
+   * - Todas as 13 consultas filtram estritamente por WHERE user_id = $1, garantindo isolamento multi-tenant absoluto.
+   */
+  async getUserSnapshot(userId: string): Promise<SnapshotStorageResult> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction('REPEATABLE READ');
+
+    try {
+      // 1. Snapshot da sequência atual e época do usuário
+      const versionRows = await queryRunner.manager.query(
+        `SELECT current_seq, epoch FROM user_sync_version WHERE user_id = $1;`,
+        [userId],
+      );
+
+      const snapshotSeq =
+        versionRows && versionRows.length > 0 ? BigInt(versionRows[0].current_seq) : 0n;
+      const epoch = versionRows && versionRows.length > 0 ? BigInt(versionRows[0].epoch) : 1n;
+
+      // 2. Extração das 13 tabelas sob a mesma transação REPEATABLE READ isolada por user_id
+      const academic_years = await queryRunner.manager.query(
+        `SELECT * FROM academic_years WHERE user_id = $1 ORDER BY year ASC;`,
+        [userId],
+      );
+      const classrooms = await queryRunner.manager.query(
+        `SELECT * FROM classrooms WHERE user_id = $1 ORDER BY name ASC;`,
+        [userId],
+      );
+      const subjects = await queryRunner.manager.query(
+        `SELECT * FROM subjects WHERE user_id = $1 ORDER BY name ASC;`,
+        [userId],
+      );
+      const classroom_subjects = await queryRunner.manager.query(
+        `SELECT * FROM classroom_subjects WHERE user_id = $1;`,
+        [userId],
+      );
+      const school_calendar_events = await queryRunner.manager.query(
+        `SELECT * FROM school_calendar_events WHERE user_id = $1 ORDER BY start_date ASC;`,
+        [userId],
+      );
+      const schedule_slots = await queryRunner.manager.query(
+        `SELECT * FROM schedule_slots WHERE user_id = $1 ORDER BY weekday ASC, order_index ASC;`,
+        [userId],
+      );
+      const curriculum_competencies = await queryRunner.manager.query(
+        `SELECT * FROM curriculum_competencies WHERE user_id = $1 ORDER BY code ASC;`,
+        [userId],
+      );
+      const course_contents = await queryRunner.manager.query(
+        `SELECT * FROM course_contents WHERE user_id = $1 ORDER BY order_index ASC;`,
+        [userId],
+      );
+      const content_prerequisites = await queryRunner.manager.query(
+        `SELECT * FROM content_prerequisites WHERE user_id = $1;`,
+        [userId],
+      );
+      const planned_lessons = await queryRunner.manager.query(
+        `SELECT * FROM planned_lessons WHERE user_id = $1 ORDER BY lesson_date ASC, order_in_day ASC;`,
+        [userId],
+      );
+      const lesson_content_allocations = await queryRunner.manager.query(
+        `SELECT * FROM lesson_content_allocations WHERE user_id = $1 ORDER BY order_index ASC;`,
+        [userId],
+      );
+      const lesson_execution_records = await queryRunner.manager.query(
+        `SELECT * FROM lesson_execution_records WHERE user_id = $1 ORDER BY execution_date ASC;`,
+        [userId],
+      );
+      const execution_content_allocations = await queryRunner.manager.query(
+        `SELECT * FROM execution_content_allocations WHERE user_id = $1 ORDER BY order_index ASC;`,
+        [userId],
+      );
+
+      await queryRunner.commitTransaction();
+
+      return {
+        snapshotSeq,
+        epoch,
+        entities: {
+          academic_years,
+          classrooms,
+          subjects,
+          classroom_subjects,
+          school_calendar_events,
+          schedule_slots,
+          curriculum_competencies,
+          course_contents,
+          content_prerequisites,
+          planned_lessons,
+          lesson_content_allocations,
+          lesson_execution_records,
+          execution_content_allocations,
+        },
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error(
+        `[SyncStorage] Falha ao extrair snapshot para usuário ${userId}: ${(error as Error).message}`,
       );
       throw error;
     } finally {

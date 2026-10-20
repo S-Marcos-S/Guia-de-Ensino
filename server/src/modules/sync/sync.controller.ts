@@ -15,6 +15,8 @@ import { PushRequestDto } from './dto/push-request.dto';
 import { PushResponseDto } from './dto/push-response.dto';
 import { PullQueryDto } from './dto/pull-query.dto';
 import { PullResponseDto } from './dto/pull-response.dto';
+import { SnapshotQueryDto } from './dto/snapshot-query.dto';
+import { SnapshotResponseDto } from './dto/snapshot-response.dto';
 
 @Controller(['api/sync', 'sync'])
 @UseGuards(JwtAuthGuard)
@@ -37,5 +39,14 @@ export class SyncController {
     @Query() query: PullQueryDto,
   ): Promise<PullResponseDto> {
     return this.syncService.processPull(user.userId, query);
+  }
+
+  @Get('snapshot')
+  @HttpCode(HttpStatus.OK)
+  async snapshot(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: SnapshotQueryDto,
+  ): Promise<SnapshotResponseDto> {
+    return this.syncService.processSnapshot(user.userId, query);
   }
 }

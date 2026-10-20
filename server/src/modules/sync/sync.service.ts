@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { SyncStorageService, SyncOperationInput } from '../sync-storage/sync-storage.service';
 import { PushRequestDto } from './dto/push-request.dto';
 import { PushResponseDto } from './dto/push-response.dto';
@@ -6,12 +7,19 @@ import { OperationAckDto } from './dto/operation-ack.dto';
 import { PullQueryDto } from './dto/pull-query.dto';
 import { PullResponseDto } from './dto/pull-response.dto';
 import { ChangeDto } from './dto/change.dto';
+import { SnapshotQueryDto } from './dto/snapshot-query.dto';
+import { SnapshotResponseDto } from './dto/snapshot-response.dto';
 import { parseCursor } from './helpers/cursor.helper';
+import { SnapshotTokenHelper } from './helpers/snapshot-token.helper';
 import { SyncEpochMismatchException } from '../../common/exceptions/sync-epoch-mismatch.exception';
+import { InvalidCursorException } from '../../common/exceptions/invalid-cursor.exception';
 
 @Injectable()
 export class SyncService {
-  constructor(private readonly syncStorageService: SyncStorageService) {}
+  constructor(
+    private readonly syncStorageService: SyncStorageService,
+    private readonly configService?: ConfigService,
+  ) {}
 
   /**
    * Processa o lote de sincronização enviado pelo cliente (Push).
@@ -69,7 +77,7 @@ export class SyncService {
    * Consulta paginada incremental de alterações com cursor composto (Pull).
    */
   async processPull(userId: string, query: PullQueryDto): Promise<PullResponseDto> {
-    // 1. Valida e analisa o cursor composto (lança BadRequestException se malformado ou negativo)
+    // 1. Valida e analisa o cursor composto (lança InvalidCursorException se malformado ou negativo)
     const parsedCursor = parseCursor(query.cursor);
 
     // 2. Limite seguro: padrão 100, teto 500
@@ -91,7 +99,19 @@ export class SyncService {
       }
     }
 
-    // 5. Mapeia os eventos serializando BIGINT para strings decimais
+    // 5. Gate de validação de cursor futuro: rejeita com HTTP 400 (INVALID_CURSOR)
+    // se o serverSeq solicitado for estritamente superior ao currentServerSeq do servidor
+    if (parsedCursor.serverSeq > pullResult.currentSeq) {
+      throw new InvalidCursorException(
+        `Cursor inválido: serverSeq '${parsedCursor.serverSeq.toString()}' excede a sequência atual do servidor '${pullResult.currentSeq.toString()}'.`,
+        {
+          requestedSeq: parsedCursor.serverSeq.toString(),
+          currentServerSeq: pullResult.currentSeq.toString(),
+        },
+      );
+    }
+
+    // 6. Mapeia os eventos serializando BIGINT para strings decimais
     const changes: ChangeDto[] = pullResult.changes.map((c) => ({
       serverSeq: c.serverSeq.toString(),
       changeLogId: c.id.toString(),
@@ -109,6 +129,42 @@ export class SyncService {
       nextCursor: pullResult.nextCursor,
       hasMore: pullResult.hasMore,
       changes,
+    };
+  }
+
+  /**
+   * Extrai o snapshot consistente de todas as 13 coleções pedagógicas do usuário sob REPEATABLE READ.
+   * Emite token opaco assinado com HMAC-SHA256 e TTL de 15 minutos.
+   */
+  async processSnapshot(userId: string, query: SnapshotQueryDto): Promise<SnapshotResponseDto> {
+    const jwtSecret =
+      this.configService?.get<string>('JWT_SECRET') ??
+      process.env.JWT_SECRET ??
+      'fallback-secret-minimum-32-chars-long';
+
+    // Se o cliente forneceu um snapshotToken, valida a autenticidade e validade temporal
+    if (query.snapshotToken) {
+      SnapshotTokenHelper.verifyToken(query.snapshotToken, userId, jwtSecret);
+    }
+
+    // Extrai o snapshot atômico sob REPEATABLE READ
+    const snapshotResult = await this.syncStorageService.getUserSnapshot(userId);
+
+    // Gera o token assinado HMAC-SHA256 para o snapshot
+    const { token, expiresAt } = SnapshotTokenHelper.generateToken(
+      userId,
+      snapshotResult.snapshotSeq,
+      snapshotResult.epoch,
+      jwtSecret,
+      15, // TTL 15 minutos
+    );
+
+    return {
+      epoch: snapshotResult.epoch.toString(),
+      snapshotSeq: snapshotResult.snapshotSeq.toString(),
+      snapshotToken: token,
+      expiresAt: expiresAt.toISOString(),
+      entities: snapshotResult.entities,
     };
   }
 }

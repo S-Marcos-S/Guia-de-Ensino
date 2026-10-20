@@ -6,6 +6,7 @@ import { SyncService } from '../src/modules/sync/sync.service';
 import { User } from '../src/modules/auth/entities/user.entity';
 import { UserSyncVersion } from '../src/modules/sync-storage/entities/user-sync-version.entity';
 import { SyncEpochMismatchException } from '../src/common/exceptions/sync-epoch-mismatch.exception';
+import { InvalidCursorException } from '../src/common/exceptions/invalid-cursor.exception';
 import { BadRequestException } from '@nestjs/common';
 
 describe('Sync Pull Protocol & Pagination (Integration Tests)', () => {
@@ -283,14 +284,13 @@ describe('Sync Pull Protocol & Pagination (Integration Tests)', () => {
   );
 
   itIfDb(
-    '6. Cursor além da sequência atual: deve retornar lista vazia sem lançar erro',
+    '6. Cursor além da sequência atual (cursor futuro): deve rejeitar com InvalidCursorException (HTTP 400 Bad Request)',
     async () => {
       const userId = await createTestUser();
 
-      const response = await syncService.processPull(userId, { cursor: '99999:0' });
-      expect(response.changes).toHaveLength(0);
-      expect(response.hasMore).toBe(false);
-      expect(response.nextCursor).toBe('99999:0');
+      await expect(syncService.processPull(userId, { cursor: '99999:0' })).rejects.toThrow(
+        InvalidCursorException,
+      );
     },
   );
 
