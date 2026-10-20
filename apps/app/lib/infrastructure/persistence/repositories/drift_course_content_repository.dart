@@ -26,18 +26,18 @@ class DriftCourseContentRepository implements CourseContentRepository {
       await _db
           .into(_db.courseContentsTable)
           .insertOnConflictUpdate(
-            CourseContentsTableCompanion.insert(
-              id: content.id,
-              classroomSubjectId: content.classroomSubjectId,
-              title: content.title,
+            CourseContentsTableCompanion(
+              id: Value(content.id),
+              classroomSubjectId: Value(content.classroomSubjectId),
+              title: Value(content.title),
               description: Value(content.description),
               thematicUnit: Value(content.thematicUnit),
               estimatedLessons: Value(content.estimatedLessons),
-              orderIndex: content.orderIndex,
+              orderIndex: Value(content.orderIndex),
               curriculumCompetencyId: Value(content.curriculumCompetencyId),
-              origin: content.origin.name,
+              origin: Value(content.origin.name),
               isMandatory: Value(content.isMandatory),
-              createdAt: isUpdate ? Value.absent() : Value(now),
+              createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
               updatedAt: Value(now),
             ),
           );

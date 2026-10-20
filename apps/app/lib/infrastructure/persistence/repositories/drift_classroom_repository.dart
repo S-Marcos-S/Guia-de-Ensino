@@ -24,13 +24,13 @@ class DriftClassroomRepository implements ClassroomRepository {
       await _db
           .into(_db.classroomsTable)
           .insertOnConflictUpdate(
-            ClassroomsTableCompanion.insert(
-              id: classroom.id,
-              academicYearId: classroom.academicYearId,
-              name: classroom.name,
-              gradeLevel: classroom.gradeLevel,
-              shift: classroom.shift.name,
-              createdAt: isUpdate ? Value.absent() : Value(now),
+            ClassroomsTableCompanion(
+              id: Value(classroom.id),
+              academicYearId: Value(classroom.academicYearId),
+              name: Value(classroom.name),
+              gradeLevel: Value(classroom.gradeLevel),
+              shift: Value(classroom.shift.name),
+              createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
               updatedAt: Value(now),
             ),
           );
@@ -77,12 +77,14 @@ class DriftClassroomRepository implements ClassroomRepository {
         await _db
             .into(_db.classroomSubjectsTable)
             .insertOnConflictUpdate(
-              ClassroomSubjectsTableCompanion.insert(
-                id: config.id,
-                classroomId: classroom.id,
-                subjectId: config.subjectId,
-                weeklyLessons: config.weeklyLessons,
-                createdAt: isConfigUpdate ? Value.absent() : Value(now),
+              ClassroomSubjectsTableCompanion(
+                id: Value(config.id),
+                classroomId: Value(classroom.id),
+                subjectId: Value(config.subjectId),
+                weeklyLessons: Value(config.weeklyLessons),
+                createdAt: isConfigUpdate
+                    ? const Value<DateTime>.absent()
+                    : Value(now),
                 updatedAt: Value(now),
               ),
             );

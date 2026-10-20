@@ -31,7 +31,7 @@ class DriftCalendarEventRepository implements CalendarEventRepository {
         endDate: Value(event.endDate),
         type: Value(event.type.name),
         affectsClasses: Value(event.affectsClasses),
-        createdAt: isUpdate ? Value.absent() : Value(now),
+        createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
         updatedAt: Value(now),
       );
 

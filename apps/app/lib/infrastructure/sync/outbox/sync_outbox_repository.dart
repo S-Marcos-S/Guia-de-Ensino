@@ -117,7 +117,7 @@ class SyncOutboxRepository {
           LIMIT ?;
           ''',
           variables: [
-            Variable<String>(SyncOutboxStatus.pending),
+            const Variable<String>(SyncOutboxStatus.pending),
             Variable<int>(limit),
           ],
         )

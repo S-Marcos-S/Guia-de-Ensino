@@ -4,7 +4,6 @@ import 'package:app/domain/models/academic_year.dart';
 import 'package:app/domain/models/classroom.dart';
 import 'package:app/domain/models/course_content.dart';
 import 'package:app/domain/models/lesson_execution_record.dart';
-import 'package:app/domain/models/lesson_execution_status.dart';
 import 'package:app/domain/models/planned_lesson.dart';
 import 'package:app/domain/models/schedule_slot.dart';
 import 'package:app/domain/models/school_calendar_event.dart';
@@ -122,7 +121,7 @@ void main() {
     });
 
     test('serializa AcademicYear com snake_case e datas', () {
-      final ay = AcademicYear(
+      const ay = AcademicYear(
         id: 'ay-2026',
         year: 2026,
         title: 'Ano 2026',
@@ -139,20 +138,21 @@ void main() {
     });
 
     test('serializa Classroom e ClassroomSubjectConfig', () {
-      final c = Classroom(
+      const c = Classroom(
         id: 'c-1',
         academicYearId: 'ay-2026',
         name: 'Turma 6A',
-        gradeLevel: 6,
+        gradeLevel: '6',
         shift: ClassroomShift.morning,
-        subjectConfigs: const <ClassroomSubjectConfig>[],
+        subjectConfigs: <ClassroomSubjectConfig>[],
       );
       final payload = SyncPayloadSerializer.classroom(c);
-      expect(payload['grade_level'], equals(6));
+      expect(payload['grade_level'], equals('6'));
       expect(payload['shift'], equals('morning'));
 
-      final cfg = ClassroomSubjectConfig(
+      const cfg = ClassroomSubjectConfig(
         id: 'cs-1',
+        classroomId: 'c-1',
         subjectId: 's-1',
         weeklyLessons: 4,
       );
@@ -354,7 +354,7 @@ void main() {
   group('Repositórios Transacionais — Atomicidade e Enfileiramento', () {
     test('DriftAcademicYearRepository enfileira INSERT e UPDATE', () async {
       final repo = DriftAcademicYearRepository(db, outboxRepo);
-      final ay = AcademicYear(
+      const ay = AcademicYear(
         id: 'ay-trans-1',
         year: 2026,
         title: 'Ano 2026',
@@ -372,7 +372,7 @@ void main() {
       expect(pending.first.payloadMap!['year'], equals(2026));
 
       // UPDATE
-      final updatedAy = AcademicYear(
+      const updatedAy = AcademicYear(
         id: 'ay-trans-1',
         year: 2026,
         title: 'Ano 2026 Atualizado',
@@ -401,7 +401,7 @@ void main() {
       'DriftSubjectRepository enfileira mutações e DELETE gera tombstone',
       () async {
         final repo = DriftSubjectRepository(db, outboxRepo);
-        final sub = Subject(
+        const sub = Subject(
           id: 'sub-hist',
           name: 'História',
           colorHex: '#E91E63',
@@ -430,7 +430,7 @@ void main() {
       final repo = DriftClassroomRepository(db, outboxRepo);
 
       await ayRepo.save(
-        AcademicYear(
+        const AcademicYear(
           id: 'ay-1',
           year: 2026,
           title: '2026',
@@ -440,10 +440,10 @@ void main() {
         ),
       );
       await subRepo.save(
-        Subject(id: 'sub-1', name: 'Matemática', colorHex: '#123456'),
+        const Subject(id: 'sub-1', name: 'Matemática', colorHex: '#123456'),
       );
       await subRepo.save(
-        Subject(id: 'sub-2', name: 'Português', colorHex: '#654321'),
+        const Subject(id: 'sub-2', name: 'Português', colorHex: '#654321'),
       );
 
       // Limpa outbox para isolar testes da turma
@@ -453,20 +453,22 @@ void main() {
             .toList(),
       );
 
-      final classroom = Classroom(
+      const classroom = Classroom(
         id: 'c-101',
         academicYearId: 'ay-1',
         name: 'Turma 7B',
-        gradeLevel: 7,
+        gradeLevel: '7',
         shift: ClassroomShift.afternoon,
         subjectConfigs: [
           ClassroomSubjectConfig(
             id: 'cs-101',
+            classroomId: 'c-101',
             subjectId: 'sub-1',
             weeklyLessons: 4,
           ),
           ClassroomSubjectConfig(
             id: 'cs-102',
+            classroomId: 'c-101',
             subjectId: 'sub-2',
             weeklyLessons: 5,
           ),
@@ -482,15 +484,16 @@ void main() {
       expect(pending[2].entityType, equals('classroom_subject'));
 
       // Atualiza removendo cs-102
-      final updatedClassroom = Classroom(
+      const updatedClassroom = Classroom(
         id: 'c-101',
         academicYearId: 'ay-1',
         name: 'Turma 7B',
-        gradeLevel: 7,
+        gradeLevel: '7',
         shift: ClassroomShift.afternoon,
         subjectConfigs: [
           ClassroomSubjectConfig(
             id: 'cs-101',
+            classroomId: 'c-101',
             subjectId: 'sub-1',
             weeklyLessons: 4,
           ),
@@ -510,7 +513,7 @@ void main() {
       final repo = DriftCalendarEventRepository(db, outboxRepo);
 
       await ayRepo.save(
-        AcademicYear(
+        const AcademicYear(
           id: 'ay-cal',
           year: 2026,
           title: '2026',
@@ -520,13 +523,13 @@ void main() {
         ),
       );
 
-      final event = SchoolCalendarEvent(
+      const event = SchoolCalendarEvent(
         id: 'ev-1',
         academicYearId: 'ay-cal',
         title: 'Feriado Tiradentes',
         startDate: DateTime.utc(2026, 4, 21),
         endDate: DateTime.utc(2026, 4, 21),
-        type: CalendarEventType.holiday,
+        type: SchoolEventType.holiday,
         affectsClasses: true,
       );
 
@@ -551,7 +554,7 @@ void main() {
       final repo = DriftScheduleSlotRepository(db, outboxRepo);
 
       await ayRepo.save(
-        AcademicYear(
+        const AcademicYear(
           id: 'ay-slot',
           year: 2026,
           title: '2026',
@@ -561,18 +564,19 @@ void main() {
         ),
       );
       await subRepo.save(
-        Subject(id: 'sub-slot', name: 'Arte', colorHex: '#FF5722'),
+        const Subject(id: 'sub-slot', name: 'Arte', colorHex: '#FF5722'),
       );
       await classroomRepo.save(
-        Classroom(
+        const Classroom(
           id: 'c-slot',
           academicYearId: 'ay-slot',
           name: '6B',
-          gradeLevel: 6,
+          gradeLevel: '6',
           shift: ClassroomShift.morning,
           subjectConfigs: [
             ClassroomSubjectConfig(
               id: 'cs-slot',
+              classroomId: 'c-slot',
               subjectId: 'sub-slot',
               weeklyLessons: 2,
             ),
@@ -586,8 +590,18 @@ void main() {
             .toList(),
       );
 
-      final slot1 = ScheduleSlot(id: 'sl-1', weekday: 2, orderIndex: 1);
-      final slot2 = ScheduleSlot(id: 'sl-2', weekday: 4, orderIndex: 2);
+      const slot1 = ScheduleSlot(
+        id: 'sl-1',
+        classroomSubjectId: 'cs-slot',
+        weekday: 2,
+        orderIndex: 1,
+      );
+      const slot2 = ScheduleSlot(
+        id: 'sl-2',
+        classroomSubjectId: 'cs-slot',
+        weekday: 4,
+        orderIndex: 2,
+      );
       await repo.saveSlots('cs-slot', [slot1, slot2]);
 
       var pending = await outboxRepo.getPendingOperations();
@@ -596,7 +610,12 @@ void main() {
       expect(pending[1].entityType, equals('schedule_slot'));
 
       // Substitui por slot1 e slot3 (removendo slot2)
-      final slot3 = ScheduleSlot(id: 'sl-3', weekday: 5, orderIndex: 1);
+      const slot3 = ScheduleSlot(
+        id: 'sl-3',
+        classroomSubjectId: 'cs-slot',
+        weekday: 5,
+        orderIndex: 1,
+      );
       await repo.saveSlots('cs-slot', [slot1, slot3]);
 
       pending = await outboxRepo.getPendingOperations();
@@ -619,7 +638,7 @@ void main() {
         final repo = DriftCourseContentRepository(db, outboxRepo);
 
         await ayRepo.save(
-          AcademicYear(
+          const AcademicYear(
             id: 'ay-cc',
             year: 2026,
             title: '2026',
@@ -629,18 +648,19 @@ void main() {
           ),
         );
         await subRepo.save(
-          Subject(id: 'sub-cc', name: 'Ciências', colorHex: '#4CAF50'),
+          const Subject(id: 'sub-cc', name: 'Ciências', colorHex: '#4CAF50'),
         );
         await classroomRepo.save(
-          Classroom(
+          const Classroom(
             id: 'c-cc',
             academicYearId: 'ay-cc',
             name: '8A',
-            gradeLevel: 8,
+            gradeLevel: '8',
             shift: ClassroomShift.morning,
             subjectConfigs: [
               ClassroomSubjectConfig(
                 id: 'cs-cc',
+                classroomId: 'c-cc',
                 subjectId: 'sub-cc',
                 weeklyLessons: 3,
               ),
@@ -654,22 +674,22 @@ void main() {
               .toList(),
         );
 
-        final c1 = CourseContent(
+        const c1 = CourseContent(
           id: 'cc-1',
           classroomSubjectId: 'cs-cc',
           title: 'Célula Animal',
           orderIndex: 0,
-          origin: CourseContentOrigin.manual,
+          origin: ContentOrigin.manual,
           estimatedLessons: 2,
         );
         await repo.save(c1);
 
-        final c2 = CourseContent(
+        const c2 = CourseContent(
           id: 'cc-2',
           classroomSubjectId: 'cs-cc',
           title: 'Divisão Celular',
           orderIndex: 1,
-          origin: CourseContentOrigin.manual,
+          origin: ContentOrigin.manual,
           estimatedLessons: 3,
           prerequisiteIds: ['cc-1'],
         );
@@ -705,7 +725,7 @@ void main() {
         final repo = DriftPlannedLessonRepository(db, outboxRepo);
 
         await ayRepo.save(
-          AcademicYear(
+          const AcademicYear(
             id: 'ay-pl',
             year: 2026,
             title: '2026',
@@ -715,18 +735,19 @@ void main() {
           ),
         );
         await subRepo.save(
-          Subject(id: 'sub-pl', name: 'Geografia', colorHex: '#795548'),
+          const Subject(id: 'sub-pl', name: 'Geografia', colorHex: '#795548'),
         );
         await classroomRepo.save(
-          Classroom(
+          const Classroom(
             id: 'c-pl',
             academicYearId: 'ay-pl',
             name: '9A',
-            gradeLevel: 9,
+            gradeLevel: '9',
             shift: ClassroomShift.morning,
             subjectConfigs: [
               ClassroomSubjectConfig(
                 id: 'cs-pl',
+                classroomId: 'c-pl',
                 subjectId: 'sub-pl',
                 weeklyLessons: 2,
               ),
@@ -734,12 +755,12 @@ void main() {
           ),
         );
         await contentRepo.save(
-          CourseContent(
+          const CourseContent(
             id: 'cnt-1',
             classroomSubjectId: 'cs-pl',
             title: 'Climas do Brasil',
             orderIndex: 0,
-            origin: CourseContentOrigin.manual,
+            origin: ContentOrigin.manual,
           ),
         );
 
@@ -749,7 +770,7 @@ void main() {
               .toList(),
         );
 
-        final lesson = PlannedLesson(
+        const lesson = PlannedLesson(
           id: 'pl-10',
           classroomSubjectId: 'cs-pl',
           date: DateTime.utc(2026, 3, 10),
@@ -786,7 +807,7 @@ void main() {
       final repo = DriftLessonExecutionRepository(db, outboxRepo);
 
       await ayRepo.save(
-        AcademicYear(
+        const AcademicYear(
           id: 'ay-exec',
           year: 2026,
           title: '2026',
@@ -796,18 +817,19 @@ void main() {
         ),
       );
       await subRepo.save(
-        Subject(id: 'sub-exec', name: 'Física', colorHex: '#00BCD4'),
+        const Subject(id: 'sub-exec', name: 'Física', colorHex: '#00BCD4'),
       );
       await classroomRepo.save(
-        Classroom(
+        const Classroom(
           id: 'c-exec',
           academicYearId: 'ay-exec',
           name: '1EM',
-          gradeLevel: 10,
+          gradeLevel: '1EM',
           shift: ClassroomShift.morning,
           subjectConfigs: [
             ClassroomSubjectConfig(
               id: 'cs-exec',
+              classroomId: 'c-exec',
               subjectId: 'sub-exec',
               weeklyLessons: 2,
             ),
@@ -815,16 +837,16 @@ void main() {
         ),
       );
       await contentRepo.save(
-        CourseContent(
+        const CourseContent(
           id: 'cnt-exec-1',
           classroomSubjectId: 'cs-exec',
           title: 'Cinemática Escalar',
           orderIndex: 0,
-          origin: CourseContentOrigin.manual,
+          origin: ContentOrigin.manual,
         ),
       );
       await lessonRepo.save(
-        PlannedLesson(
+        const PlannedLesson(
           id: 'pl-exec-1',
           classroomSubjectId: 'cs-exec',
           date: DateTime.utc(2026, 3, 12),
@@ -846,7 +868,7 @@ void main() {
         classroomSubjectId: 'cs-exec',
         executionDate: DateTime.utc(2026, 3, 12),
         status: LessonExecutionStatus.completed,
-        actualContentIds: ['cnt-exec-1'],
+        actualContentIds: const ['cnt-exec-1'],
         recordedAt: DateTime.utc(2026, 3, 12, 11, 0),
         pedagogicalNotes:
             'Aula ministrada com excelente participação dos alunos.',
@@ -878,7 +900,7 @@ void main() {
       try {
         await db.transaction(() async {
           await repo.save(
-            AcademicYear(
+            const AcademicYear(
               id: 'ay-rollback',
               year: 2030,
               title: 'Ano Rollback',

@@ -26,14 +26,14 @@ class DriftAcademicYearRepository implements AcademicYearRepository {
       await _db
           .into(_db.academicYearsTable)
           .insertOnConflictUpdate(
-            AcademicYearsTableCompanion.insert(
-              id: academicYear.id,
-              year: academicYear.year,
-              title: academicYear.title,
-              startDate: academicYear.startDate,
-              endDate: academicYear.endDate,
+            AcademicYearsTableCompanion(
+              id: Value(academicYear.id),
+              year: Value(academicYear.year),
+              title: Value(academicYear.title),
+              startDate: Value(academicYear.startDate),
+              endDate: Value(academicYear.endDate),
               totalMandatoryDays: Value(academicYear.totalMandatoryDays),
-              createdAt: isUpdate ? Value.absent() : Value(now),
+              createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
               updatedAt: Value(now),
             ),
           );

@@ -24,11 +24,11 @@ class DriftSubjectRepository implements SubjectRepository {
       await _db
           .into(_db.subjectsTable)
           .insertOnConflictUpdate(
-            SubjectsTableCompanion.insert(
-              id: subject.id,
-              name: subject.name,
-              colorHex: subject.colorHex,
-              createdAt: isUpdate ? Value.absent() : Value(now),
+            SubjectsTableCompanion(
+              id: Value(subject.id),
+              name: Value(subject.name),
+              colorHex: Value(subject.colorHex),
+              createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
               updatedAt: Value(now),
             ),
           );

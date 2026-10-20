@@ -57,7 +57,7 @@ class DriftScheduleSlotRepository implements ScheduleSlotRepository {
           orderIndex: Value(slot.orderIndex),
           startTime: Value(slot.startTime),
           endTime: Value(slot.endTime),
-          createdAt: isUpdate ? Value.absent() : Value(now),
+          createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
           updatedAt: Value(now),
         );
 

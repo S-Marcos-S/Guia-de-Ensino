@@ -42,15 +42,15 @@ class DriftPlannedLessonRepository implements PlannedLessonRepository {
     await _db
         .into(_db.plannedLessonsTable)
         .insertOnConflictUpdate(
-          PlannedLessonsTableCompanion.insert(
-            id: lesson.id,
-            classroomSubjectId: lesson.classroomSubjectId,
-            lessonDate: lesson.date,
-            orderInDay: lesson.orderInDay,
-            status: lesson.status.name,
+          PlannedLessonsTableCompanion(
+            id: Value(lesson.id),
+            classroomSubjectId: Value(lesson.classroomSubjectId),
+            lessonDate: Value(lesson.date),
+            orderInDay: Value(lesson.orderInDay),
+            status: Value(lesson.status.name),
             isLocked: Value(lesson.isLocked),
             notes: Value(lesson.notes),
-            createdAt: isUpdate ? Value.absent() : Value(now),
+            createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
             updatedAt: Value(now),
           ),
         );
