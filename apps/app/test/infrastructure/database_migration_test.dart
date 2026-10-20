@@ -11,7 +11,7 @@ void main() {
       'deve executar onCreate criando todas as tabelas na versão atual',
       () async {
         final db = AppDatabase.forTesting(NativeDatabase.memory());
-        expect(db.schemaVersion, equals(5));
+        expect(db.schemaVersion, equals(6));
 
         // As novas tabelas devem aceitar inserções sem erro
         const yearId = 'ay-mig-2026';
