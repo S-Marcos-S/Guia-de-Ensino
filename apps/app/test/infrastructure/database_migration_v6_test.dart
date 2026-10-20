@@ -1,7 +1,3 @@
-import 'package:app/domain/models/lesson_execution_record.dart';
-import 'package:app/domain/models/planned_lesson.dart';
-import 'package:app/domain/repositories/lesson_execution_repository.dart';
-import 'package:app/domain/repositories/planned_lesson_repository.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_lesson_execution_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_planned_lesson_repository.dart';
