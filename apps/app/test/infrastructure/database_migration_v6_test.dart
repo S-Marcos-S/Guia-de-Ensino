@@ -5,7 +5,7 @@ import 'package:app/domain/repositories/planned_lesson_repository.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_lesson_execution_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_planned_lesson_repository.dart';
-import 'package:drift/drift.dart' hide isNotNull;
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -270,17 +270,17 @@ void main() {
 
       // 2. Verifica tabelas novas vazias e prontas
       final syncStateRows = await v5Db
-          .customSelect("SELECT * FROM sync_state_table;")
+          .customSelect('SELECT * FROM sync_state_table;')
           .get();
       expect(syncStateRows, isEmpty);
 
       final outboxRows = await v5Db
-          .customSelect("SELECT * FROM sync_outbox_table;")
+          .customSelect('SELECT * FROM sync_outbox_table;')
           .get();
       expect(outboxRows, isEmpty);
 
       final tombRows = await v5Db
-          .customSelect("SELECT * FROM sync_tombstones_table;")
+          .customSelect('SELECT * FROM sync_tombstones_table;')
           .get();
       expect(tombRows, isEmpty);
 
