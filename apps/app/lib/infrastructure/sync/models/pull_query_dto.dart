@@ -23,10 +23,10 @@ class PullQueryDto {
 
   Map<String, String> toQueryParams() {
     return {
-      if (cursor != null) 'cursor': cursor!,
+      'cursor': ?cursor,
       'limit': limit.toString(),
-      if (excludeDeviceId != null) 'excludeDeviceId': excludeDeviceId!,
-      if (clientEpoch != null) 'clientEpoch': clientEpoch!,
+      'excludeDeviceId': ?excludeDeviceId,
+      'clientEpoch': ?clientEpoch,
     };
   }
 

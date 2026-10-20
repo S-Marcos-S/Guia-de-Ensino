@@ -35,7 +35,7 @@ class SnapshotEntitiesDto {
   static List<Map<String, dynamic>> _parseList(dynamic raw) {
     if (raw is! List) return const [];
     return raw
-        .whereType<Map>()
+        .whereType<Map<Object?, Object?>>()
         .map((e) => Map<String, dynamic>.from(e))
         .toList();
   }

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:app/infrastructure/sync/client/sync_api_client.dart';
@@ -21,7 +20,7 @@ void main() {
         late http.Request capturedRequest;
 
         final mockClient = MockClient((request) async {
-          capturedRequest = request as http.Request;
+          capturedRequest = request;
           expect(request.method, equals('POST'));
           expect(request.url.toString(), equals('$testBaseUrl/api/sync/push'));
           expect(request.headers['Authorization'], equals('Bearer $testToken'));
@@ -51,7 +50,7 @@ void main() {
           tokenProvider: () => testToken,
         );
 
-        final pushRequest = PushRequestDto(
+        const pushRequest = PushRequestDto(
           deviceId: 'dev-1',
           clientBatchId: 'batch-1',
           operations: [
@@ -86,10 +85,10 @@ void main() {
           httpClient: MockClient((_) async => http.Response('{}', 200)),
         );
 
-        final invalidRequest = PushRequestDto(
+        const invalidRequest = PushRequestDto(
           deviceId: 'dev-1',
           clientBatchId: 'batch-1',
-          operations: const [],
+          operations: [],
         );
 
         expect(() => client.push(invalidRequest), throwsArgumentError);
@@ -112,7 +111,7 @@ void main() {
         httpClient: mockClient,
       );
 
-      final pushRequest = PushRequestDto(
+      const pushRequest = PushRequestDto(
         deviceId: 'dev-1',
         clientBatchId: 'batch-1',
         operations: [
@@ -154,7 +153,7 @@ void main() {
         httpClient: mockClient,
       );
 
-      final pushRequest = PushRequestDto(
+      const pushRequest = PushRequestDto(
         deviceId: 'dev-1',
         clientBatchId: 'batch-1',
         operations: [
@@ -198,7 +197,7 @@ void main() {
           httpClient: mockClient,
         );
 
-        final pushRequest = PushRequestDto(
+        const pushRequest = PushRequestDto(
           deviceId: 'dev-1',
           clientBatchId: 'batch-1',
           operations: [
@@ -368,18 +367,18 @@ void main() {
             'academic_years': [
               {'id': 'ay-1', 'year': 2026},
             ],
-            'classrooms': [],
-            'subjects': [],
-            'classroom_subjects': [],
-            'school_calendar_events': [],
-            'schedule_slots': [],
-            'curriculum_competencies': [],
-            'course_contents': [],
-            'content_prerequisites': [],
-            'planned_lessons': [],
-            'lesson_content_allocations': [],
-            'lesson_execution_records': [],
-            'execution_content_allocations': [],
+            'classrooms': <Map<String, dynamic>>[],
+            'subjects': <Map<String, dynamic>>[],
+            'classroom_subjects': <Map<String, dynamic>>[],
+            'school_calendar_events': <Map<String, dynamic>>[],
+            'schedule_slots': <Map<String, dynamic>>[],
+            'curriculum_competencies': <Map<String, dynamic>>[],
+            'course_contents': <Map<String, dynamic>>[],
+            'content_prerequisites': <Map<String, dynamic>>[],
+            'planned_lessons': <Map<String, dynamic>>[],
+            'lesson_content_allocations': <Map<String, dynamic>>[],
+            'lesson_execution_records': <Map<String, dynamic>>[],
+            'execution_content_allocations': <Map<String, dynamic>>[],
           },
         };
 
@@ -423,7 +422,7 @@ void main() {
   group('SyncApiClient - Resiliência e Falhas de Transporte', () {
     test('deve converter TimeoutException em SyncTimeoutException', () async {
       final mockClient = MockClient((_) async {
-        await Future.delayed(const Duration(milliseconds: 50));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
         return http.Response('{}', 200);
       });
 

@@ -1,5 +1,3 @@
-import 'package:app/infrastructure/sync/models/change_dto.dart';
-import 'package:app/infrastructure/sync/models/operation_ack_dto.dart';
 import 'package:app/infrastructure/sync/models/pull_query_dto.dart';
 import 'package:app/infrastructure/sync/models/pull_response_dto.dart';
 import 'package:app/infrastructure/sync/models/push_request_dto.dart';
@@ -79,7 +77,7 @@ void main() {
     );
 
     test('deve suportar payload e campos opcionais nulos (ex: DELETE)', () {
-      final op = SyncOperationDto(
+      const op = SyncOperationDto(
         clientOpId: '33333333-3333-4333-8333-333333333333',
         entityType: 'classroom',
         entityId: '44444444-4444-4444-8444-444444444444',
@@ -100,7 +98,7 @@ void main() {
 
   group('PushRequestDto', () {
     test('deve serializar envelope de Push com sucesso', () {
-      final req = PushRequestDto(
+      const req = PushRequestDto(
         deviceId: 'dev-123',
         clientBatchId: '55555555-5555-4555-8555-555555555555',
         operations: [
@@ -134,10 +132,10 @@ void main() {
     test(
       'validate() deve lançar ArgumentError se lista de operações for vazia',
       () {
-        final req = PushRequestDto(
+        const req = PushRequestDto(
           deviceId: 'dev-123',
           clientBatchId: 'batch-1',
-          operations: const [],
+          operations: [],
         );
 
         expect(() => req.validate(), throwsArgumentError);
@@ -168,7 +166,7 @@ void main() {
     );
 
     test('validate() deve lançar ArgumentError se houver clientOpId duplicado no mesmo lote', () {
-      final req = PushRequestDto(
+      const req = PushRequestDto(
         deviceId: 'dev-123',
         clientBatchId: 'batch-1',
         operations: [
