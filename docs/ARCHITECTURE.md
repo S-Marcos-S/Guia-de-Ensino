@@ -61,6 +61,7 @@ O Guia de Ensino adota uma **Arquitetura em Camadas Orientada ao Domínio (Clean
   - **Schema v3**: `curriculum_competencies` (BNCC oficial), `course_contents`, `content_prerequisites`.
   - **Schema v4**: `lesson_content_allocations` (tabela associativa com cascata na exclusão da aula e restrição na exclusão do conteúdo para assegurar integridade referencial).
   - **Schema v5**: `lesson_execution_records` (diário fático de aula com unicidade por aula planejada e `KeyAction.restrict` para impedir exclusão da aula com histórico registrado) e `execution_content_allocations` (tabela associativa com conteúdos efetivamente ministrados e `KeyAction.restrict` para proteger conteúdos ministrados contra remoção acidental).
+  - **Schema v6**: Adição de colunas `updated_at` (timestamptz anulável) nas tabelas pedagógicas e criação das 3 tabelas de sincronização: `sync_states` (cursor e status por partição/entidade), `sync_tombstones` (lápides com `entity_name`, `entity_id` e data de exclusão) e `sync_outbox` (fila de mutações locais pendentes com payload JSON, status e contagem de tentativas).
 - **Sincronização**: Cliente de sincronização HTTP para comunicação com o backend NestJS quando online.
 - **Serviço de IA**: Implementação da interface `AiServiceProvider`, intermediando chamadas à API Gemini com proteção de segredos, esquemas JSON validados e tratamento de falhas.
 
@@ -81,6 +82,43 @@ O Guia de Ensino adota uma **Arquitetura em Camadas Orientada ao Domínio (Clean
 4. **Resolução de Conflitos**:
    - Conflitos de edição são tratados explicitamente com política "campo a campo" ou apresentação de conflito para escolha do professor quando houver divergência relevante de cronograma.
    - Registros de aulas realizadas possuem prioridade e nunca são sobrescritos por planejamentos desatualizados.
+
+### 3.1 Arquitetura do Backend e Persistência PostgreSQL (Subetapa 9.2)
+
+O backend do Guia de Ensino reside em `server/`, desenvolvido em NestJS 10 com TypeScript estrito e TypeORM, mantendo `synchronize: false` obrigatório em todos os ambientes e baseando-se em migrações versionadas explícitas (`server/src/database/migrations/`).
+
+1. **Isolamento Multi-tenant Físico via Chaves Compostas**:
+   - Todas as entidades pedagógicas possuem a restrição `UNIQUE (id, user_id)`.
+   - Todas as chaves estrangeiras entre entidades pedagógicas referenciam explicitamente o par composto `(parent_id, user_id)`. Isso impede fisicamente, no nível do motor relacional PostgreSQL, que qualquer entidade de um professor faça referência ou associe-se acidentalmente a dados de outro usuário.
+
+2. **Controle de Concorrência e Atomicidade**:
+   - Cada mutação de sincronização executa dentro de uma transação isolada com advisory lock transacional:
+     `SELECT pg_advisory_xact_lock(hashtext('user_sync_lock:' || $1))`
+   - Em seguida, adquire lock pessimista de linha via `SELECT current_seq, epoch FROM user_sync_version WHERE user_id = $1 FOR UPDATE`.
+   - Caso a linha ainda não exista (cenário concorrente extremo pós-registro), ela é inserida com `ON CONFLICT (user_id) DO UPDATE` e novamente travada com `FOR UPDATE`.
+   - Todas as mutações do lote (alteração de entidades, registro de `user_change_log`, persistência do recibo de idempotência em `idempotency_receipts` e avanço de `current_seq`) são executadas na mesma transação atômica. Se houver qualquer falha ou exceção, o rollback desfaz todas as alterações de forma transparente e libera o advisory lock automaticamente.
+
+3. **Precisão Numérica de 64 bits (`BIGINT`)**:
+   - Colunas de sequência (`current_seq`, `change_seq`, `epoch`, `target_seq`) são tipadas como `BIGINT` no PostgreSQL e manipuladas como `bigint` nativo no TypeScript por meio de `bigintTransformer` (`src/common/transformers/bigint.transformer.ts`).
+   - Evita-se perda de precisão ou truncamento arbitrário para `Number` de JavaScript.
+
+4. **Idempotência Estrita e Hash de Payload**:
+   - Cada operação enviada pelo cliente contém um `client_op_id` (UUID).
+   - O backend calcula deterministicamente o hash SHA-256 do payload canônico recebido.
+   - Antes de efetuar qualquer alteração de estado, consulta a tabela `idempotency_receipts`:
+     - Se `client_op_id` já existir com o mesmo hash: a operação não é reaplicada e o recibo original persistido é devolvido imediatamente.
+     - Se `client_op_id` já existir com hash diferente: lança `IdempotencyConflictException` (HTTP 409), impedindo corrupção ou reutilização ilegítima do identificador.
+     - Se não existir: executa a mutação, grava o log de alterações, gera a nova sequência e persiste o recibo na mesma transação.
+
+5. **Semântica de Sequenciamento Estritamente Monotônica**:
+   - Cada mutação bem-sucedida de um usuário recebe um `change_seq` sequencial estritamente crescente (`current_seq + 1n`).
+   - A sequência é contínua e sem lacunas para operações comutadas no histórico do usuário, permitindo sincronização incremental via cursor (`last_seq`) com snapshot consistente.
+
+6. **Segurança e Sanitização**:
+   - Autenticação por JWT assinado com chave secreta mínima de 32 caracteres via algoritmo HS256 (`JwtAuthGuard`).
+   - Hash de senhas realizado exclusivamente com bcrypt utilizando fator de custo fixado em 12 (`BCRYPT_SALT_ROUNDS = 12`).
+   - Validação de configurações via `class-validator` na inicialização do serviço.
+   - Filtro global de exceções HTTP (`HttpExceptionFilter`) que captura erros de driver e banco de dados, registrando o log internamente sem vazar consultas SQL, detalhes de schema ou dados de infraestrutura para o cliente.
 
 ---
 

@@ -239,16 +239,34 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 9 — Sincronização e Gestão de Contas
-- **Status**: Planejada
-- **Objetivos**:
-  - Implementação do backend (NestJS + PostgreSQL) para sincronização multi-dispositivo opcional.
-  - Autenticação e autorização seguras com JWT.
-  - Modelo de sincronização com identificadores estáveis (UUID) e resolução explícita de conflitos.
-  - Funcionamento local-first ininterrupto em caso de queda de conexão.
-- **Critérios de Aceitação**:
-  1. Dados locais sincronizados sem duplicação ou sobrescrita silenciosa.
-  2. Isolamento rígido de dados por usuário e conformidade com LGPD.
-  3. Testes de sincronização com alterações conflitantes e reconexão.
+- **Status**: **Em Andamento**
+- **Incrementos**:
+  - **9.1 — Schema Local v6 (Colunas updatedAt e Tabelas de Sincronização)**: **Concluído**
+    - Adição de 8 colunas `updatedAt` anuláveis nas tabelas de dados pedagógicos (`academic_years`, `classrooms`, `subjects`, `classroom_subjects`, `course_contents`, `curriculum_competencies`, `schedule_slots`, `school_calendar_events`).
+    - Criação das 3 tabelas dedicadas ao protocolo de sincronização no Drift: `sync_states`, `sync_tombstones` e `sync_outbox` com índices parciais e constraints.
+    - Migração incremental v5 → v6 em SQLite com preservação integral de dados legados e validação no CI.
+  - **9.2 — Backend NestJS e Persistência PostgreSQL**: **Concluído**
+    - Backend modular em `server/` com TypeScript estrito, NestJS 10 e TypeORM (`synchronize: false` obrigatório em todos os ambientes).
+    - Persistência PostgreSQL estruturada com migrações versionadas (`1710000001000-CreateUsersAndSyncTables.ts` e `1710000002000-CreatePedagogicalEntities.ts`).
+    - Isolamento multi-tenant físico em nível de banco garantido por chaves estrangeiras compostas contendo `user_id` em todas as relações entre entidades pedagógicas.
+    - Controle de concorrência com advisory lock transacional (`pg_advisory_xact_lock`) e `SELECT ... FOR UPDATE` sobre `user_sync_version`.
+    - Garantia de monotonia estrita de sequência (`current_seq`), precisão nativa de 64 bits (`BIGINT` com `bigintTransformer`) e verificação idempotente de mutações (`client_op_id` + hash SHA-256 do payload).
+    - Autenticação JWT com HS256, hash de senha via bcrypt com fator de custo 12, validação de variáveis de ambiente com `class-validator` e sanitização de erros HTTP contra vazamento de detalhes internos do banco.
+    - Testes unitários (AuthService, SyncStorageService, transformers) e testes de integração com PostgreSQL 16 no GitHub Actions CI.
+  - **9.3 — Protocolo de Sincronização e Endpoints**: Planejada
+    - Endpoints `/api/sync/push` (recebimento em lote, idempotência, avanço de versão) e `/api/sync/pull` (cursor-based incremental com snapshot consistente).
+    - Mecanismo de resolução determinística de conflitos e preservação de registros divergentes para decisão explícita do professor.
+  - **9.4 — Cliente de Sincronização Local-First (Flutter)**: Planejada
+    - Orquestrador de sincronização em segundo plano no app cliente, outbox processing, reconciliação de tombstones e garantia offline-first.
+- **Critérios de Aceitação Gerais**:
+  1. [x] Schema local v6 validado com integridade e sem perda de dados legados.
+  2. [x] Backend NestJS estruturado com TypeScript estrito, TypeORM e migrações versionadas.
+  3. [x] Isolamento multi-tenant estrito via chaves estrangeiras compostas com `user_id`.
+  4. [x] Concorrência e integridade serializadas via advisory lock e `SELECT ... FOR UPDATE`.
+  5. [x] Preservação de 64 bits em `BIGINT` e rejeição a conflitos de idempotência.
+  6. [x] Testes unitários do backend aprovados e integração com PostgreSQL real configurada no CI.
+  7. Dados locais sincronizados sem duplicação ou sobrescrita silenciosa.
+  8. Funcionamento local-first ininterrupto em caso de queda de rede ou offline prolongado.
 
 ---
 
