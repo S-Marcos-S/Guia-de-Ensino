@@ -30,12 +30,14 @@ import 'package:app/infrastructure/persistence/repositories/drift_lesson_executi
 import 'package:app/infrastructure/persistence/repositories/drift_planned_lesson_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_schedule_slot_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_subject_repository.dart';
+import 'package:app/infrastructure/sync/outbox/sync_outbox_repository.dart';
 import 'package:flutter/widgets.dart';
 
 /// Contêiner de dependências e repositórios da aplicação.
 class AppDependencies {
   AppDependencies({
     required this.database,
+    SyncOutboxRepository? syncOutboxRepository,
     AcademicYearRepository? academicYearRepository,
     SubjectRepository? subjectRepository,
     ClassroomRepository? classroomRepository,
@@ -58,28 +60,61 @@ class AppDependencies {
     DetectScheduleDelayUseCase? detectScheduleDelayUseCase,
     GenerateReplanningProposalUseCase? generateReplanningProposalUseCase,
     ApplyReplanningProposalUseCase? applyReplanningProposalUseCase,
-  }) : academicYearRepository =
-           academicYearRepository ?? DriftAcademicYearRepository(database),
+  }) : syncOutboxRepository =
+           syncOutboxRepository ?? SyncOutboxRepository(database),
+       academicYearRepository =
+           academicYearRepository ??
+           DriftAcademicYearRepository(
+             database,
+             syncOutboxRepository ?? SyncOutboxRepository(database),
+           ),
        subjectRepository =
-           subjectRepository ?? DriftSubjectRepository(database),
+           subjectRepository ??
+           DriftSubjectRepository(
+             database,
+             syncOutboxRepository ?? SyncOutboxRepository(database),
+           ),
        classroomRepository =
-           classroomRepository ?? DriftClassroomRepository(database),
+           classroomRepository ??
+           DriftClassroomRepository(
+             database,
+             syncOutboxRepository ?? SyncOutboxRepository(database),
+           ),
        calendarEventRepository =
-           calendarEventRepository ?? DriftCalendarEventRepository(database),
+           calendarEventRepository ??
+           DriftCalendarEventRepository(
+             database,
+             syncOutboxRepository ?? SyncOutboxRepository(database),
+           ),
        scheduleSlotRepository =
-           scheduleSlotRepository ?? DriftScheduleSlotRepository(database),
+           scheduleSlotRepository ??
+           DriftScheduleSlotRepository(
+             database,
+             syncOutboxRepository ?? SyncOutboxRepository(database),
+           ),
        plannedLessonRepository =
-           plannedLessonRepository ?? DriftPlannedLessonRepository(database),
+           plannedLessonRepository ??
+           DriftPlannedLessonRepository(
+             database,
+             syncOutboxRepository ?? SyncOutboxRepository(database),
+           ),
        lessonExecutionRepository =
            lessonExecutionRepository ??
-           DriftLessonExecutionRepository(database),
+           DriftLessonExecutionRepository(
+             database,
+             syncOutboxRepository ?? SyncOutboxRepository(database),
+           ),
        calendarCalculationService =
            calendarCalculationService ?? const CalendarCalculationService(),
        curriculumCompetencyRepository =
            curriculumCompetencyRepository ??
            DriftCurriculumCompetencyRepository(database),
        courseContentRepository =
-           courseContentRepository ?? DriftCourseContentRepository(database),
+           courseContentRepository ??
+           DriftCourseContentRepository(
+             database,
+             syncOutboxRepository ?? SyncOutboxRepository(database),
+           ),
        curriculumIntegrityService =
            curriculumIntegrityService ?? const CurriculumIntegrityService(),
        curriculumSeedLoader =
@@ -272,6 +307,7 @@ class AppDependencies {
            );
 
   final AppDatabase database;
+  final SyncOutboxRepository syncOutboxRepository;
   final AcademicYearRepository academicYearRepository;
   final SubjectRepository subjectRepository;
   final ClassroomRepository classroomRepository;

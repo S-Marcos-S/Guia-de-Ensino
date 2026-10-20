@@ -2,49 +2,26 @@ import 'package:app/domain/models/planned_lesson.dart';
 import 'package:app/domain/repositories/planned_lesson_repository.dart';
 import 'package:app/infrastructure/persistence/converters/calendar_date_converter.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
+import 'package:app/infrastructure/sync/models/sync_entity_type.dart';
+import 'package:app/infrastructure/sync/outbox/sync_outbox_repository.dart';
+import 'package:app/infrastructure/sync/outbox/sync_payload_serializer.dart';
 import 'package:drift/drift.dart';
 
 /// Implementação do repositório de Aulas e Registros Históricos utilizando Drift.
 class DriftPlannedLessonRepository implements PlannedLessonRepository {
-  DriftPlannedLessonRepository(this._db);
+  DriftPlannedLessonRepository(
+    this._db, [
+    SyncOutboxRepository? outboxRepository,
+  ]) : _outboxRepository = outboxRepository ?? SyncOutboxRepository(_db);
 
   final AppDatabase _db;
+  final SyncOutboxRepository _outboxRepository;
   static const _dateConverter = CalendarDateConverter();
 
   @override
   Future<void> save(PlannedLesson lesson) async {
     await _db.transaction(() async {
-      await _db
-          .into(_db.plannedLessonsTable)
-          .insertOnConflictUpdate(
-            PlannedLessonsTableCompanion.insert(
-              id: lesson.id,
-              classroomSubjectId: lesson.classroomSubjectId,
-              lessonDate: lesson.date,
-              orderInDay: lesson.orderInDay,
-              status: lesson.status.name,
-              isLocked: Value(lesson.isLocked),
-              notes: Value(lesson.notes),
-              createdAt: DateTime.now().toUtc(),
-            ),
-          );
-
-      await (_db.delete(
-        _db.lessonContentAllocationsTable,
-      )..where((tbl) => tbl.lessonId.equals(lesson.id))).go();
-
-      for (var i = 0; i < lesson.contentIds.length; i++) {
-        await _db
-            .into(_db.lessonContentAllocationsTable)
-            .insert(
-              LessonContentAllocationsTableCompanion.insert(
-                lessonId: lesson.id,
-                contentId: lesson.contentIds[i],
-                orderIndex: Value(i + 1),
-              ),
-              mode: InsertMode.insertOrReplace,
-            );
-      }
+      await _saveSingleLessonInternal(lesson);
     });
   }
 
@@ -52,39 +29,95 @@ class DriftPlannedLessonRepository implements PlannedLessonRepository {
   Future<void> saveAll(List<PlannedLesson> lessons) async {
     await _db.transaction(() async {
       for (final lesson in lessons) {
-        await _db
-            .into(_db.plannedLessonsTable)
-            .insertOnConflictUpdate(
-              PlannedLessonsTableCompanion.insert(
-                id: lesson.id,
-                classroomSubjectId: lesson.classroomSubjectId,
-                lessonDate: lesson.date,
-                orderInDay: lesson.orderInDay,
-                status: lesson.status.name,
-                isLocked: Value(lesson.isLocked),
-                notes: Value(lesson.notes),
-                createdAt: DateTime.now().toUtc(),
-              ),
-            );
-
-        await (_db.delete(
-          _db.lessonContentAllocationsTable,
-        )..where((tbl) => tbl.lessonId.equals(lesson.id))).go();
-
-        for (var i = 0; i < lesson.contentIds.length; i++) {
-          await _db
-              .into(_db.lessonContentAllocationsTable)
-              .insert(
-                LessonContentAllocationsTableCompanion.insert(
-                  lessonId: lesson.id,
-                  contentId: lesson.contentIds[i],
-                  orderIndex: Value(i + 1),
-                ),
-                mode: InsertMode.insertOrReplace,
-              );
-        }
+        await _saveSingleLessonInternal(lesson);
       }
     });
+  }
+
+  Future<void> _saveSingleLessonInternal(PlannedLesson lesson) async {
+    final existing = await findById(lesson.id);
+    final isUpdate = existing != null;
+    final now = DateTime.now().toUtc();
+
+    await _db
+        .into(_db.plannedLessonsTable)
+        .insertOnConflictUpdate(
+          PlannedLessonsTableCompanion.insert(
+            id: lesson.id,
+            classroomSubjectId: lesson.classroomSubjectId,
+            lessonDate: lesson.date,
+            orderInDay: lesson.orderInDay,
+            status: lesson.status.name,
+            isLocked: Value(lesson.isLocked),
+            notes: Value(lesson.notes),
+            createdAt: isUpdate ? Value.absent() : Value(now),
+            updatedAt: Value(now),
+          ),
+        );
+
+    await _outboxRepository.enqueueOperation(
+      entityType: SyncEntityType.plannedLesson,
+      entityId: lesson.id,
+      operation: isUpdate ? SyncMutationType.update : SyncMutationType.insert,
+      payload: SyncPayloadSerializer.plannedLesson(
+        lesson,
+        createdAt: isUpdate ? null : now,
+        updatedAt: now,
+      ),
+    );
+
+    // Consulta alocações anteriores de conteúdos
+    final oldAllocRows = await (_db.select(
+      _db.lessonContentAllocationsTable,
+    )..where((tbl) => tbl.lessonId.equals(lesson.id))).get();
+    final oldContentIds = oldAllocRows.map((r) => r.contentId).toSet();
+    final newContentIds = lesson.contentIds.toSet();
+
+    // Remove alocações descartadas e registra tombstones
+    for (final oldAlloc in oldAllocRows) {
+      if (!newContentIds.contains(oldAlloc.contentId)) {
+        await (_db.delete(_db.lessonContentAllocationsTable)..where(
+              (tbl) =>
+                  tbl.lessonId.equals(lesson.id) &
+                  tbl.contentId.equals(oldAlloc.contentId),
+            ))
+            .go();
+
+        await _outboxRepository.enqueueDelete(
+          entityType: SyncEntityType.lessonContentAllocation,
+          entityId: '${lesson.id}:${oldAlloc.contentId}',
+        );
+      }
+    }
+
+    // Insere ou atualiza novas alocações
+    for (var i = 0; i < lesson.contentIds.length; i++) {
+      final contentId = lesson.contentIds[i];
+      final orderIndex = i + 1;
+      final existed = oldContentIds.contains(contentId);
+
+      await _db
+          .into(_db.lessonContentAllocationsTable)
+          .insert(
+            LessonContentAllocationsTableCompanion.insert(
+              lessonId: lesson.id,
+              contentId: contentId,
+              orderIndex: Value(orderIndex),
+            ),
+            mode: InsertMode.insertOrReplace,
+          );
+
+      await _outboxRepository.enqueueOperation(
+        entityType: SyncEntityType.lessonContentAllocation,
+        entityId: '${lesson.id}:$contentId',
+        operation: existed ? SyncMutationType.update : SyncMutationType.insert,
+        payload: SyncPayloadSerializer.lessonContentAllocation(
+          lessonId: lesson.id,
+          contentId: contentId,
+          orderIndex: orderIndex,
+        ),
+      );
+    }
   }
 
   @override
@@ -174,9 +207,34 @@ class DriftPlannedLessonRepository implements PlannedLessonRepository {
       );
     }
 
-    await (_db.delete(
-      _db.plannedLessonsTable,
-    )..where((tbl) => tbl.id.equals(id))).go();
+    await _db.transaction(() async {
+      final allocations = await (_db.select(
+        _db.lessonContentAllocationsTable,
+      )..where((tbl) => tbl.lessonId.equals(id))).get();
+
+      for (final alloc in allocations) {
+        await (_db.delete(_db.lessonContentAllocationsTable)..where(
+              (tbl) =>
+                  tbl.lessonId.equals(id) &
+                  tbl.contentId.equals(alloc.contentId),
+            ))
+            .go();
+
+        await _outboxRepository.enqueueDelete(
+          entityType: SyncEntityType.lessonContentAllocation,
+          entityId: '$id:${alloc.contentId}',
+        );
+      }
+
+      await (_db.delete(
+        _db.plannedLessonsTable,
+      )..where((tbl) => tbl.id.equals(id))).go();
+
+      await _outboxRepository.enqueueDelete(
+        entityType: SyncEntityType.plannedLesson,
+        entityId: id,
+      );
+    });
   }
 
   Future<Map<String, List<String>>> _loadContentIdsForLessons(

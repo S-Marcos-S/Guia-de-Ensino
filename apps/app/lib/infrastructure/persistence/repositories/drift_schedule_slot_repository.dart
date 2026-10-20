@@ -1,13 +1,20 @@
 import 'package:app/domain/models/schedule_slot.dart';
 import 'package:app/domain/repositories/schedule_slot_repository.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
+import 'package:app/infrastructure/sync/models/sync_entity_type.dart';
+import 'package:app/infrastructure/sync/outbox/sync_outbox_repository.dart';
+import 'package:app/infrastructure/sync/outbox/sync_payload_serializer.dart';
 import 'package:drift/drift.dart';
 
 /// Implementação Drift/SQLite para persistência da grade semanal de horários.
 class DriftScheduleSlotRepository implements ScheduleSlotRepository {
-  DriftScheduleSlotRepository(this._db);
+  DriftScheduleSlotRepository(
+    this._db, [
+    SyncOutboxRepository? outboxRepository,
+  ]) : _outboxRepository = outboxRepository ?? SyncOutboxRepository(_db);
 
   final AppDatabase _db;
+  final SyncOutboxRepository _outboxRepository;
 
   @override
   Future<void> saveSlots(
@@ -15,12 +22,34 @@ class DriftScheduleSlotRepository implements ScheduleSlotRepository {
     List<ScheduleSlot> slots,
   ) async {
     await _db.transaction(() async {
-      // Remove slots prévios deste vínculo para atualizar a grade de forma atômica
-      await (_db.delete(_db.scheduleSlotsTable)
-            ..where((tbl) => tbl.classroomSubjectId.equals(classroomSubjectId)))
-          .go();
+      final now = DateTime.now().toUtc();
 
+      // Consulta slots anteriores para identificar remoções e atualizações
+      final oldSlots =
+          await (_db.select(_db.scheduleSlotsTable)..where(
+                (tbl) => tbl.classroomSubjectId.equals(classroomSubjectId),
+              ))
+              .get();
+      final newSlotIds = slots.map((s) => s.id).toSet();
+
+      // Remove slots prévios excluídos da grade e enfileira tombstones
+      for (final oldSlot in oldSlots) {
+        if (!newSlotIds.contains(oldSlot.id)) {
+          await (_db.delete(
+            _db.scheduleSlotsTable,
+          )..where((tbl) => tbl.id.equals(oldSlot.id))).go();
+          await _outboxRepository.enqueueDelete(
+            entityType: SyncEntityType.scheduleSlot,
+            entityId: oldSlot.id,
+          );
+        }
+      }
+
+      // Atualiza ou insere os slots vigentes na grade horária
       for (final slot in slots) {
+        final existing = oldSlots.where((s) => s.id == slot.id).firstOrNull;
+        final isUpdate = existing != null;
+
         final companion = ScheduleSlotsTableCompanion(
           id: Value(slot.id),
           classroomSubjectId: Value(classroomSubjectId),
@@ -28,10 +57,29 @@ class DriftScheduleSlotRepository implements ScheduleSlotRepository {
           orderIndex: Value(slot.orderIndex),
           startTime: Value(slot.startTime),
           endTime: Value(slot.endTime),
-          createdAt: Value(DateTime.now()),
+          createdAt: isUpdate ? Value.absent() : Value(now),
+          updatedAt: Value(now),
         );
 
-        await _db.into(_db.scheduleSlotsTable).insert(companion);
+        await _db
+            .into(_db.scheduleSlotsTable)
+            .insertOnConflictUpdate(companion);
+
+        final payload = SyncPayloadSerializer.scheduleSlot(
+          slot,
+          classroomSubjectId: classroomSubjectId,
+          createdAt: isUpdate ? null : now,
+          updatedAt: now,
+        );
+
+        await _outboxRepository.enqueueOperation(
+          entityType: SyncEntityType.scheduleSlot,
+          entityId: slot.id,
+          operation: isUpdate
+              ? SyncMutationType.update
+              : SyncMutationType.insert,
+          payload: payload,
+        );
       }
     });
   }
