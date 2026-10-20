@@ -20,7 +20,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 | **Etapa 6** | Acompanhamento e Registro de Aulas | **Concluída** | Etapa 5 |
 | **Etapa 7** | Replanejamento Automático Determinístico e Viabilidade Curricular | **Concluída** | Etapa 6 |
 | **Etapa 8** | Integração com Inteligência Artificial | Planejada | Etapa 7 |
-| **Etapa 9** | Sincronização e Gestão de Contas | Planejada | Etapa 8 |
+| **Etapa 9** | Sincronização e Gestão de Contas | Em Andamento (9.1 pronta) | Etapa 8 |
 | **Etapa 10** | Experiência Multiplataforma e Acessibilidade | Planejada | Etapa 9 |
 | **Etapa 11** | Estabilização, Testes Finais e Distribuição | Planejada | Etapa 10 |
 
@@ -239,7 +239,15 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 9 — Sincronização e Gestão de Contas
-- **Status**: Planejada
+- **Status**: Em Andamento
+- **Subetapas**:
+  - **Subetapa 9.1 — Schema v6 e Metadados de Sincronização Local (Concluída na branch `feature/etapa-9-schema-v6`)**:
+    - [x] Adição da coluna `updatedAt` anulável nas 8 tabelas de entidades (`AcademicYearsTable`, `ClassroomsTable`, `SubjectsTable`, `ClassroomSubjectsTable`, `PlannedLessonsTable`, `SchoolCalendarEventsTable`, `ScheduleSlotsTable`, `CourseContentsTable`).
+    - [x] Criação de `SyncStateTable`, `SyncTombstonesTable` e `SyncOutboxTable` com constraints de unicidade e integridade no Drift.
+    - [x] Implementação da migração incremental v5 $\to$ v6 em `AppDatabase.onUpgrade`, preservando dados legados e adicionando índices para outbox e tombstones.
+    - [x] Criação da suíte de testes de migração `database_migration_v6_test.dart` (validação de schema limpo, preservação de dados legados v5, migrações encadeadas v1-v6, constraints de unicidade e integridade referencial com foreign keys).
+  - **Subetapa 9.2 — Backend NestJS e Persistência PostgreSQL**: Planejada
+  - **Subetapa 9.3 — Protocolo de Sincronização Bidirecional e Resolução de Conflitos**: Planejada
 - **Objetivos**:
   - Implementação do backend (NestJS + PostgreSQL) para sincronização multi-dispositivo opcional.
   - Autenticação e autorização seguras com JWT.

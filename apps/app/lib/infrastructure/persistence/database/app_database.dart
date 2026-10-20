@@ -25,6 +25,9 @@ part 'app_database.g.dart';
     LessonContentAllocationsTable,
     LessonExecutionRecordsTable,
     ExecutionContentAllocationsTable,
+    SyncStateTable,
+    SyncTombstonesTable,
+    SyncOutboxTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -34,12 +37,20 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_sync_outbox_status '
+        'ON sync_outbox_table (status, local_revision);',
+      );
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_sync_tombstones_entity '
+        'ON sync_tombstones_table (entity_type, entity_id);',
+      );
     },
     onUpgrade: (m, from, to) async {
       if (from < 2) {
@@ -57,6 +68,35 @@ class AppDatabase extends _$AppDatabase {
       if (from < 5) {
         await m.createTable(lessonExecutionRecordsTable);
         await m.createTable(executionContentAllocationsTable);
+      }
+      if (from < 6) {
+        await m.createTable(syncStateTable);
+        await m.createTable(syncTombstonesTable);
+        await m.createTable(syncOutboxTable);
+
+        await m.addColumn(academicYearsTable, academicYearsTable.updatedAt);
+        await m.addColumn(classroomsTable, classroomsTable.updatedAt);
+        await m.addColumn(subjectsTable, subjectsTable.updatedAt);
+        await m.addColumn(
+          classroomSubjectsTable,
+          classroomSubjectsTable.updatedAt,
+        );
+        await m.addColumn(plannedLessonsTable, plannedLessonsTable.updatedAt);
+        await m.addColumn(
+          schoolCalendarEventsTable,
+          schoolCalendarEventsTable.updatedAt,
+        );
+        await m.addColumn(scheduleSlotsTable, scheduleSlotsTable.updatedAt);
+        await m.addColumn(courseContentsTable, courseContentsTable.updatedAt);
+
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_sync_outbox_status '
+          'ON sync_outbox_table (status, local_revision);',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_sync_tombstones_entity '
+          'ON sync_tombstones_table (entity_type, entity_id);',
+        );
       }
     },
     beforeOpen: (details) async {
