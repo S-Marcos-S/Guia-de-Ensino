@@ -121,7 +121,7 @@ void main() {
     });
 
     test('serializa AcademicYear com snake_case e datas', () {
-      const ay = AcademicYear(
+      final ay = AcademicYear(
         id: 'ay-2026',
         year: 2026,
         title: 'Ano 2026',
@@ -354,7 +354,7 @@ void main() {
   group('Repositórios Transacionais — Atomicidade e Enfileiramento', () {
     test('DriftAcademicYearRepository enfileira INSERT e UPDATE', () async {
       final repo = DriftAcademicYearRepository(db, outboxRepo);
-      const ay = AcademicYear(
+      final ay = AcademicYear(
         id: 'ay-trans-1',
         year: 2026,
         title: 'Ano 2026',
@@ -372,7 +372,7 @@ void main() {
       expect(pending.first.payloadMap!['year'], equals(2026));
 
       // UPDATE
-      const updatedAy = AcademicYear(
+      final updatedAy = AcademicYear(
         id: 'ay-trans-1',
         year: 2026,
         title: 'Ano 2026 Atualizado',
@@ -430,7 +430,7 @@ void main() {
       final repo = DriftClassroomRepository(db, outboxRepo);
 
       await ayRepo.save(
-        const AcademicYear(
+        AcademicYear(
           id: 'ay-1',
           year: 2026,
           title: '2026',
@@ -513,7 +513,7 @@ void main() {
       final repo = DriftCalendarEventRepository(db, outboxRepo);
 
       await ayRepo.save(
-        const AcademicYear(
+        AcademicYear(
           id: 'ay-cal',
           year: 2026,
           title: '2026',
@@ -523,7 +523,7 @@ void main() {
         ),
       );
 
-      const event = SchoolCalendarEvent(
+      final event = SchoolCalendarEvent(
         id: 'ev-1',
         academicYearId: 'ay-cal',
         title: 'Feriado Tiradentes',
@@ -554,7 +554,7 @@ void main() {
       final repo = DriftScheduleSlotRepository(db, outboxRepo);
 
       await ayRepo.save(
-        const AcademicYear(
+        AcademicYear(
           id: 'ay-slot',
           year: 2026,
           title: '2026',
@@ -638,7 +638,7 @@ void main() {
         final repo = DriftCourseContentRepository(db, outboxRepo);
 
         await ayRepo.save(
-          const AcademicYear(
+          AcademicYear(
             id: 'ay-cc',
             year: 2026,
             title: '2026',
@@ -725,7 +725,7 @@ void main() {
         final repo = DriftPlannedLessonRepository(db, outboxRepo);
 
         await ayRepo.save(
-          const AcademicYear(
+          AcademicYear(
             id: 'ay-pl',
             year: 2026,
             title: '2026',
@@ -770,12 +770,12 @@ void main() {
               .toList(),
         );
 
-        const lesson = PlannedLesson(
+        final lesson = PlannedLesson(
           id: 'pl-10',
           classroomSubjectId: 'cs-pl',
           date: DateTime.utc(2026, 3, 10),
           orderInDay: 1,
-          contentIds: ['cnt-1'],
+          contentIds: const ['cnt-1'],
           status: LessonExecutionStatus.planned,
         );
 
@@ -807,7 +807,7 @@ void main() {
       final repo = DriftLessonExecutionRepository(db, outboxRepo);
 
       await ayRepo.save(
-        const AcademicYear(
+        AcademicYear(
           id: 'ay-exec',
           year: 2026,
           title: '2026',
@@ -846,12 +846,12 @@ void main() {
         ),
       );
       await lessonRepo.save(
-        const PlannedLesson(
+        PlannedLesson(
           id: 'pl-exec-1',
           classroomSubjectId: 'cs-exec',
           date: DateTime.utc(2026, 3, 12),
           orderInDay: 1,
-          contentIds: ['cnt-exec-1'],
+          contentIds: const ['cnt-exec-1'],
           status: LessonExecutionStatus.planned,
         ),
       );
@@ -900,7 +900,7 @@ void main() {
       try {
         await db.transaction(() async {
           await repo.save(
-            const AcademicYear(
+            AcademicYear(
               id: 'ay-rollback',
               year: 2030,
               title: 'Ano Rollback',
