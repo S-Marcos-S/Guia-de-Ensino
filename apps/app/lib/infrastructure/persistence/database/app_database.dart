@@ -75,8 +75,8 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(syncOutboxTable);
 
         Future<void> addColumnIfNotExists(
-          TableInfo table,
-          GeneratedColumn column,
+          TableInfo<Table, dynamic> table,
+          GeneratedColumn<Object> column,
         ) async {
           final columns = await customSelect(
             "PRAGMA table_info('${table.actualTableName}');",

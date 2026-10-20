@@ -21,7 +21,7 @@ void main() {
           .get();
       final tableNames = tableResult.map((r) => r.read<String>('name')).toSet();
 
-      final expectedTables = {
+      const expectedTables = {
         'academic_years_table',
         'classrooms_table',
         'subjects_table',
@@ -60,7 +60,7 @@ void main() {
       expect(indexNames.contains('idx_sync_tombstones_entity'), isTrue);
 
       // 3. Verifica a presença da coluna updated_at nas 8 tabelas de entidades
-      final entityTables = [
+      const entityTables = [
         'academic_years_table',
         'classrooms_table',
         'subjects_table',
@@ -469,8 +469,8 @@ void main() {
     test('deve permitir gravacao e atualizacao de updatedAt nas 8 tabelas de entidades', () async {
       final db = AppDatabase.forTesting(NativeDatabase.memory());
 
-      final nowSec = 1768032000; // 2026-01-10 08:00:00 UTC
-      final updatedSec = 1768041000; // 2026-01-10 10:30:00 UTC
+      const nowSec = 1768032000; // 2026-01-10 08:00:00 UTC
+      const updatedSec = 1768041000; // 2026-01-10 10:30:00 UTC
       final expectedUpdated = DateTime.fromMillisecondsSinceEpoch(
         updatedSec * 1000,
         isUtc: true,
@@ -602,7 +602,7 @@ void main() {
     test('deve preservar integridade referencial com foreign keys habilitadas no v6', () async {
       final db = AppDatabase.forTesting(NativeDatabase.memory());
 
-      final tsSec = 1768032000;
+      const tsSec = 1768032000;
 
       // Insere base referencial
       await db.customStatement('''
