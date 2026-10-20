@@ -41,6 +41,12 @@ export class SyncController {
     return this.syncService.processPull(user.userId, query);
   }
 
+  /**
+   * Endpoint de Full Resync / Snapshot Consistente.
+   * Contrato estritamente monolítico: entrega o estado atômico completo das 13 coleções sob REPEATABLE READ.
+   * Não suporta retomada parcial entre requisições. Em caso de falha de transporte, o cliente descarta
+   * o staging local e solicita um novo snapshot. Após aplicação atômica, o cliente prossegue pelo Pull.
+   */
   @Get('snapshot')
   @HttpCode(HttpStatus.OK)
   async snapshot(

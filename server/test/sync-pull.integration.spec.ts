@@ -215,6 +215,30 @@ describe('Sync Pull Protocol & Pagination (Integration Tests)', () => {
       expect(pullDevA.changes).toHaveLength(1);
       expect(pullDevA.changes[0].payload).toEqual(expect.objectContaining({ name: 'Biologia' }));
       expect(pullDevA.changes[0].deviceId).toBe(devB);
+      expect(pullDevA.nextCursor).not.toBe('0:0');
+
+      // Quando apenas o próprio dispositivo possui eventos examinados, changes é vazio mas nextCursor avança com segurança
+      const userSolo = await createTestUser();
+      await syncService.processPush(userSolo, {
+        deviceId: 'dev-solo',
+        clientBatchId: uuidv4(),
+        operations: [
+          {
+            clientOpId: uuidv4(),
+            entityType: 'subject',
+            entityId: uuidv4(),
+            mutationType: 'INSERT',
+            payload: { name: 'Física' },
+          },
+        ],
+      });
+      const pullSolo = await syncService.processPull(userSolo, {
+        cursor: '0:0',
+        excludeDeviceId: 'dev-solo',
+      });
+      expect(pullSolo.changes).toHaveLength(0);
+      expect(pullSolo.nextCursor).not.toBe('0:0');
+      expect(pullSolo.nextCursor.startsWith('1:')).toBe(true);
     },
   );
 

@@ -289,8 +289,9 @@ export class SyncStorageService {
         versionRows && versionRows.length > 0 ? BigInt(versionRows[0].current_seq) : 0n;
       const epoch = versionRows && versionRows.length > 0 ? BigInt(versionRows[0].epoch) : 1n;
 
-      // 2. Consulta paginada indexada por idx_user_change_log_cursor (user_id, server_seq ASC, id ASC)
+      // 2. Consulta a janela de eventos examinados indexada por idx_user_change_log_cursor (user_id, server_seq ASC, id ASC)
       // Utiliza construtor de tupla nativo do PostgreSQL: (server_seq, id) > ($cursorSeq, $cursorId)
+      // Lemos (limit + 1) para determinar hasMore com precisão sem COUNT(*) adicional
       const queryParams: (string | number)[] = [
         userId,
         cursorSeq.toString(),
@@ -298,18 +299,11 @@ export class SyncStorageService {
         limit + 1,
       ];
 
-      let deviceFilter = '';
-      if (excludeDeviceId) {
-        queryParams.push(excludeDeviceId);
-        deviceFilter = `AND device_id != $5`;
-      }
-
       const sql = `
         SELECT id, server_seq, entity_type, entity_id, mutation_type, payload, device_id, created_at
         FROM user_change_log
         WHERE user_id = $1
           AND (server_seq, id) > ($2, $3)
-          ${deviceFilter}
         ORDER BY server_seq ASC, id ASC
         LIMIT $4;
       `;
@@ -327,10 +321,23 @@ export class SyncStorageService {
 
       await queryRunner.commitTransaction();
 
+      // 3. Delimita a janela de eventos efetivamente examinados
       const hasMore = rawRows.length > limit;
-      const pageRows = hasMore ? rawRows.slice(0, limit) : rawRows;
+      const examinedRows = hasMore ? rawRows.slice(0, limit) : rawRows;
 
-      const changes: ChangeLogRecord[] = pageRows.map((r) => ({
+      // 4. Determina o nextCursor com base no ÚLTIMO evento examinado na janela
+      // Preserva a semântica da paginação por (server_seq, id) e evita reexaminar eventos já varridos
+      const nextCursor =
+        examinedRows.length > 0
+          ? `${examinedRows[examinedRows.length - 1].server_seq}:${examinedRows[examinedRows.length - 1].id}`
+          : `${cursorSeq}:${cursorId}`;
+
+      // 5. Filtra os eventos a serem retornados ao cliente (descarte de eco por excludeDeviceId)
+      const filteredRows = excludeDeviceId
+        ? examinedRows.filter((r) => r.device_id !== excludeDeviceId)
+        : examinedRows;
+
+      const changes: ChangeLogRecord[] = filteredRows.map((r) => ({
         id: BigInt(r.id),
         serverSeq: BigInt(r.server_seq),
         entityType: r.entity_type,
@@ -340,11 +347,6 @@ export class SyncStorageService {
         deviceId: r.device_id,
         createdAt: new Date(r.created_at),
       }));
-
-      const nextCursor =
-        changes.length > 0
-          ? `${changes[changes.length - 1].serverSeq}:${changes[changes.length - 1].id}`
-          : `${cursorSeq}:${cursorId}`;
 
       return {
         currentSeq,

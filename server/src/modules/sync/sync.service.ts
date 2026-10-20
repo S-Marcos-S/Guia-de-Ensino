@@ -134,28 +134,40 @@ export class SyncService {
 
   /**
    * Extrai o snapshot consistente de todas as 13 coleções pedagógicas do usuário sob REPEATABLE READ.
-   * Emite token opaco assinado com HMAC-SHA256 e TTL de 15 minutos.
+   *
+   * Formalização do Contrato do Snapshot Monolítico:
+   * 1. Cada resposta HTTP representa um Snapshot consistente obtido numa única transação atômica.
+   * 2. O contrato é estritamente monolítico: não há suporte a retomada parcial do corpo HTTP
+   *    nem paginação histórica entre requisições no servidor.
+   * 3. Em caso de falha de rede ou resposta incompleta, o cliente DEVE descartar os dados parciais
+   *    em staging e solicitar um novo Snapshot completo.
+   * 4. Após a aplicação atômica de um Snapshot completo no SQLite local, o cliente prossegue pelo
+   *    fluxo normal de Pull chamando GET /api/sync/pull a partir do cursor "${snapshotSeq}:0".
+   * 5. O snapshotToken emitido serve como atestado criptográfico assinado via HMAC-SHA256
+   *    (com subchave derivada via HKDF-SHA256) garantindo autenticidade e proveniência do marco.
    */
   async processSnapshot(userId: string, query: SnapshotQueryDto): Promise<SnapshotResponseDto> {
-    const jwtSecret =
+    const masterSecret =
+      this.configService?.get<string>('SYNC_SNAPSHOT_SECRET') ??
       this.configService?.get<string>('JWT_SECRET') ??
+      process.env.SYNC_SNAPSHOT_SECRET ??
       process.env.JWT_SECRET ??
       'fallback-secret-minimum-32-chars-long';
 
-    // Se o cliente forneceu um snapshotToken, valida a autenticidade e validade temporal
+    // Se o cliente forneceu um snapshotToken, valida autenticidade e validade temporal
     if (query.snapshotToken) {
-      SnapshotTokenHelper.verifyToken(query.snapshotToken, userId, jwtSecret);
+      SnapshotTokenHelper.verifyToken(query.snapshotToken, userId, masterSecret);
     }
 
     // Extrai o snapshot atômico sob REPEATABLE READ
     const snapshotResult = await this.syncStorageService.getUserSnapshot(userId);
 
-    // Gera o token assinado HMAC-SHA256 para o snapshot
+    // Gera o token assinado HMAC-SHA256 (com subchave derivada via HKDF) para o snapshot
     const { token, expiresAt } = SnapshotTokenHelper.generateToken(
       userId,
       snapshotResult.snapshotSeq,
       snapshotResult.epoch,
-      jwtSecret,
+      masterSecret,
       15, // TTL 15 minutos
     );
 

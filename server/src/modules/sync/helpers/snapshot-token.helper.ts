@@ -10,8 +10,25 @@ export interface SnapshotTokenPayload {
 }
 
 export class SnapshotTokenHelper {
+  private static readonly HKDF_INFO = 'guia-de-ensino:sync-snapshot-hmac:v1';
+
   /**
-   * Gera um token de snapshot opaco assinado com HMAC-SHA256 e TTL padrão de 15 minutos.
+   * Deriva uma subchave criptográfica exclusiva de 256 bits via HKDF-SHA256
+   * para separação estrita de domínio (RFC 5869 / NIST SP 800-108).
+   */
+  static deriveKey(masterSecret: string): Buffer {
+    if (!masterSecret || masterSecret.length < 32) {
+      throw new Error(
+        'O segredo mestre deve possuir no mínimo 32 caracteres para derivação HKDF segura.',
+      );
+    }
+    return Buffer.from(
+      crypto.hkdfSync('sha256', masterSecret, '', SnapshotTokenHelper.HKDF_INFO, 32),
+    );
+  }
+
+  /**
+   * Gera um token de snapshot opaco assinado com HMAC-SHA256 (usando subchave HKDF) e TTL padrão de 15 minutos.
    * Formato decodificado: `${userId}:${snapshotSeq}:${epoch}:${expiresAtMs}:${signature}`
    */
   static generateToken(
@@ -23,7 +40,8 @@ export class SnapshotTokenHelper {
   ): { token: string; expiresAt: Date } {
     const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000);
     const dataToSign = `${userId}:${snapshotSeq.toString()}:${epoch.toString()}:${expiresAt.getTime()}`;
-    const signature = crypto.createHmac('sha256', secret).update(dataToSign).digest('hex');
+    const derivedKey = SnapshotTokenHelper.deriveKey(secret);
+    const signature = crypto.createHmac('sha256', derivedKey).update(dataToSign).digest('hex');
     const fullPayload = `${dataToSign}:${signature}`;
     const token = Buffer.from(fullPayload, 'utf-8').toString('base64url');
 
@@ -47,7 +65,6 @@ export class SnapshotTokenHelper {
 
     let decoded: string;
     try {
-      // Suporta tanto base64 quanto base64url
       decoded = Buffer.from(token, 'base64url').toString('utf-8');
     } catch {
       throw new BadRequestException({
@@ -80,9 +97,13 @@ export class SnapshotTokenHelper {
       });
     }
 
-    // 2. Validação criptográfica da assinatura HMAC-SHA256 com timingSafeEqual
+    // 2. Validação criptográfica da assinatura HMAC-SHA256 com subchave HKDF e timingSafeEqual
     const dataToSign = `${userId}:${snapshotSeqStr}:${epochStr}:${expiresAtMsStr}`;
-    const expectedSignature = crypto.createHmac('sha256', secret).update(dataToSign).digest('hex');
+    const derivedKey = SnapshotTokenHelper.deriveKey(secret);
+    const expectedSignature = crypto
+      .createHmac('sha256', derivedKey)
+      .update(dataToSign)
+      .digest('hex');
 
     const sigBuf = Buffer.from(signature, 'hex');
     const expBuf = Buffer.from(expectedSignature, 'hex');
