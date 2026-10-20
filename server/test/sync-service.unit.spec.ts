@@ -22,6 +22,13 @@ describe('SyncService (Unit Tests)', () => {
         currentSeq: 10n,
         epoch: 1n,
       }),
+      getChangesSinceCursor: jest.fn().mockResolvedValue({
+        currentSeq: 10n,
+        epoch: 1n,
+        changes: [],
+        nextCursor: '0:0',
+        hasMore: false,
+      }),
     };
 
     syncService = new SyncService(mockSyncStorageService as SyncStorageService);
@@ -99,5 +106,113 @@ describe('SyncService (Unit Tests)', () => {
 
     await expect(syncService.processPush(userId, dto)).rejects.toThrow(BadRequestException);
     expect(mockSyncStorageService.processBatchMutations).not.toHaveBeenCalled();
+  });
+
+  describe('parseCursor', () => {
+    it('deve retornar (0n, 0n) para cursor nulo, indefinido ou vazio', async () => {
+      const resNull = await syncService.processPull(uuidv4(), { cursor: undefined });
+      expect(resNull).toBeDefined();
+
+      const resEmpty = await syncService.processPull(uuidv4(), { cursor: '' });
+      expect(resEmpty).toBeDefined();
+    });
+
+    it('deve rejeitar cursores malformados, negativos ou não numéricos com BadRequestException', async () => {
+      const invalidCursors = [
+        'abc',
+        '-1:5',
+        '10:-2',
+        '10',
+        '10:20:30',
+        ':::',
+        'null',
+        'undefined:1',
+      ];
+
+      for (const cursor of invalidCursors) {
+        await expect(syncService.processPull(uuidv4(), { cursor })).rejects.toThrow(
+          BadRequestException,
+        );
+      }
+    });
+  });
+
+  describe('processPull', () => {
+    it('deve processar consulta válida retornando alterações formatadas e nextCursor', async () => {
+      const userId = uuidv4();
+      mockSyncStorageService.getChangesSinceCursor = jest.fn().mockResolvedValue({
+        currentSeq: 25n,
+        epoch: 1n,
+        changes: [
+          {
+            id: 101n,
+            serverSeq: 20n,
+            entityType: 'subject',
+            entityId: uuidv4(),
+            mutationType: 'INSERT',
+            payload: { name: 'Matemática' },
+            deviceId: 'dev-1',
+            createdAt: new Date('2026-10-20T14:40:00.000Z'),
+          },
+        ],
+        nextCursor: '20:101',
+        hasMore: false,
+      });
+
+      const response = await syncService.processPull(userId, {
+        cursor: '15:100',
+        limit: 50,
+      });
+
+      expect(response.epoch).toBe('1');
+      expect(response.currentServerSeq).toBe('25');
+      expect(response.nextCursor).toBe('20:101');
+      expect(response.hasMore).toBe(false);
+      expect(response.changes).toHaveLength(1);
+      expect(response.changes[0].serverSeq).toBe('20');
+      expect(response.changes[0].changeLogId).toBe('101');
+
+      expect(mockSyncStorageService.getChangesSinceCursor).toHaveBeenCalledWith(
+        userId,
+        15n,
+        100n,
+        50,
+        undefined,
+      );
+    });
+
+    it('deve lançar SyncEpochMismatchException (HTTP 410 Gone / RESYNC_REQUIRED) quando clientEpoch for divergente', async () => {
+      const userId = uuidv4();
+      mockSyncStorageService.getChangesSinceCursor = jest.fn().mockResolvedValue({
+        currentSeq: 25n,
+        epoch: 2n, // Servidor está na época 2!
+        changes: [],
+        nextCursor: '0:0',
+        hasMore: false,
+      });
+
+      await expect(
+        syncService.processPull(userId, {
+          cursor: '0:0',
+          clientEpoch: '1', // Cliente está na época 1!
+        }),
+      ).rejects.toThrow('Época de sincronização divergente');
+    });
+
+    it('deve aceitar cursor além da sequência atual sem lançar erro retornando lista vazia', async () => {
+      const userId = uuidv4();
+      mockSyncStorageService.getChangesSinceCursor = jest.fn().mockResolvedValue({
+        currentSeq: 10n,
+        epoch: 1n,
+        changes: [],
+        nextCursor: '999:0',
+        hasMore: false,
+      });
+
+      const response = await syncService.processPull(userId, { cursor: '999:0' });
+      expect(response.changes).toHaveLength(0);
+      expect(response.hasMore).toBe(false);
+      expect(response.nextCursor).toBe('999:0');
+    });
   });
 });

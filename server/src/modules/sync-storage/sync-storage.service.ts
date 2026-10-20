@@ -23,6 +23,25 @@ export interface SyncOperationResult {
   appliedAt: Date;
 }
 
+export interface ChangeLogRecord {
+  id: bigint;
+  serverSeq: bigint;
+  entityType: string;
+  entityId: string;
+  mutationType: string;
+  payload: Record<string, unknown> | null;
+  deviceId: string;
+  createdAt: Date;
+}
+
+export interface PullStorageResult {
+  currentSeq: bigint;
+  epoch: bigint;
+  changes: ChangeLogRecord[];
+  nextCursor: string;
+  hasMore: boolean;
+}
+
 /**
  * Serviço central de persistência e orquestração transacional de sincronização.
  *
@@ -219,6 +238,108 @@ export class SyncStorageService {
       currentSeq: version.currentSeq,
       epoch: version.epoch,
     };
+  }
+
+  /**
+   * Consulta paginada consistente de alterações a partir de um cursor composto (server_seq, id).
+   * Executa em transação de leitura isolada para assegurar que currentSeq e o lote de alterações
+   * reflitam o mesmo instante temporal comutado no PostgreSQL.
+   */
+  async getChangesSinceCursor(
+    userId: string,
+    cursorSeq: bigint,
+    cursorId: bigint,
+    limit: number,
+    excludeDeviceId?: string,
+  ): Promise<PullStorageResult> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction('READ COMMITTED');
+
+    try {
+      // 1. Consulta versão e sequência atual do usuário no mesmo snapshot
+      const versionRows = await queryRunner.manager.query(
+        `SELECT current_seq, epoch FROM user_sync_version WHERE user_id = $1;`,
+        [userId],
+      );
+
+      const currentSeq =
+        versionRows && versionRows.length > 0 ? BigInt(versionRows[0].current_seq) : 0n;
+      const epoch = versionRows && versionRows.length > 0 ? BigInt(versionRows[0].epoch) : 1n;
+
+      // 2. Consulta paginada indexada por idx_user_change_log_cursor (user_id, server_seq ASC, id ASC)
+      // Utiliza construtor de tupla nativo do PostgreSQL: (server_seq, id) > ($cursorSeq, $cursorId)
+      const queryParams: (string | number)[] = [
+        userId,
+        cursorSeq.toString(),
+        cursorId.toString(),
+        limit + 1,
+      ];
+
+      let deviceFilter = '';
+      if (excludeDeviceId) {
+        queryParams.push(excludeDeviceId);
+        deviceFilter = `AND device_id != $5`;
+      }
+
+      const sql = `
+        SELECT id, server_seq, entity_type, entity_id, mutation_type, payload, device_id, created_at
+        FROM user_change_log
+        WHERE user_id = $1
+          AND (server_seq, id) > ($2, $3)
+          ${deviceFilter}
+        ORDER BY server_seq ASC, id ASC
+        LIMIT $4;
+      `;
+
+      const rawRows: Array<{
+        id: string;
+        server_seq: string;
+        entity_type: string;
+        entity_id: string;
+        mutation_type: string;
+        payload: Record<string, unknown> | null;
+        device_id: string;
+        created_at: Date;
+      }> = await queryRunner.manager.query(sql, queryParams);
+
+      await queryRunner.commitTransaction();
+
+      const hasMore = rawRows.length > limit;
+      const pageRows = hasMore ? rawRows.slice(0, limit) : rawRows;
+
+      const changes: ChangeLogRecord[] = pageRows.map((r) => ({
+        id: BigInt(r.id),
+        serverSeq: BigInt(r.server_seq),
+        entityType: r.entity_type,
+        entityId: r.entity_id,
+        mutationType: r.mutation_type,
+        payload: r.payload,
+        deviceId: r.device_id,
+        createdAt: new Date(r.created_at),
+      }));
+
+      const nextCursor =
+        changes.length > 0
+          ? `${changes[changes.length - 1].serverSeq}:${changes[changes.length - 1].id}`
+          : `${cursorSeq}:${cursorId}`;
+
+      return {
+        currentSeq,
+        epoch,
+        changes,
+        nextCursor,
+        hasMore,
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error(
+        `[SyncStorage] Falha ao consultar alterações para usuário ${userId}: ${(error as Error).message}`,
+      );
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   /**

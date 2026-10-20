@@ -3,6 +3,11 @@ import { SyncStorageService, SyncOperationInput } from '../sync-storage/sync-sto
 import { PushRequestDto } from './dto/push-request.dto';
 import { PushResponseDto } from './dto/push-response.dto';
 import { OperationAckDto } from './dto/operation-ack.dto';
+import { PullQueryDto } from './dto/pull-query.dto';
+import { PullResponseDto } from './dto/pull-response.dto';
+import { ChangeDto } from './dto/change.dto';
+import { parseCursor } from './helpers/cursor.helper';
+import { SyncEpochMismatchException } from '../../common/exceptions/sync-epoch-mismatch.exception';
 
 @Injectable()
 export class SyncService {
@@ -57,6 +62,53 @@ export class SyncService {
       serverEpoch: syncVersion.epoch.toString(),
       currentServerSeq: syncVersion.currentSeq.toString(),
       acks,
+    };
+  }
+
+  /**
+   * Consulta paginada incremental de alterações com cursor composto (Pull).
+   */
+  async processPull(userId: string, query: PullQueryDto): Promise<PullResponseDto> {
+    // 1. Valida e analisa o cursor composto (lança BadRequestException se malformado ou negativo)
+    const parsedCursor = parseCursor(query.cursor);
+
+    // 2. Limite seguro: padrão 100, teto 500
+    const limit = query.limit ? Math.min(Math.max(query.limit, 1), 500) : 100;
+
+    // 3. Consulta as alterações no serviço de persistência
+    const pullResult = await this.syncStorageService.getChangesSinceCursor(
+      userId,
+      parsedCursor.serverSeq,
+      parsedCursor.id,
+      limit,
+      query.excludeDeviceId,
+    );
+
+    // 4. Validação de época (epoch) com retorno 410 Gone / RESYNC_REQUIRED
+    if (query.clientEpoch !== undefined && query.clientEpoch !== null && query.clientEpoch !== '') {
+      if (pullResult.epoch.toString() !== query.clientEpoch) {
+        throw new SyncEpochMismatchException(query.clientEpoch, pullResult.epoch.toString());
+      }
+    }
+
+    // 5. Mapeia os eventos serializando BIGINT para strings decimais
+    const changes: ChangeDto[] = pullResult.changes.map((c) => ({
+      serverSeq: c.serverSeq.toString(),
+      changeLogId: c.id.toString(),
+      entityType: c.entityType,
+      entityId: c.entityId,
+      mutationType: c.mutationType,
+      payload: c.payload,
+      deviceId: c.deviceId,
+      createdAt: c.createdAt.toISOString(),
+    }));
+
+    return {
+      epoch: pullResult.epoch.toString(),
+      currentServerSeq: pullResult.currentSeq.toString(),
+      nextCursor: pullResult.nextCursor,
+      hasMore: pullResult.hasMore,
+      changes,
     };
   }
 }
