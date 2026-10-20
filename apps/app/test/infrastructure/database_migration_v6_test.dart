@@ -98,8 +98,36 @@ void main() {
       final v5Db = AppDatabase.forTesting(rawDb);
       final migrator = v5Db.createMigrator();
 
-      // 1. Cria as 13 tabelas na estrutura exata de Schema v5 (sem colunas updated_at nas 8 tabelas)
-      await _createV5Tables(v5Db);
+      // 1. Cria as 13 tabelas usando Migrator
+      await migrator.createTable(v5Db.academicYearsTable);
+      await migrator.createTable(v5Db.subjectsTable);
+      await migrator.createTable(v5Db.classroomsTable);
+      await migrator.createTable(v5Db.classroomSubjectsTable);
+      await migrator.createTable(v5Db.plannedLessonsTable);
+      await migrator.createTable(v5Db.schoolCalendarEventsTable);
+      await migrator.createTable(v5Db.scheduleSlotsTable);
+      await migrator.createTable(v5Db.curriculumCompetenciesTable);
+      await migrator.createTable(v5Db.courseContentsTable);
+      await migrator.createTable(v5Db.contentPrerequisitesTable);
+      await migrator.createTable(v5Db.lessonContentAllocationsTable);
+      await migrator.createTable(v5Db.lessonExecutionRecordsTable);
+      await migrator.createTable(v5Db.executionContentAllocationsTable);
+
+      // Simula Schema v5 exato: remove a coluna updated_at das 8 tabelas de entidades
+      for (final table in [
+        'academic_years_table',
+        'classrooms_table',
+        'subjects_table',
+        'classroom_subjects_table',
+        'planned_lessons_table',
+        'school_calendar_events_table',
+        'schedule_slots_table',
+        'course_contents_table',
+      ]) {
+        await v5Db.customStatement(
+          'ALTER TABLE $table DROP COLUMN updated_at;',
+        );
+      }
 
       // Timestamps inteiros em segundos (padrão DateTimeColumn do Drift)
       final createdAtSec =
@@ -282,8 +310,23 @@ void main() {
       final db = AppDatabase.forTesting(rawDb);
       final migrator = db.createMigrator();
 
-      // 1. Cria tabelas de v1 (sem updated_at)
-      await _createV1Tables(db);
+      // 1. Cria tabelas de v1 usando Migrator
+      await migrator.createTable(db.academicYearsTable);
+      await migrator.createTable(db.subjectsTable);
+      await migrator.createTable(db.classroomsTable);
+      await migrator.createTable(db.classroomSubjectsTable);
+      await migrator.createTable(db.plannedLessonsTable);
+
+      // Simula Schema v1 exato: remove a coluna updated_at das 5 tabelas
+      for (final table in [
+        'academic_years_table',
+        'subjects_table',
+        'classrooms_table',
+        'classroom_subjects_table',
+        'planned_lessons_table',
+      ]) {
+        await db.customStatement('ALTER TABLE $table DROP COLUMN updated_at;');
+      }
 
       // Executa migração direta de v1 para v6
       await db.migration.onUpgrade(migrator, 1, 6);
@@ -489,7 +532,10 @@ void main() {
             "SELECT updated_at FROM academic_years_table WHERE id = 'ay-upd-test';",
           )
           .getSingle();
-      expect(row.read<DateTime?>('updated_at'), equals(expectedUpdated));
+      expect(
+        row.read<DateTime?>('updated_at')?.toUtc(),
+        equals(expectedUpdated),
+      );
 
       // 2. ClassroomsTable
       await db.customStatement('''
@@ -504,7 +550,10 @@ void main() {
             "SELECT updated_at FROM classrooms_table WHERE id = 'c-upd-test';",
           )
           .getSingle();
-      expect(row.read<DateTime?>('updated_at'), equals(expectedUpdated));
+      expect(
+        row.read<DateTime?>('updated_at')?.toUtc(),
+        equals(expectedUpdated),
+      );
 
       // 3. SubjectsTable
       await db.customStatement('''
@@ -519,7 +568,10 @@ void main() {
             "SELECT updated_at FROM subjects_table WHERE id = 's-upd-test';",
           )
           .getSingle();
-      expect(row.read<DateTime?>('updated_at'), equals(expectedUpdated));
+      expect(
+        row.read<DateTime?>('updated_at')?.toUtc(),
+        equals(expectedUpdated),
+      );
 
       // 4. ClassroomSubjectsTable
       await db.customStatement('''
@@ -534,7 +586,10 @@ void main() {
             "SELECT updated_at FROM classroom_subjects_table WHERE id = 'cs-upd-test';",
           )
           .getSingle();
-      expect(row.read<DateTime?>('updated_at'), equals(expectedUpdated));
+      expect(
+        row.read<DateTime?>('updated_at')?.toUtc(),
+        equals(expectedUpdated),
+      );
 
       // 5. CourseContentsTable
       await db.customStatement('''
@@ -549,7 +604,10 @@ void main() {
             "SELECT updated_at FROM course_contents_table WHERE id = 'cnt-upd-test';",
           )
           .getSingle();
-      expect(row.read<DateTime?>('updated_at'), equals(expectedUpdated));
+      expect(
+        row.read<DateTime?>('updated_at')?.toUtc(),
+        equals(expectedUpdated),
+      );
 
       // 6. PlannedLessonsTable
       await db.customStatement('''
@@ -564,7 +622,10 @@ void main() {
             "SELECT updated_at FROM planned_lessons_table WHERE id = 'l-upd-test';",
           )
           .getSingle();
-      expect(row.read<DateTime?>('updated_at'), equals(expectedUpdated));
+      expect(
+        row.read<DateTime?>('updated_at')?.toUtc(),
+        equals(expectedUpdated),
+      );
 
       // 7. SchoolCalendarEventsTable
       await db.customStatement('''
@@ -579,7 +640,10 @@ void main() {
             "SELECT updated_at FROM school_calendar_events_table WHERE id = 'ev-upd-test';",
           )
           .getSingle();
-      expect(row.read<DateTime?>('updated_at'), equals(expectedUpdated));
+      expect(
+        row.read<DateTime?>('updated_at')?.toUtc(),
+        equals(expectedUpdated),
+      );
 
       // 8. ScheduleSlotsTable
       await db.customStatement('''
@@ -594,7 +658,10 @@ void main() {
             "SELECT updated_at FROM schedule_slots_table WHERE id = 'sl-upd-test';",
           )
           .getSingle();
-      expect(row.read<DateTime?>('updated_at'), equals(expectedUpdated));
+      expect(
+        row.read<DateTime?>('updated_at')?.toUtc(),
+        equals(expectedUpdated),
+      );
 
       await db.close();
     });
@@ -674,227 +741,4 @@ void main() {
       await db.close();
     });
   });
-}
-
-/// Cria o conjunto das 13 tabelas no formato original do Schema v5 (sem colunas updated_at nas 8 tabelas).
-Future<void> _createV5Tables(AppDatabase db) async {
-  await db.customStatement('''
-    CREATE TABLE academic_years_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      year INTEGER NOT NULL UNIQUE,
-      title TEXT NOT NULL,
-      start_date TEXT NOT NULL,
-      end_date TEXT NOT NULL,
-      total_mandatory_days INTEGER NOT NULL DEFAULT 200,
-      created_at INTEGER NOT NULL
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE classrooms_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      academic_year_id TEXT NOT NULL REFERENCES academic_years_table(id) ON DELETE RESTRICT,
-      name TEXT NOT NULL,
-      grade_level TEXT NOT NULL,
-      shift TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      UNIQUE (academic_year_id, name)
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE subjects_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      name TEXT NOT NULL UNIQUE,
-      color_hex TEXT NOT NULL,
-      created_at INTEGER NOT NULL
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE classroom_subjects_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      classroom_id TEXT NOT NULL REFERENCES classrooms_table(id) ON DELETE CASCADE,
-      subject_id TEXT NOT NULL REFERENCES subjects_table(id) ON DELETE RESTRICT,
-      weekly_lessons INTEGER NOT NULL,
-      created_at INTEGER NOT NULL,
-      UNIQUE (classroom_id, subject_id)
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE planned_lessons_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      classroom_subject_id TEXT NOT NULL REFERENCES classroom_subjects_table(id) ON DELETE RESTRICT,
-      lesson_date TEXT NOT NULL,
-      order_in_day INTEGER NOT NULL,
-      status TEXT NOT NULL,
-      is_locked INTEGER NOT NULL DEFAULT 0,
-      notes TEXT,
-      created_at INTEGER NOT NULL,
-      UNIQUE (classroom_subject_id, lesson_date, order_in_day)
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE school_calendar_events_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      academic_year_id TEXT NOT NULL REFERENCES academic_years_table(id) ON DELETE CASCADE,
-      title TEXT NOT NULL,
-      start_date TEXT NOT NULL,
-      end_date TEXT NOT NULL,
-      type TEXT NOT NULL,
-      affects_classes INTEGER NOT NULL DEFAULT 1,
-      created_at INTEGER NOT NULL
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE schedule_slots_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      classroom_subject_id TEXT NOT NULL REFERENCES classroom_subjects_table(id) ON DELETE CASCADE,
-      weekday INTEGER NOT NULL,
-      order_index INTEGER NOT NULL,
-      start_time TEXT,
-      end_time TEXT,
-      created_at INTEGER NOT NULL,
-      UNIQUE (classroom_subject_id, weekday, order_index)
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE curriculum_competencies_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      code TEXT NOT NULL UNIQUE,
-      description TEXT NOT NULL,
-      thematic_unit TEXT NOT NULL,
-      knowledge_object TEXT,
-      stage TEXT NOT NULL,
-      grade_level TEXT NOT NULL,
-      subject_name TEXT NOT NULL,
-      source_name TEXT NOT NULL,
-      source_version TEXT NOT NULL,
-      created_at INTEGER NOT NULL
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE course_contents_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      classroom_subject_id TEXT NOT NULL REFERENCES classroom_subjects_table(id) ON DELETE RESTRICT,
-      title TEXT NOT NULL,
-      description TEXT,
-      thematic_unit TEXT,
-      estimated_lessons INTEGER NOT NULL DEFAULT 1,
-      order_index INTEGER NOT NULL,
-      is_mandatory INTEGER NOT NULL DEFAULT 1,
-      curriculum_competency_id TEXT REFERENCES curriculum_competencies_table(id) ON DELETE SET NULL,
-      origin TEXT NOT NULL,
-      created_at INTEGER NOT NULL
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE content_prerequisites_table (
-      content_id TEXT NOT NULL REFERENCES course_contents_table(id) ON DELETE CASCADE,
-      prerequisite_content_id TEXT NOT NULL REFERENCES course_contents_table(id) ON DELETE RESTRICT,
-      PRIMARY KEY (content_id, prerequisite_content_id)
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE lesson_content_allocations_table (
-      lesson_id TEXT NOT NULL REFERENCES planned_lessons_table(id) ON DELETE CASCADE,
-      content_id TEXT NOT NULL REFERENCES course_contents_table(id) ON DELETE RESTRICT,
-      order_index INTEGER NOT NULL DEFAULT 1,
-      PRIMARY KEY (lesson_id, content_id)
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE lesson_execution_records_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      planned_lesson_id TEXT NOT NULL UNIQUE REFERENCES planned_lessons_table(id) ON DELETE RESTRICT,
-      classroom_subject_id TEXT NOT NULL REFERENCES classroom_subjects_table(id) ON DELETE RESTRICT,
-      execution_date TEXT NOT NULL,
-      status TEXT NOT NULL,
-      cancellation_reason TEXT,
-      cancellation_details TEXT,
-      pedagogical_notes TEXT,
-      needs_follow_up INTEGER NOT NULL DEFAULT 0,
-      follow_up_notes TEXT,
-      recorded_at INTEGER NOT NULL,
-      updated_at INTEGER
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE execution_content_allocations_table (
-      record_id TEXT NOT NULL REFERENCES lesson_execution_records_table(id) ON DELETE CASCADE,
-      content_id TEXT NOT NULL REFERENCES course_contents_table(id) ON DELETE RESTRICT,
-      order_index INTEGER NOT NULL DEFAULT 1,
-      PRIMARY KEY (record_id, content_id)
-    );
-  ''');
-}
-
-/// Cria as 5 tabelas no formato original do Schema v1 (sem updated_at).
-Future<void> _createV1Tables(AppDatabase db) async {
-  await db.customStatement('''
-    CREATE TABLE academic_years_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      year INTEGER NOT NULL UNIQUE,
-      title TEXT NOT NULL,
-      start_date TEXT NOT NULL,
-      end_date TEXT NOT NULL,
-      total_mandatory_days INTEGER NOT NULL DEFAULT 200,
-      created_at INTEGER NOT NULL
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE classrooms_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      academic_year_id TEXT NOT NULL REFERENCES academic_years_table(id) ON DELETE RESTRICT,
-      name TEXT NOT NULL,
-      grade_level TEXT NOT NULL,
-      shift TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      UNIQUE (academic_year_id, name)
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE subjects_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      name TEXT NOT NULL UNIQUE,
-      color_hex TEXT NOT NULL,
-      created_at INTEGER NOT NULL
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE classroom_subjects_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      classroom_id TEXT NOT NULL REFERENCES classrooms_table(id) ON DELETE CASCADE,
-      subject_id TEXT NOT NULL REFERENCES subjects_table(id) ON DELETE RESTRICT,
-      weekly_lessons INTEGER NOT NULL,
-      created_at INTEGER NOT NULL,
-      UNIQUE (classroom_id, subject_id)
-    );
-  ''');
-
-  await db.customStatement('''
-    CREATE TABLE planned_lessons_table (
-      id TEXT NOT NULL PRIMARY KEY,
-      classroom_subject_id TEXT NOT NULL REFERENCES classroom_subjects_table(id) ON DELETE RESTRICT,
-      lesson_date TEXT NOT NULL,
-      order_in_day INTEGER NOT NULL,
-      status TEXT NOT NULL,
-      is_locked INTEGER NOT NULL DEFAULT 0,
-      notes TEXT,
-      created_at INTEGER NOT NULL,
-      UNIQUE (classroom_subject_id, lesson_date, order_in_day)
-    );
-  ''');
 }
