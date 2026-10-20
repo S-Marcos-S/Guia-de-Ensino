@@ -261,7 +261,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
   - **9.4 — Integração Flutter/Drift com o Protocolo de Sincronização**: **Em Andamento**
     - Preparação segura da branch de trabalho `feature/etapa-9-cliente-sync` e unificação com Drift Schema v6.
     - Incremento 1: DTOs canônicos do protocolo de sincronização (Push, Pull, Snapshot) e cliente HTTP `SyncApiClient` com autenticação Bearer JWT e tratamento tipado de erros (validado no commit `562cb7f`).
-    - Incremento 2: Repositórios Drift transacionais com enfileiramento atômico na Outbox (`SyncOutboxRepository`), serialização canônica (`SyncPayloadSerializer`), avanço monotônico de `local_revision`, registro determinístico de tombstones e recuperação pós-falha (`resetSendingToPending`).
+    - Incremento 2: Repositórios Drift transacionais com enfileiramento atômico na Outbox (`SyncOutboxRepository`), serialização canônica (`SyncPayloadSerializer`), avanço monotônico de `local_revision`, registro determinístico de tombstones e recuperação pós-falha (`resetSendingToPending`) (validado no commit `6008ae4`).
     - Incremento 3: Orquestrador de sincronização local-first (`SyncOrchestrator`), loops de Push, Pull e Snapshot staging, controle de concorrência e reconciliação.
 - **Critérios de Aceitação Gerais**:
   1. [x] Schema local v6 validado com integridade e sem perda de dados legados.
