@@ -20,7 +20,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 | **Etapa 6** | Acompanhamento e Registro de Aulas | **Concluída** | Etapa 5 |
 | **Etapa 7** | Replanejamento Automático Determinístico e Viabilidade Curricular | **Concluída** | Etapa 6 |
 | **Etapa 8** | Integração com Inteligência Artificial | Planejada | Etapa 7 |
-| **Etapa 9** | Sincronização e Gestão de Contas | Planejada | Etapa 8 |
+| **Etapa 9** | Sincronização e Gestão de Contas | Em Andamento (9.1 pronta) | Etapa 8 |
 | **Etapa 10** | Experiência Multiplataforma e Acessibilidade | Planejada | Etapa 9 |
 | **Etapa 11** | Estabilização, Testes Finais e Distribuição | Planejada | Etapa 10 |
 
@@ -240,11 +240,12 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 
 ### Etapa 9 — Sincronização e Gestão de Contas
 - **Status**: **Em Andamento**
-- **Incrementos**:
+- **Subetapas**:
   - **9.1 — Schema Local v6 (Colunas updatedAt e Tabelas de Sincronização)**: **Concluído**
-    - Adição de 8 colunas `updatedAt` anuláveis nas tabelas de dados pedagógicos (`academic_years`, `classrooms`, `subjects`, `classroom_subjects`, `course_contents`, `curriculum_competencies`, `schedule_slots`, `school_calendar_events`).
-    - Criação das 3 tabelas dedicadas ao protocolo de sincronização no Drift: `sync_states`, `sync_tombstones` e `sync_outbox` com índices parciais e constraints.
-    - Migração incremental v5 → v6 em SQLite com preservação integral de dados legados e validação no CI.
+    - [x] Adição da coluna `updatedAt` anulável nas 8 tabelas de entidades (`AcademicYearsTable`, `ClassroomsTable`, `SubjectsTable`, `ClassroomSubjectsTable`, `PlannedLessonsTable`, `SchoolCalendarEventsTable`, `ScheduleSlotsTable`, `CourseContentsTable`).
+    - [x] Criação de `SyncStateTable`, `SyncTombstonesTable` e `SyncOutboxTable` com constraints de unicidade e integridade no Drift.
+    - [x] Implementação da migração incremental v5 $\to$ v6 em `AppDatabase.onUpgrade`, preservando dados legados e adicionando índices para outbox e tombstones.
+    - [x] Criação da suíte de testes de migração `database_migration_v6_test.dart` (validação de schema limpo, preservação de dados legados v5, migrações encadeadas v1-v6, constraints de unicidade e integridade referencial com foreign keys).
   - **9.2 — Backend NestJS e Persistência PostgreSQL**: **Concluído**
     - Backend modular em `server/` com TypeScript estrito, NestJS 10 e TypeORM (`synchronize: false` obrigatório em todos os ambientes).
     - Persistência PostgreSQL estruturada com migrações versionadas (`1710000001000-CreateUsersAndSyncTables.ts` e `1710000002000-CreatePedagogicalEntities.ts`).
@@ -253,18 +254,20 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
     - Garantia de monotonia estrita de sequência (`current_seq`), precisão nativa de 64 bits (`BIGINT` com `bigintTransformer`) e verificação idempotente de mutações (`client_op_id` + hash SHA-256 do payload).
     - Autenticação JWT com HS256, hash de senha via bcrypt com fator de custo 12, validação de variáveis de ambiente com `class-validator` e sanitização de erros HTTP contra vazamento de detalhes internos do banco.
     - Testes unitários (AuthService, SyncStorageService, transformers) e testes de integração com PostgreSQL 16 no GitHub Actions CI.
-  - **9.3 — Protocolo de Sincronização e Endpoints**: Planejada
-    - Endpoints `/api/sync/push` (recebimento em lote, idempotência, avanço de versão) e `/api/sync/pull` (cursor-based incremental com snapshot consistente).
-    - Mecanismo de resolução determinística de conflitos e preservação de registros divergentes para decisão explícita do professor.
-  - **9.4 — Cliente de Sincronização Local-First (Flutter)**: Planejada
-    - Orquestrador de sincronização em segundo plano no app cliente, outbox processing, reconciliação de tombstones e garantia offline-first.
+  - **9.3 — Protocolo de Sincronização e Endpoints**: **Concluído**
+    - Endpoints `/api/sync/push` (recebimento em lote de 1 a 100 operações, atomicidade estrita, idempotência por hash de payload, ACKs `APPLIED`, `SKIPPED`, `CONFLICT`), `/api/sync/pull` (cursor composto determinístico `(server_seq, id)`, detecção de época e descarte de eco) e `/api/sync/snapshot` (snapshot consistente das 13 coleções sob `REPEATABLE READ` com token HMAC-SHA256 derivado via HKDF).
+    - Proteção explícita de registros históricos fáticos de aula (`lesson_execution_records`) e regras de integridade curricular.
+    - Suíte de 28 testes de integração contra PostgreSQL 16 real e 36 testes unitários aprovados no CI.
+  - **9.4 — Integração Flutter/Drift com o Protocolo de Sincronização**: **Em Andamento**
+    - Preparação segura da branch de trabalho `feature/etapa-9-cliente-sync` e unificação com Drift Schema v6.
+    - Orquestrador de sincronização local-first, processamento de outbox, reconciliação de tombstones, paginação de deltas e staging atômico de snapshot.
 - **Critérios de Aceitação Gerais**:
   1. [x] Schema local v6 validado com integridade e sem perda de dados legados.
   2. [x] Backend NestJS estruturado com TypeScript estrito, TypeORM e migrações versionadas.
   3. [x] Isolamento multi-tenant estrito via chaves estrangeiras compostas com `user_id`.
   4. [x] Concorrência e integridade serializadas via advisory lock e `SELECT ... FOR UPDATE`.
   5. [x] Preservação de 64 bits em `BIGINT` e rejeição a conflitos de idempotência.
-  6. [x] Testes unitários do backend aprovados e integração com PostgreSQL real configurada no CI.
+  6. [x] Testes unitários do backend aprovados e integração com PostgreSQL real configurada no CI (28 testes de integração + 36 testes unitários).
   7. Dados locais sincronizados sem duplicação ou sobrescrita silenciosa.
   8. Funcionamento local-first ininterrupto em caso de queda de rede ou offline prolongado.
 

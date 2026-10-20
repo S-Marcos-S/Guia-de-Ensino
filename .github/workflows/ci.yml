@@ -49,11 +49,20 @@ jobs:
       - name: Instalar Dependencias do Projeto
         run: flutter pub get
 
+      - name: Gerar Codigo Drift (build_runner)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Formatar Codigo Gerado (dart format)
+        run: dart format lib/infrastructure/persistence/database/app_database.g.dart
+
       - name: Verificar Formatacao de Codigo (dart format)
         run: dart format --set-exit-if-changed .
 
       - name: Executar Analise Estatica Estrita (flutter analyze)
         run: flutter analyze
+
+      - name: Executar Teste de Migracao de Banco SQLite v6
+        run: flutter test test/infrastructure/database_migration_v6_test.dart
 
       - name: Executar Testes Automatizados (flutter test)
         run: flutter test

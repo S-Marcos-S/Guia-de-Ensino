@@ -11,6 +11,7 @@ class AcademicYearsTable extends Table {
   IntColumn get totalMandatoryDays =>
       integer().withDefault(const Constant(200))();
   DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -33,6 +34,7 @@ class ClassroomsTable extends Table {
   TextColumn get gradeLevel => text()();
   TextColumn get shift => text()();
   DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -49,6 +51,7 @@ class SubjectsTable extends Table {
   TextColumn get name => text()();
   TextColumn get colorHex => text()();
   DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -68,6 +71,7 @@ class ClassroomSubjectsTable extends Table {
       text().references(SubjectsTable, #id, onDelete: KeyAction.restrict)();
   IntColumn get weeklyLessons => integer()();
   DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -92,6 +96,7 @@ class PlannedLessonsTable extends Table {
   BoolColumn get isLocked => boolean().withDefault(const Constant(false))();
   TextColumn get notes => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -114,6 +119,7 @@ class SchoolCalendarEventsTable extends Table {
   BoolColumn get affectsClasses =>
       boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -132,6 +138,7 @@ class ScheduleSlotsTable extends Table {
   TextColumn get startTime => text().nullable()();
   TextColumn get endTime => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -186,6 +193,7 @@ class CourseContentsTable extends Table {
   )();
   TextColumn get origin => text()();
   DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -312,4 +320,55 @@ class ExecutionContentAllocationsTable extends Table {
 
   @override
   Set<Column> get primaryKey => {recordId, contentId};
+}
+
+/// Tabela de Estado e Controle de Sincronização Local (Schema v6).
+class SyncStateTable extends Table {
+  TextColumn get id => text().withDefault(const Constant('default'))();
+  DateTimeColumn get lastSyncedAt => dateTime().nullable()();
+  TextColumn get lastSyncStatus => text().withDefault(const Constant('idle'))();
+  TextColumn get lastSyncError => text().nullable()();
+  TextColumn get serverCursor => text().nullable()();
+  TextColumn get deviceId => text()();
+  TextColumn get accountEmail => text().nullable()();
+  IntColumn get localRevision => integer().withDefault(const Constant(0))();
+  IntColumn get accountEpoch => integer().withDefault(const Constant(1))();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Tabela de Lápides de Exclusão para Sincronização (Schema v6).
+class SyncTombstonesTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get entityType => text()();
+  TextColumn get entityId => text()();
+  TextColumn get operationId => text()();
+  DateTimeColumn get deletedAt => dateTime()();
+  IntColumn get localRevision => integer()();
+  BoolColumn get synced => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {entityType, entityId},
+  ];
+}
+
+/// Tabela de Fila de Saída Transacional (Outbox) para Sincronização (Schema v6).
+class SyncOutboxTable extends Table {
+  TextColumn get operationId => text()();
+  TextColumn get entityType => text()();
+  TextColumn get entityId => text()();
+  TextColumn get operation => text()();
+  TextColumn get payloadJson => text().nullable()();
+  IntColumn get localRevision => integer()();
+  TextColumn get status => text().withDefault(const Constant('pending'))();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {operationId};
 }
