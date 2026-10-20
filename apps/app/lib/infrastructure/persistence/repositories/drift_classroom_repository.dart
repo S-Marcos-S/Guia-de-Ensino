@@ -21,19 +21,33 @@ class DriftClassroomRepository implements ClassroomRepository {
       final isUpdate = existing != null;
       final now = DateTime.now().toUtc();
 
-      await _db
-          .into(_db.classroomsTable)
-          .insertOnConflictUpdate(
-            ClassroomsTableCompanion(
-              id: Value(classroom.id),
-              academicYearId: Value(classroom.academicYearId),
-              name: Value(classroom.name),
-              gradeLevel: Value(classroom.gradeLevel),
-              shift: Value(classroom.shift.name),
-              createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
-              updatedAt: Value(now),
-            ),
-          );
+      if (isUpdate) {
+        await (_db.update(
+          _db.classroomsTable,
+        )..where((tbl) => tbl.id.equals(classroom.id))).write(
+          ClassroomsTableCompanion(
+            academicYearId: Value(classroom.academicYearId),
+            name: Value(classroom.name),
+            gradeLevel: Value(classroom.gradeLevel),
+            shift: Value(classroom.shift.name),
+            updatedAt: Value(now),
+          ),
+        );
+      } else {
+        await _db
+            .into(_db.classroomsTable)
+            .insert(
+              ClassroomsTableCompanion(
+                id: Value(classroom.id),
+                academicYearId: Value(classroom.academicYearId),
+                name: Value(classroom.name),
+                gradeLevel: Value(classroom.gradeLevel),
+                shift: Value(classroom.shift.name),
+                createdAt: Value(now),
+                updatedAt: Value(now),
+              ),
+            );
+      }
 
       await _outboxRepository.enqueueOperation(
         entityType: SyncEntityType.classroom,
@@ -74,20 +88,31 @@ class DriftClassroomRepository implements ClassroomRepository {
             .firstOrNull;
         final isConfigUpdate = existingConfig != null;
 
-        await _db
-            .into(_db.classroomSubjectsTable)
-            .insertOnConflictUpdate(
-              ClassroomSubjectsTableCompanion(
-                id: Value(config.id),
-                classroomId: Value(classroom.id),
-                subjectId: Value(config.subjectId),
-                weeklyLessons: Value(config.weeklyLessons),
-                createdAt: isConfigUpdate
-                    ? const Value<DateTime>.absent()
-                    : Value(now),
-                updatedAt: Value(now),
-              ),
-            );
+        if (isConfigUpdate) {
+          await (_db.update(
+            _db.classroomSubjectsTable,
+          )..where((tbl) => tbl.id.equals(config.id))).write(
+            ClassroomSubjectsTableCompanion(
+              classroomId: Value(classroom.id),
+              subjectId: Value(config.subjectId),
+              weeklyLessons: Value(config.weeklyLessons),
+              updatedAt: Value(now),
+            ),
+          );
+        } else {
+          await _db
+              .into(_db.classroomSubjectsTable)
+              .insert(
+                ClassroomSubjectsTableCompanion(
+                  id: Value(config.id),
+                  classroomId: Value(classroom.id),
+                  subjectId: Value(config.subjectId),
+                  weeklyLessons: Value(config.weeklyLessons),
+                  createdAt: Value(now),
+                  updatedAt: Value(now),
+                ),
+              );
+        }
 
         await _outboxRepository.enqueueOperation(
           entityType: SyncEntityType.classroomSubject,

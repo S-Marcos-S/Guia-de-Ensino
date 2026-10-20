@@ -21,17 +21,29 @@ class DriftSubjectRepository implements SubjectRepository {
       final isUpdate = existing != null;
       final now = DateTime.now().toUtc();
 
-      await _db
-          .into(_db.subjectsTable)
-          .insertOnConflictUpdate(
-            SubjectsTableCompanion(
-              id: Value(subject.id),
-              name: Value(subject.name),
-              colorHex: Value(subject.colorHex),
-              createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
-              updatedAt: Value(now),
-            ),
-          );
+      if (isUpdate) {
+        await (_db.update(
+          _db.subjectsTable,
+        )..where((tbl) => tbl.id.equals(subject.id))).write(
+          SubjectsTableCompanion(
+            name: Value(subject.name),
+            colorHex: Value(subject.colorHex),
+            updatedAt: Value(now),
+          ),
+        );
+      } else {
+        await _db
+            .into(_db.subjectsTable)
+            .insert(
+              SubjectsTableCompanion(
+                id: Value(subject.id),
+                name: Value(subject.name),
+                colorHex: Value(subject.colorHex),
+                createdAt: Value(now),
+                updatedAt: Value(now),
+              ),
+            );
+      }
 
       final payload = SyncPayloadSerializer.subject(
         subject,

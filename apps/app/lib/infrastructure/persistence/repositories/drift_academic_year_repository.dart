@@ -23,20 +23,35 @@ class DriftAcademicYearRepository implements AcademicYearRepository {
       final isUpdate = existing != null;
       final now = DateTime.now().toUtc();
 
-      await _db
-          .into(_db.academicYearsTable)
-          .insertOnConflictUpdate(
-            AcademicYearsTableCompanion(
-              id: Value(academicYear.id),
-              year: Value(academicYear.year),
-              title: Value(academicYear.title),
-              startDate: Value(academicYear.startDate),
-              endDate: Value(academicYear.endDate),
-              totalMandatoryDays: Value(academicYear.totalMandatoryDays),
-              createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
-              updatedAt: Value(now),
-            ),
-          );
+      if (isUpdate) {
+        await (_db.update(
+          _db.academicYearsTable,
+        )..where((tbl) => tbl.id.equals(academicYear.id))).write(
+          AcademicYearsTableCompanion(
+            year: Value(academicYear.year),
+            title: Value(academicYear.title),
+            startDate: Value(academicYear.startDate),
+            endDate: Value(academicYear.endDate),
+            totalMandatoryDays: Value(academicYear.totalMandatoryDays),
+            updatedAt: Value(now),
+          ),
+        );
+      } else {
+        await _db
+            .into(_db.academicYearsTable)
+            .insert(
+              AcademicYearsTableCompanion(
+                id: Value(academicYear.id),
+                year: Value(academicYear.year),
+                title: Value(academicYear.title),
+                startDate: Value(academicYear.startDate),
+                endDate: Value(academicYear.endDate),
+                totalMandatoryDays: Value(academicYear.totalMandatoryDays),
+                createdAt: Value(now),
+                updatedAt: Value(now),
+              ),
+            );
+      }
 
       final payload = SyncPayloadSerializer.academicYear(
         academicYear,

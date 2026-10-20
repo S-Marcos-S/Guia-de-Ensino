@@ -50,20 +50,35 @@ class DriftScheduleSlotRepository implements ScheduleSlotRepository {
         final existing = oldSlots.where((s) => s.id == slot.id).firstOrNull;
         final isUpdate = existing != null;
 
-        final companion = ScheduleSlotsTableCompanion(
-          id: Value(slot.id),
-          classroomSubjectId: Value(classroomSubjectId),
-          weekday: Value(slot.weekday),
-          orderIndex: Value(slot.orderIndex),
-          startTime: Value(slot.startTime),
-          endTime: Value(slot.endTime),
-          createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
-          updatedAt: Value(now),
-        );
-
-        await _db
-            .into(_db.scheduleSlotsTable)
-            .insertOnConflictUpdate(companion);
+        if (isUpdate) {
+          await (_db.update(
+            _db.scheduleSlotsTable,
+          )..where((tbl) => tbl.id.equals(slot.id))).write(
+            ScheduleSlotsTableCompanion(
+              classroomSubjectId: Value(classroomSubjectId),
+              weekday: Value(slot.weekday),
+              orderIndex: Value(slot.orderIndex),
+              startTime: Value(slot.startTime),
+              endTime: Value(slot.endTime),
+              updatedAt: Value(now),
+            ),
+          );
+        } else {
+          await _db
+              .into(_db.scheduleSlotsTable)
+              .insert(
+                ScheduleSlotsTableCompanion(
+                  id: Value(slot.id),
+                  classroomSubjectId: Value(classroomSubjectId),
+                  weekday: Value(slot.weekday),
+                  orderIndex: Value(slot.orderIndex),
+                  startTime: Value(slot.startTime),
+                  endTime: Value(slot.endTime),
+                  createdAt: Value(now),
+                  updatedAt: Value(now),
+                ),
+              );
+        }
 
         final payload = SyncPayloadSerializer.scheduleSlot(
           slot,

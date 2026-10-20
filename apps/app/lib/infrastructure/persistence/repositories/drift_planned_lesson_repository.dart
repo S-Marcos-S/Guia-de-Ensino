@@ -39,21 +39,37 @@ class DriftPlannedLessonRepository implements PlannedLessonRepository {
     final isUpdate = existing != null;
     final now = DateTime.now().toUtc();
 
-    await _db
-        .into(_db.plannedLessonsTable)
-        .insertOnConflictUpdate(
-          PlannedLessonsTableCompanion(
-            id: Value(lesson.id),
-            classroomSubjectId: Value(lesson.classroomSubjectId),
-            lessonDate: Value(lesson.date),
-            orderInDay: Value(lesson.orderInDay),
-            status: Value(lesson.status.name),
-            isLocked: Value(lesson.isLocked),
-            notes: Value(lesson.notes),
-            createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
-            updatedAt: Value(now),
-          ),
-        );
+    if (isUpdate) {
+      await (_db.update(
+        _db.plannedLessonsTable,
+      )..where((tbl) => tbl.id.equals(lesson.id))).write(
+        PlannedLessonsTableCompanion(
+          classroomSubjectId: Value(lesson.classroomSubjectId),
+          lessonDate: Value(lesson.date),
+          orderInDay: Value(lesson.orderInDay),
+          status: Value(lesson.status.name),
+          isLocked: Value(lesson.isLocked),
+          notes: Value(lesson.notes),
+          updatedAt: Value(now),
+        ),
+      );
+    } else {
+      await _db
+          .into(_db.plannedLessonsTable)
+          .insert(
+            PlannedLessonsTableCompanion(
+              id: Value(lesson.id),
+              classroomSubjectId: Value(lesson.classroomSubjectId),
+              lessonDate: Value(lesson.date),
+              orderInDay: Value(lesson.orderInDay),
+              status: Value(lesson.status.name),
+              isLocked: Value(lesson.isLocked),
+              notes: Value(lesson.notes),
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+    }
 
     await _outboxRepository.enqueueOperation(
       entityType: SyncEntityType.plannedLesson,

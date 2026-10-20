@@ -23,21 +23,37 @@ class DriftCalendarEventRepository implements CalendarEventRepository {
       final isUpdate = existing != null;
       final now = DateTime.now().toUtc();
 
-      final companion = SchoolCalendarEventsTableCompanion(
-        id: Value(event.id),
-        academicYearId: Value(event.academicYearId),
-        title: Value(event.title),
-        startDate: Value(event.startDate),
-        endDate: Value(event.endDate),
-        type: Value(event.type.name),
-        affectsClasses: Value(event.affectsClasses),
-        createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
-        updatedAt: Value(now),
-      );
-
-      await _db
-          .into(_db.schoolCalendarEventsTable)
-          .insertOnConflictUpdate(companion);
+      if (isUpdate) {
+        await (_db.update(
+          _db.schoolCalendarEventsTable,
+        )..where((tbl) => tbl.id.equals(event.id))).write(
+          SchoolCalendarEventsTableCompanion(
+            academicYearId: Value(event.academicYearId),
+            title: Value(event.title),
+            startDate: Value(event.startDate),
+            endDate: Value(event.endDate),
+            type: Value(event.type.name),
+            affectsClasses: Value(event.affectsClasses),
+            updatedAt: Value(now),
+          ),
+        );
+      } else {
+        await _db
+            .into(_db.schoolCalendarEventsTable)
+            .insert(
+              SchoolCalendarEventsTableCompanion(
+                id: Value(event.id),
+                academicYearId: Value(event.academicYearId),
+                title: Value(event.title),
+                startDate: Value(event.startDate),
+                endDate: Value(event.endDate),
+                type: Value(event.type.name),
+                affectsClasses: Value(event.affectsClasses),
+                createdAt: Value(now),
+                updatedAt: Value(now),
+              ),
+            );
+      }
 
       final payload = SyncPayloadSerializer.schoolCalendarEvent(
         event,

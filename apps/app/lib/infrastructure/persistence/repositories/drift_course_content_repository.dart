@@ -23,24 +23,43 @@ class DriftCourseContentRepository implements CourseContentRepository {
       final isUpdate = existing != null;
       final now = DateTime.now().toUtc();
 
-      await _db
-          .into(_db.courseContentsTable)
-          .insertOnConflictUpdate(
-            CourseContentsTableCompanion(
-              id: Value(content.id),
-              classroomSubjectId: Value(content.classroomSubjectId),
-              title: Value(content.title),
-              description: Value(content.description),
-              thematicUnit: Value(content.thematicUnit),
-              estimatedLessons: Value(content.estimatedLessons),
-              orderIndex: Value(content.orderIndex),
-              curriculumCompetencyId: Value(content.curriculumCompetencyId),
-              origin: Value(content.origin.name),
-              isMandatory: Value(content.isMandatory),
-              createdAt: isUpdate ? const Value<DateTime>.absent() : Value(now),
-              updatedAt: Value(now),
-            ),
-          );
+      if (isUpdate) {
+        await (_db.update(
+          _db.courseContentsTable,
+        )..where((tbl) => tbl.id.equals(content.id))).write(
+          CourseContentsTableCompanion(
+            classroomSubjectId: Value(content.classroomSubjectId),
+            title: Value(content.title),
+            description: Value(content.description),
+            thematicUnit: Value(content.thematicUnit),
+            estimatedLessons: Value(content.estimatedLessons),
+            orderIndex: Value(content.orderIndex),
+            curriculumCompetencyId: Value(content.curriculumCompetencyId),
+            origin: Value(content.origin.name),
+            isMandatory: Value(content.isMandatory),
+            updatedAt: Value(now),
+          ),
+        );
+      } else {
+        await _db
+            .into(_db.courseContentsTable)
+            .insert(
+              CourseContentsTableCompanion(
+                id: Value(content.id),
+                classroomSubjectId: Value(content.classroomSubjectId),
+                title: Value(content.title),
+                description: Value(content.description),
+                thematicUnit: Value(content.thematicUnit),
+                estimatedLessons: Value(content.estimatedLessons),
+                orderIndex: Value(content.orderIndex),
+                curriculumCompetencyId: Value(content.curriculumCompetencyId),
+                origin: Value(content.origin.name),
+                isMandatory: Value(content.isMandatory),
+                createdAt: Value(now),
+                updatedAt: Value(now),
+              ),
+            );
+      }
 
       await _outboxRepository.enqueueOperation(
         entityType: SyncEntityType.courseContent,
