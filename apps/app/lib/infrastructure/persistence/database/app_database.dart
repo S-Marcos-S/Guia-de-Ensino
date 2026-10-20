@@ -74,20 +74,47 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(syncTombstonesTable);
         await m.createTable(syncOutboxTable);
 
-        await m.addColumn(academicYearsTable, academicYearsTable.updatedAt);
-        await m.addColumn(classroomsTable, classroomsTable.updatedAt);
-        await m.addColumn(subjectsTable, subjectsTable.updatedAt);
-        await m.addColumn(
+        Future<void> addColumnIfNotExists(
+          TableInfo table,
+          GeneratedColumn column,
+        ) async {
+          final columns = await customSelect(
+            "PRAGMA table_info('${table.actualTableName}');",
+          ).get();
+          final columnNames = columns
+              .map((r) => r.read<String>('name'))
+              .toSet();
+          if (!columnNames.contains(column.$name)) {
+            await m.addColumn(table, column);
+          }
+        }
+
+        await addColumnIfNotExists(
+          academicYearsTable,
+          academicYearsTable.updatedAt,
+        );
+        await addColumnIfNotExists(classroomsTable, classroomsTable.updatedAt);
+        await addColumnIfNotExists(subjectsTable, subjectsTable.updatedAt);
+        await addColumnIfNotExists(
           classroomSubjectsTable,
           classroomSubjectsTable.updatedAt,
         );
-        await m.addColumn(plannedLessonsTable, plannedLessonsTable.updatedAt);
-        await m.addColumn(
+        await addColumnIfNotExists(
+          plannedLessonsTable,
+          plannedLessonsTable.updatedAt,
+        );
+        await addColumnIfNotExists(
           schoolCalendarEventsTable,
           schoolCalendarEventsTable.updatedAt,
         );
-        await m.addColumn(scheduleSlotsTable, scheduleSlotsTable.updatedAt);
-        await m.addColumn(courseContentsTable, courseContentsTable.updatedAt);
+        await addColumnIfNotExists(
+          scheduleSlotsTable,
+          scheduleSlotsTable.updatedAt,
+        );
+        await addColumnIfNotExists(
+          courseContentsTable,
+          courseContentsTable.updatedAt,
+        );
 
         await customStatement(
           'CREATE INDEX IF NOT EXISTS idx_sync_outbox_status '
