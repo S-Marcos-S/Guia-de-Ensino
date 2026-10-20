@@ -338,7 +338,7 @@ class SyncOutboxRepository {
       payloadJson: r.readNullable<String>('payload_json'),
       localRevision: r.read<int>('local_revision'),
       status: r.read<String>('status'),
-      createdAt: _readDateTime(r, 'created_at'),
+      createdAt: r.read<DateTime>('created_at').toUtc(),
     );
   }
 
@@ -348,7 +348,7 @@ class SyncOutboxRepository {
       entityType: r.read<String>('entity_type'),
       entityId: r.read<String>('entity_id'),
       operationId: r.read<String>('operation_id'),
-      deletedAt: _readDateTime(r, 'deleted_at'),
+      deletedAt: r.read<DateTime>('deleted_at').toUtc(),
       localRevision: r.read<int>('local_revision'),
       synced: r.read<bool>('synced'),
     );
@@ -357,7 +357,7 @@ class SyncOutboxRepository {
   SyncStateItem _mapStateItem(QueryRow r) {
     return SyncStateItem(
       id: r.read<String>('id'),
-      lastSyncedAt: _readNullableDateTime(r, 'last_synced_at'),
+      lastSyncedAt: r.readNullable<DateTime>('last_synced_at')?.toUtc(),
       lastSyncStatus: r.read<String>('last_sync_status'),
       lastSyncError: r.readNullable<String>('last_sync_error'),
       serverCursor: r.readNullable<String>('server_cursor'),
@@ -365,30 +365,7 @@ class SyncOutboxRepository {
       accountEmail: r.readNullable<String>('account_email'),
       localRevision: r.read<int>('local_revision'),
       accountEpoch: r.read<int>('account_epoch'),
-      updatedAt: _readDateTime(r, 'updated_at'),
+      updatedAt: r.read<DateTime>('updated_at').toUtc(),
     );
-  }
-
-  DateTime _readDateTime(QueryRow r, String column) {
-    final raw = r.read<Object>(column);
-    if (raw is int) {
-      return DateTime.fromMillisecondsSinceEpoch(raw * 1000, isUtc: true);
-    }
-    if (raw is DateTime) {
-      return raw.toUtc();
-    }
-    return DateTime.parse(raw.toString()).toUtc();
-  }
-
-  DateTime? _readNullableDateTime(QueryRow r, String column) {
-    final raw = r.readNullable<Object>(column);
-    if (raw == null) return null;
-    if (raw is int) {
-      return DateTime.fromMillisecondsSinceEpoch(raw * 1000, isUtc: true);
-    }
-    if (raw is DateTime) {
-      return raw.toUtc();
-    }
-    return DateTime.parse(raw.toString()).toUtc();
   }
 }
