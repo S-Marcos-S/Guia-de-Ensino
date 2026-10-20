@@ -5,6 +5,7 @@ import { UserSyncVersion } from './entities/user-sync-version.entity';
 import { UserChangeLog, MutationType } from './entities/user-change-log.entity';
 import { IdempotencyReceipt, IdempotencyStatus } from './entities/idempotency-receipt.entity';
 import { IdempotencyConflictException } from '../../common/exceptions/idempotency-conflict.exception';
+import { FactualIntegrityException } from '../../common/exceptions/factual-integrity.exception';
 
 export interface SyncOperationInput {
   clientOpId: string;
@@ -155,13 +156,16 @@ export class SyncStorageService {
           continue;
         }
 
-        // 2. Reserva a próxima sequência centralizada com precisão BIGINT (seq + 1n)
+        // 2. Validação rigorosa de integridade factual de domínio antes de qualquer efeito
+        await this.validateFactualIntegrity(manager, userId, op);
+
+        // 3. Reserva a próxima sequência centralizada com precisão BIGINT (seq + 1n)
         currentSeq = currentSeq + 1n;
 
-        // 3. Aplica a mutação relacional na tabela de negócio correspondente
+        // 4. Aplica a mutação relacional na tabela de negócio correspondente
         await this.applyEntityMutation(manager, userId, op);
 
-        // 4. Grava o evento imutável no log de alterações (user_change_log)
+        // 5. Grava o evento imutável no log de alterações (user_change_log)
         const logEntry = manager.create(UserChangeLog, {
           userId,
           serverSeq: currentSeq,
@@ -174,7 +178,7 @@ export class SyncStorageService {
         });
         await manager.save(UserChangeLog, logEntry);
 
-        // 5. Grava o recibo de idempotência
+        // 6. Grava o recibo de idempotência
         const appliedAt = new Date();
         const receipt = manager.create(IdempotencyReceipt, {
           userId,
@@ -230,7 +234,102 @@ export class SyncStorageService {
   }
 
   /**
+   * Validações ativas de integridade factual de domínio (proteção sagrada de diários e fatos históricos).
+   */
+  private async validateFactualIntegrity(
+    manager: EntityManager,
+    userId: string,
+    op: SyncOperationInput,
+  ): Promise<void> {
+    // 1. Proibição categórica de exclusão de LessonExecutionRecord via sincronização
+    if (op.entityType === 'lesson_execution_record' && op.mutationType === 'DELETE') {
+      throw new FactualIntegrityException(
+        `Registros históricos de realização de aula (lesson_execution_records) não podem ser excluídos via protocolo de sincronização.`,
+      );
+    }
+
+    // 2. Proibição de exclusão direta de conteúdos ministrados (ExecutionContentAllocation)
+    if (op.entityType === 'execution_content_allocation' && op.mutationType === 'DELETE') {
+      throw new FactualIntegrityException(
+        `Conteúdos efetivamente ministrados em aula não podem ser excluídos diretamente via sincronização sem retificação docente formal.`,
+      );
+    }
+
+    // 3. Não permitir exclusão de aula planejada que possua registro histórico de execução vinculado
+    if (op.entityType === 'planned_lesson' && op.mutationType === 'DELETE') {
+      const records = await manager.query(
+        `SELECT id FROM lesson_execution_records WHERE planned_lesson_id = $1 AND user_id = $2 LIMIT 1;`,
+        [op.entityId, userId],
+      );
+      if (records && records.length > 0) {
+        throw new FactualIntegrityException(
+          `A aula planejada '${op.entityId}' não pode ser excluída pois possui registro histórico fático de execução (diário de classe).`,
+        );
+      }
+    }
+
+    // 4. Não permitir rebaixamento ou alteração do status de aula planejada com execução vinculada
+    if (op.entityType === 'planned_lesson' && op.mutationType === 'UPDATE') {
+      const records = await manager.query(
+        `SELECT id, status FROM lesson_execution_records WHERE planned_lesson_id = $1 AND user_id = $2 LIMIT 1;`,
+        [op.entityId, userId],
+      );
+      if (records && records.length > 0) {
+        const payloadStatus = op.payload?.status as string | undefined;
+        if (
+          payloadStatus &&
+          payloadStatus !== 'completed' &&
+          payloadStatus !== 'partiallyCompleted' &&
+          payloadStatus !== 'notHeld'
+        ) {
+          throw new FactualIntegrityException(
+            `Não é permitido alterar ou reverter o status de uma aula planejada para '${payloadStatus}' quando há registro fático de execução vinculado.`,
+          );
+        }
+      }
+    }
+
+    // 5. Monotonicidade temporal e imutabilidade de recorded_at em LessonExecutionRecord
+    if (
+      op.entityType === 'lesson_execution_record' &&
+      (op.mutationType === 'UPDATE' || op.mutationType === 'INSERT')
+    ) {
+      const existing = await manager.query(
+        `SELECT recorded_at, updated_at FROM lesson_execution_records WHERE id = $1 AND user_id = $2 LIMIT 1;`,
+        [op.entityId, userId],
+      );
+      if (existing && existing.length > 0) {
+        const existingRow = existing[0];
+        if (op.payload?.recorded_at) {
+          const payloadRec = new Date(op.payload.recorded_at as string).getTime();
+          const existingRec = new Date(existingRow.recorded_at).getTime();
+          if (Math.abs(payloadRec - existingRec) > 1000) {
+            throw new FactualIntegrityException(
+              `A data original de realização da aula (recorded_at) é imutável.`,
+            );
+          }
+        }
+
+        if (op.payload?.updated_at) {
+          const payloadUpd = new Date(op.payload.updated_at as string).getTime();
+          const existingRec = new Date(existingRow.recorded_at).getTime();
+          const existingUpd = existingRow.updated_at
+            ? new Date(existingRow.updated_at).getTime()
+            : existingRec;
+
+          if (payloadUpd < existingRec || payloadUpd < existingUpd) {
+            throw new FactualIntegrityException(
+              `A data de retificação pedagógica (updated_at) deve ser posterior ou igual ao registro original e à retificação anterior.`,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Aplica a mutação direta na tabela de negócio, respeitando o isolamento por user_id.
+   * Suporta tabelas associativas com chave primária composta e tabelas com ID simples.
    */
   private async applyEntityMutation(
     manager: EntityManager,
@@ -239,7 +338,41 @@ export class SyncStorageService {
   ): Promise<void> {
     const tableName = this.resolveTableName(op.entityType);
 
+    // Tratamento de DELETE para tabelas associativas e tabelas com ID simples
     if (op.mutationType === 'DELETE') {
+      if (op.entityType === 'content_prerequisite') {
+        const [contentId, prereqId] = op.entityId.split(':');
+        const cId = (op.payload?.content_id as string) ?? contentId;
+        const pId = (op.payload?.prerequisite_content_id as string) ?? prereqId;
+        await manager.query(
+          `DELETE FROM content_prerequisites WHERE content_id = $1 AND prerequisite_content_id = $2 AND user_id = $3;`,
+          [cId, pId, userId],
+        );
+        return;
+      }
+
+      if (op.entityType === 'lesson_content_allocation') {
+        const [lessonId, contentId] = op.entityId.split(':');
+        const lId = (op.payload?.lesson_id as string) ?? lessonId;
+        const cId = (op.payload?.content_id as string) ?? contentId;
+        await manager.query(
+          `DELETE FROM lesson_content_allocations WHERE lesson_id = $1 AND content_id = $2 AND user_id = $3;`,
+          [lId, cId, userId],
+        );
+        return;
+      }
+
+      if (op.entityType === 'execution_content_allocation') {
+        const [recordId, contentId] = op.entityId.split(':');
+        const rId = (op.payload?.record_id as string) ?? recordId;
+        const cId = (op.payload?.content_id as string) ?? contentId;
+        await manager.query(
+          `DELETE FROM execution_content_allocations WHERE record_id = $1 AND content_id = $2 AND user_id = $3;`,
+          [rId, cId, userId],
+        );
+        return;
+      }
+
       await manager.query(`DELETE FROM ${tableName} WHERE id = $1 AND user_id = $2;`, [
         op.entityId,
         userId,
@@ -248,6 +381,50 @@ export class SyncStorageService {
     }
 
     if (!op.payload) {
+      return;
+    }
+
+    // Tratamento de INSERT/UPDATE para tabelas associativas compostas
+    if (op.entityType === 'content_prerequisite') {
+      const [contentId, prereqId] = op.entityId.split(':');
+      const cId = (op.payload.content_id as string) ?? contentId;
+      const pId = (op.payload.prerequisite_content_id as string) ?? prereqId;
+      await manager.query(
+        `INSERT INTO content_prerequisites (content_id, prerequisite_content_id, user_id)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (content_id, prerequisite_content_id, user_id) DO NOTHING;`,
+        [cId, pId, userId],
+      );
+      return;
+    }
+
+    if (op.entityType === 'lesson_content_allocation') {
+      const [lessonId, contentId] = op.entityId.split(':');
+      const lId = (op.payload.lesson_id as string) ?? lessonId;
+      const cId = (op.payload.content_id as string) ?? contentId;
+      const orderIndex = (op.payload.order_index as number) ?? 1;
+      await manager.query(
+        `INSERT INTO lesson_content_allocations (lesson_id, content_id, user_id, order_index)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (lesson_id, content_id, user_id) DO UPDATE
+         SET order_index = EXCLUDED.order_index;`,
+        [lId, cId, userId, orderIndex],
+      );
+      return;
+    }
+
+    if (op.entityType === 'execution_content_allocation') {
+      const [recordId, contentId] = op.entityId.split(':');
+      const rId = (op.payload.record_id as string) ?? recordId;
+      const cId = (op.payload.content_id as string) ?? contentId;
+      const orderIndex = (op.payload.order_index as number) ?? 1;
+      await manager.query(
+        `INSERT INTO execution_content_allocations (record_id, content_id, user_id, order_index)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (record_id, content_id, user_id) DO UPDATE
+         SET order_index = EXCLUDED.order_index;`,
+        [rId, cId, userId, orderIndex],
+      );
       return;
     }
 

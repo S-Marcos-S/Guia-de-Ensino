@@ -5,6 +5,7 @@ import { validateEnvironment } from './config/env.validation';
 import { getDatabaseConfig } from './config/database.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { SyncStorageModule } from './modules/sync-storage/sync-storage.module';
+import { SyncModule } from './modules/sync/sync.module';
 import { PedagogicalModule } from './modules/pedagogical/pedagogical.module';
 
 @Module({
@@ -21,6 +22,7 @@ import { PedagogicalModule } from './modules/pedagogical/pedagogical.module';
     }),
     AuthModule,
     SyncStorageModule,
+    SyncModule,
     PedagogicalModule,
   ],
 })
