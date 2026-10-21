@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag SemVer de release (ex: v0.9.0)'
+        required: false
+        default: ''
 
 # Permissoes minimas necessarias para publicacao de release no GitHub
 permissions:
@@ -14,6 +20,7 @@ jobs:
     name: Validar Formato da Tag Semântica
     runs-on: ubuntu-latest
     outputs:
+      tag_name: ${{ steps.parse_tag.outputs.tag_name }}
       version_name: ${{ steps.parse_tag.outputs.version_name }}
       build_number: ${{ steps.parse_tag.outputs.build_number }}
     steps:
@@ -22,7 +29,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME="${GITHUB_REF_NAME}"
+          TAG_NAME="${{ inputs.tag_name }}"
+          if [ -z "$TAG_NAME" ]; then
+            TAG_NAME="${GITHUB_REF_NAME}"
+          fi
           echo "Validando tag de release: $TAG_NAME"
           if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
             echo "::error::ERRO CRÍTICO: A tag '$TAG_NAME' não segue o padrão SemVer esperado (ex: v1.0.0 ou v0.9.0-rc.1)."
@@ -37,6 +47,7 @@ jobs:
           echo "Nenhuma release pré-existente encontrada para '$TAG_NAME'. Tag apta para prosseguir."
 
           VERSION_NAME="${TAG_NAME#v}"
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "build_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
           echo "Tag validada com sucesso: Versão $VERSION_NAME (Build ${GITHUB_RUN_NUMBER})"
@@ -260,7 +271,7 @@ jobs:
           echo "$APKSIGNER_OUTPUT"
           
           # Extrai o fingerprint SHA-256 do certificado do APK via apksigner ou keytool
-          APK_CERT_SHA256=$(echo "$APKSIGNER_OUTPUT" | grep -i "Signer #1 certificate SHA-256 digest:" | head -n 1 | awk '{print $NF}')
+          APK_CERT_SHA256=$(echo "$APKSIGNER_OUTPUT" | grep -i "certificate SHA-256 digest:" | head -n 1 | awk '{print $NF}')
           if [ -z "$APK_CERT_SHA256" ]; then
             APK_CERT_SHA256=$(keytool -printcert -jarfile "$APK_FILE" | grep -i "SHA256:" | head -n 1 | awk '{print $2}')
           fi
@@ -282,7 +293,7 @@ jobs:
       - name: Preparar Artefatos e Calcular Checksums
         id: prepare_artifacts
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          TAG="${{ needs.validate-tag.outputs.tag_name }}"
           ARTIFACTS_DIR="../../release-artifacts"
           mkdir -p "$ARTIFACTS_DIR"
           
@@ -311,8 +322,8 @@ jobs:
       - name: Publicar Release no GitHub
         uses: softprops/action-gh-release@v2
         with:
-          name: "Release ${{ github.ref_name }}"
-          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ needs.validate-tag.outputs.tag_name }}"
+          tag_name: ${{ needs.validate-tag.outputs.tag_name }}
           generate_release_notes: true
           files: |
             release-artifacts/guia-de-ensino-*.apk
@@ -322,7 +333,7 @@ jobs:
             ### Informações de Distribuição Oficial
             - **Versão**: `${{ needs.validate-tag.outputs.version_name }}` (Build `${{ needs.validate-tag.outputs.build_number }}`)
             - **Commit de Origem**: `${{ github.sha }}`
-            - **Tag**: `${{ github.ref_name }}`
+            - **Tag**: `${{ needs.validate-tag.outputs.tag_name }}`
             - **Status da Assinatura**: Assinado oficialmente com chave privada de produção permanente (RSA 3072 bits)
             - **Fingerprint SHA-256 do Certificado**: `F3:8E:A5:2C:BC:07:B5:1B:C9:DA:69:94:A7:44:A2:AD:4F:A8:75:4C:1B:F8:52:43:A5:95:A0:94:BD:2E:9E:E2`
             - **Checksum SHA-256 do APK**: `${{ steps.prepare_artifacts.outputs.apk_sha256 }}`
