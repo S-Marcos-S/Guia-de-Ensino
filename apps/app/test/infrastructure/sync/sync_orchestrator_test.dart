@@ -407,7 +407,7 @@ void main() {
 
         // Pull retorna delta com payload inválido para INSERT (payload nulo dispara FormatException)
         fakeApiClient.onPull = (query) async {
-          return const PullResponseDto(
+          return PullResponseDto(
             epoch: '1',
             currentServerSeq: '10',
             nextCursor: '10:0',
