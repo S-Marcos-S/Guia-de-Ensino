@@ -312,6 +312,10 @@ void main() {
     testWidgets('modo convidado deve permitir navegação sem acionar login', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -340,7 +344,9 @@ void main() {
 
       expect(find.byType(AuthScreen), findsOneWidget);
 
-      await tester.tap(find.text(AppStrings.authGuestButton));
+      final guestButton = find.text(AppStrings.authGuestButton);
+      await tester.ensureVisible(guestButton);
+      await tester.tap(guestButton);
       await tester.pumpAndSettle();
 
       expect(find.byType(AuthScreen), findsNothing);

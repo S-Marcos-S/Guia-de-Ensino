@@ -150,11 +150,15 @@ class SyncTriggerManager {
       return const SyncResult.alreadyInProgress();
     }
 
+    if (_isDisposed || _syncingController.isClosed) return null;
+
     _syncingController.add(true);
     try {
       final result = await orchestrator.synchronize(rethrowExceptions: false);
       _lastResult = result;
-      _resultController.add(result);
+      if (!_isDisposed && !_resultController.isClosed) {
+        _resultController.add(result);
+      }
 
       // Ao término, se houver solicitação pendente acumulada durante a execução:
       if (_hasPendingSyncRequest &&
@@ -171,10 +175,12 @@ class SyncTriggerManager {
       // Captura defensiva de falhas para isolar a interface
       final failure = SyncResult.failure(error: e);
       _lastResult = failure;
-      _resultController.add(failure);
+      if (!_isDisposed && !_resultController.isClosed) {
+        _resultController.add(failure);
+      }
       return failure;
     } finally {
-      if (!_isDisposed) {
+      if (!_isDisposed && !_syncingController.isClosed) {
         _syncingController.add(false);
       }
     }
