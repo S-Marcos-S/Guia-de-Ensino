@@ -113,7 +113,7 @@ void main() {
     // 1. Ciclo bem-sucedido de Push e Pull
     test('1. Ciclo bem-sucedido de Push e Pull', () async {
       // Enfileira operação local
-      final op = await outboxRepo.enqueueOperation(
+      await outboxRepo.enqueueOperation(
         entityType: SyncEntityType.subject,
         entityId: 'sub-1',
         operation: SyncMutationType.insert,
@@ -340,7 +340,7 @@ void main() {
 
     // 6. Confirmação correta de lápides por IDs de operação
     test('6. Confirmação correta de lápides por IDs de operação', () async {
-      final deleteOp = await outboxRepo.enqueueDelete(
+      await outboxRepo.enqueueDelete(
         entityType: SyncEntityType.subject,
         entityId: 'sub-to-delete',
       );
@@ -420,6 +420,8 @@ void main() {
                 entityId: 'ay-fail',
                 mutationType: 'INSERT',
                 payload: null, // Inválido!
+                deviceId: 'other-device',
+                createdAt: DateTime.utc(2026, 1, 1),
               ),
             ],
           );
@@ -563,7 +565,7 @@ void main() {
         final future1 = orchestrator.synchronize();
 
         // Aguarda breve instante para que o lock seja adquirido
-        await Future.delayed(const Duration(milliseconds: 10));
+        await Future<void>.delayed(const Duration(milliseconds: 10));
         expect(orchestrator.isSyncing, isTrue);
 
         // Segunda chamada concorrente
@@ -721,10 +723,10 @@ void main() {
 
       // As tabelas de domínio receberam os dados
       final subjects = await db
-          .customSelect("SELECT * FROM subjects_table;")
+          .customSelect('SELECT * FROM subjects_table;')
           .get();
       final classrooms = await db
-          .customSelect("SELECT * FROM classrooms_table;")
+          .customSelect('SELECT * FROM classrooms_table;')
           .get();
       expect(subjects, hasLength(1));
       expect(classrooms, hasLength(1));

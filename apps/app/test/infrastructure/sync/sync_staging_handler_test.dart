@@ -4,8 +4,8 @@ import 'package:app/infrastructure/sync/models/change_dto.dart';
 import 'package:app/infrastructure/sync/models/snapshot_response_dto.dart';
 import 'package:app/infrastructure/sync/models/sync_entity_type.dart';
 import 'package:app/infrastructure/sync/orchestrator/sync_staging_handler.dart';
-import 'package:app/infrastructure/sync/outbox/sync_outbox_item.dart';
 import 'package:app/infrastructure/sync/outbox/sync_outbox_repository.dart';
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -474,7 +474,7 @@ void main() {
     test(
       'ingere snapshot completo das 13 coleções em ordem topológica',
       () async {
-        final snapshot = SnapshotEntitiesDto(
+        final snapshot = const SnapshotEntitiesDto(
           academicYears: [
             {
               'id': 'ay-snap',
@@ -651,7 +651,7 @@ void main() {
     );
 
     test('falha durante snapshot dispara rollback integral sem deixar dados parciais', () async {
-      final corruptSnapshot = SnapshotEntitiesDto(
+      final corruptSnapshot = const SnapshotEntitiesDto(
         academicYears: [
           {
             'id': 'ay-valid',

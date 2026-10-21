@@ -100,18 +100,15 @@ class SyncResult {
 /// 8. Manutenção atômica do estado de sincronização em `sync_state_table`.
 class SyncOrchestrator {
   SyncOrchestrator({
-    required SyncApiClient apiClient,
-    required SyncOutboxRepository outboxRepository,
-    required SyncStagingHandler stagingHandler,
+    required this.apiClient,
+    required this.outboxRepository,
+    required this.stagingHandler,
     Uuid? uuid,
-  }) : _apiClient = apiClient,
-       _outboxRepository = outboxRepository,
-       _stagingHandler = stagingHandler,
-       _uuid = uuid ?? const Uuid();
+  }) : _uuid = uuid ?? const Uuid();
 
-  final SyncApiClient _apiClient;
-  final SyncOutboxRepository _outboxRepository;
-  final SyncStagingHandler _stagingHandler;
+  final SyncApiClient apiClient;
+  final SyncOutboxRepository outboxRepository;
+  final SyncStagingHandler stagingHandler;
   final Uuid _uuid;
 
   bool _isSyncing = false;
@@ -139,7 +136,7 @@ class SyncOrchestrator {
       final result = await _executeSyncCycle(forceSnapshot: forceSnapshot);
       return result;
     } catch (e) {
-      await _outboxRepository.updateSyncFailure(e.toString());
+      await outboxRepository.updateSyncFailure(e.toString());
       if (rethrowExceptions) {
         rethrow;
       }
@@ -151,9 +148,9 @@ class SyncOrchestrator {
 
   Future<SyncResult> _executeSyncCycle({required bool forceSnapshot}) async {
     // 1. Recuperação defensiva de operações interrompidas em trânsito
-    await _outboxRepository.resetSendingToPending();
+    await outboxRepository.resetSendingToPending();
 
-    var state = await _outboxRepository.getOrCreateSyncState();
+    var state = await outboxRepository.getOrCreateSyncState();
     var snapshotApplied = false;
 
     // 2. Snapshot forçado sob demanda
@@ -166,7 +163,7 @@ class SyncOrchestrator {
     final pushResult = await _executePushLoop(state);
 
     // Atualiza estado local caso o push tenha alterado metadados locais
-    state = await _outboxRepository.getOrCreateSyncState();
+    state = await outboxRepository.getOrCreateSyncState();
 
     // 4. Loop de Pull (recebimento incremental de alterações remotas)
     final pullResult = await _executePullLoop(state);
@@ -187,7 +184,7 @@ class SyncOrchestrator {
 
     while (true) {
       // Lê até 100 operações pendentes na ordem FIFO de revisão local
-      final pendingOps = await _outboxRepository.getPendingOperations(
+      final pendingOps = await outboxRepository.getPendingOperations(
         limit: 100,
       );
       if (pendingOps.isEmpty) {
@@ -197,10 +194,7 @@ class SyncOrchestrator {
       final batchOpIds = pendingOps.map((op) => op.operationId).toList();
 
       // Transiciona operações para 'sending' antes da chamada de rede
-      await _outboxRepository.updateStatus(
-        batchOpIds,
-        SyncOutboxStatus.sending,
-      );
+      await outboxRepository.updateStatus(batchOpIds, SyncOutboxStatus.sending);
 
       final clientBatchId = _uuid.v4();
       final request = PushRequestDto(
@@ -211,10 +205,10 @@ class SyncOrchestrator {
 
       PushResponseDto response;
       try {
-        response = await _apiClient.push(request);
+        response = await apiClient.push(request);
       } catch (e) {
         // Falha no envio: reverte lote inteiro para 'pending' para permitir nova tentativa
-        await _outboxRepository.updateStatus(
+        await outboxRepository.updateStatus(
           batchOpIds,
           SyncOutboxStatus.pending,
         );
@@ -247,7 +241,7 @@ class SyncOrchestrator {
           .where((id) => !appliedIds.contains(id) && !conflictIds.contains(id))
           .toList();
       if (unacknowledged.isNotEmpty) {
-        await _outboxRepository.updateStatus(
+        await outboxRepository.updateStatus(
           unacknowledged,
           SyncOutboxStatus.pending,
         );
@@ -255,14 +249,14 @@ class SyncOrchestrator {
 
       // Operações confirmadas são removidas e lápides marcadas como sincronizadas
       if (appliedIds.isNotEmpty) {
-        await _outboxRepository.removeOperations(appliedIds);
-        await _outboxRepository.markTombstonesSyncedByOperationIds(appliedIds);
+        await outboxRepository.removeOperations(appliedIds);
+        await outboxRepository.markTombstonesSyncedByOperationIds(appliedIds);
         totalPushed += appliedIds.length;
       }
 
       // Conflitos são marcados como 'failed'
       if (conflictIds.isNotEmpty) {
-        await _outboxRepository.updateStatus(
+        await outboxRepository.updateStatus(
           conflictIds,
           SyncOutboxStatus.failed,
         );
@@ -292,7 +286,7 @@ class SyncOrchestrator {
 
       PullResponseDto response;
       try {
-        response = await _apiClient.pull(query);
+        response = await apiClient.pull(query);
       } on SyncResyncRequiredException {
         // Servidor sinalizou RESYNC_REQUIRED (HTTP 410) por descontinuidade de época
         state = await _recoverSnapshot(state);
@@ -303,19 +297,19 @@ class SyncOrchestrator {
 
       // Ingestão remota direta dos deltas via StagingHandler
       if (response.changes.isNotEmpty) {
-        await _stagingHandler.applyChanges(response.changes);
+        await stagingHandler.applyChanges(response.changes);
         totalAppliedChanges += response.changes.length;
       }
 
       // O cursor e a época só avançam após o término bem-sucedido da aplicação das alterações
       final epochInt = int.tryParse(response.epoch) ?? state.accountEpoch;
-      await _outboxRepository.updateSyncState(
+      await outboxRepository.updateSyncState(
         serverCursor: response.nextCursor,
         accountEpoch: epochInt,
         lastSyncedAt: DateTime.now().toUtc(),
       );
 
-      state = await _outboxRepository.getOrCreateSyncState();
+      state = await outboxRepository.getOrCreateSyncState();
 
       if (!response.hasMore) {
         break;
@@ -334,22 +328,22 @@ class SyncOrchestrator {
   }
 
   Future<SyncStateItem> _recoverSnapshot(SyncStateItem currentState) async {
-    final snapshot = await _apiClient.getSnapshot();
+    final snapshot = await apiClient.getSnapshot();
 
     // Aplicação atômica transacional de todas as 13 coleções pedagógicas
-    await _stagingHandler.applySnapshot(snapshot.entities);
+    await stagingHandler.applySnapshot(snapshot.entities);
 
     final newEpoch =
         int.tryParse(snapshot.epoch) ?? (currentState.accountEpoch + 1);
     final newCursor = '${snapshot.snapshotSeq}:0';
 
-    await _outboxRepository.updateSyncState(
+    await outboxRepository.updateSyncState(
       serverCursor: newCursor,
       accountEpoch: newEpoch,
       lastSyncedAt: DateTime.now().toUtc(),
     );
 
-    return await _outboxRepository.getOrCreateSyncState();
+    return await outboxRepository.getOrCreateSyncState();
   }
 }
 
