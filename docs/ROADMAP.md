@@ -239,7 +239,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 9 — Sincronização e Gestão de Contas
-- **Status**: **Em Andamento**
+- **Status**: **Concluída**
 - **Subetapas**:
   - **9.1 — Schema Local v6 (Colunas updatedAt e Tabelas de Sincronização)**: **Concluído**
     - [x] Adição da coluna `updatedAt` anulável nas 8 tabelas de entidades (`AcademicYearsTable`, `ClassroomsTable`, `SubjectsTable`, `ClassroomSubjectsTable`, `PlannedLessonsTable`, `SchoolCalendarEventsTable`, `ScheduleSlotsTable`, `CourseContentsTable`).
@@ -258,7 +258,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
     - Endpoints `/api/sync/push` (recebimento em lote de 1 a 100 operações, atomicidade estrita, idempotência por hash de payload, ACKs `APPLIED`, `SKIPPED`, `CONFLICT`), `/api/sync/pull` (cursor composto determinístico `(server_seq, id)`, detecção de época e descarte de eco) e `/api/sync/snapshot` (snapshot consistente das 13 coleções sob `REPEATABLE READ` com token HMAC-SHA256 derivado via HKDF).
     - Proteção explícita de registros históricos fáticos de aula (`lesson_execution_records`) e regras de integridade curricular.
     - Suíte de 28 testes de integração contra PostgreSQL 16 real e 36 testes unitários aprovados no CI.
-  - **9.4 — Integração Flutter/Drift com o Protocolo de Sincronização**: **Em Andamento (Núcleo Técnico Concluído)**
+  - **9.4 — Integração Flutter/Drift com o Protocolo de Sincronização**: **Concluído**
     - Preparação segura da branch de trabalho `feature/etapa-9-cliente-sync` e unificação com Drift Schema v6.
     - [x] **Incremento 1 — DTOs Canônicos e Cliente HTTP (`SyncApiClient`)**:
       - Implementação dos DTOs canônicos do protocolo de sincronização em Dart (`SyncOperationDto`, `OperationAckDto`, `PushRequestDto`, `PushResponseDto`, `ChangeDto`, `PullQueryDto`, `PullResponseDto`, `SnapshotResponseDto`).
@@ -276,8 +276,8 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
       - *Evidências de validação*: 92 testes automatizados no Flutter aprovados (`sync_outbox_repository_test`, `sync_staging_handler_test`, `sync_orchestrator_test`), 0 avisos no `flutter analyze`, 64 testes do backend aprovados com PostgreSQL 16 real, compilação Release do APK Android no GitHub Actions (Run ID `39589750496`, commit `100611e`).
     - **Demarcação de Estado**:
       - *Núcleo Técnico da Sincronização*: **Concluído e validado em CI**.
-      - *Integração com Apresentação, Autenticação e Sessão*: **Pendente (escopo da Subetapa 9.5)**.
-      - *Consolidação da Branch*: **Pendente de autorização explícita do usuário** (trabalho mantido isolado na branch `feature/etapa-9-cliente-sync`).
+      - *Integração com Apresentação, Autenticação e Sessão*: **Concluído na Subetapa 9.5**.
+      - *Consolidação da Branch*: **Concluído** via merge commit `3b41548` e validado com 100% de sucesso na CI remota (Run `39606787913`).
   - **9.5 — Autenticação, Gestão de Sessão e Apresentação de Sincronização**: **Concluído**
     - [x] **Incremento 1 — Autenticação e Armazenamento Seguro de Tokens**:
       - Contrato abstrato `TokenStorage` desacoplado de APIs nativas, com implementação em memória (`InMemoryTokenStorage`) e persistência segura em arquivo no diretório privado da aplicação (`SecureFileTokenStorage`, permissões restritas e codificação isolada, conforme ADR 0004).
