@@ -262,7 +262,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
     - Preparação segura da branch de trabalho `feature/etapa-9-cliente-sync` e unificação com Drift Schema v6.
     - Incremento 1: DTOs canônicos do protocolo de sincronização (Push, Pull, Snapshot) e cliente HTTP `SyncApiClient` com autenticação Bearer JWT e tratamento tipado de erros (validado no commit `562cb7f`).
     - Incremento 2: Repositórios Drift transacionais com enfileiramento atômico na Outbox (`SyncOutboxRepository`), serialização canônica (`SyncPayloadSerializer`), avanço monotônico de `local_revision`, registro determinístico de tombstones e recuperação pós-falha (`resetSendingToPending`) (validado no commit `6008ae4`).
-    - Incremento 3: Orquestrador de sincronização local-first (`SyncOrchestrator`), loops de Push, Pull e Snapshot staging, controle de concorrência e reconciliação.
+    - Incremento 3: Orquestrador de sincronização local-first (`SyncOrchestrator`), ingestão remota direta e atômica (`SyncStagingHandler`), exclusão mútua (`isSyncing`), recuperação por Snapshot sob `RESYNC_REQUIRED` e integração com `AppDependencies`.
 - **Critérios de Aceitação Gerais**:
   1. [x] Schema local v6 validado com integridade e sem perda de dados legados.
   2. [x] Backend NestJS estruturado com TypeScript estrito, TypeORM e migrações versionadas.

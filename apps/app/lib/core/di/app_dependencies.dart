@@ -30,6 +30,9 @@ import 'package:app/infrastructure/persistence/repositories/drift_lesson_executi
 import 'package:app/infrastructure/persistence/repositories/drift_planned_lesson_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_schedule_slot_repository.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_subject_repository.dart';
+import 'package:app/infrastructure/sync/client/sync_api_client.dart';
+import 'package:app/infrastructure/sync/orchestrator/sync_orchestrator.dart';
+import 'package:app/infrastructure/sync/orchestrator/sync_staging_handler.dart';
 import 'package:app/infrastructure/sync/outbox/sync_outbox_repository.dart';
 import 'package:flutter/widgets.dart';
 
@@ -38,6 +41,9 @@ class AppDependencies {
   AppDependencies({
     required this.database,
     SyncOutboxRepository? syncOutboxRepository,
+    SyncApiClient? syncApiClient,
+    SyncStagingHandler? syncStagingHandler,
+    SyncOrchestrator? syncOrchestrator,
     AcademicYearRepository? academicYearRepository,
     SubjectRepository? subjectRepository,
     ClassroomRepository? classroomRepository,
@@ -62,6 +68,19 @@ class AppDependencies {
     ApplyReplanningProposalUseCase? applyReplanningProposalUseCase,
   }) : syncOutboxRepository =
            syncOutboxRepository ?? SyncOutboxRepository(database),
+       syncApiClient = syncApiClient,
+       syncStagingHandler = syncStagingHandler ?? SyncStagingHandler(database),
+       syncOrchestrator =
+           syncOrchestrator ??
+           (syncApiClient != null
+               ? SyncOrchestrator(
+                   apiClient: syncApiClient,
+                   outboxRepository:
+                       syncOutboxRepository ?? SyncOutboxRepository(database),
+                   stagingHandler:
+                       syncStagingHandler ?? SyncStagingHandler(database),
+                 )
+               : null),
        academicYearRepository =
            academicYearRepository ??
            DriftAcademicYearRepository(
@@ -308,6 +327,9 @@ class AppDependencies {
 
   final AppDatabase database;
   final SyncOutboxRepository syncOutboxRepository;
+  final SyncApiClient? syncApiClient;
+  final SyncStagingHandler syncStagingHandler;
+  final SyncOrchestrator? syncOrchestrator;
   final AcademicYearRepository academicYearRepository;
   final SubjectRepository subjectRepository;
   final ClassroomRepository classroomRepository;

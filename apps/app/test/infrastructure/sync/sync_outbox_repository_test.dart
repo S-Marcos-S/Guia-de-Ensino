@@ -255,6 +255,50 @@ void main() {
       expect(synced.length, equals(1));
     });
 
+    test('markTombstonesSyncedByOperationIds marca apenas as lápides correspondentes', () async {
+      final op1 = await outboxRepo.enqueueDelete(
+        entityType: SyncEntityType.subject,
+        entityId: 'sub-tomb-1',
+      );
+      final op2 = await outboxRepo.enqueueDelete(
+        entityType: SyncEntityType.subject,
+        entityId: 'sub-tomb-2',
+      );
+
+      // Ambas as lápides devem estar inicialmente com synced = false
+      var tombstones = await outboxRepo.getTombstones();
+      expect(tombstones.length, equals(2));
+      expect(tombstones.every((t) => !t.synced), isTrue);
+
+      // Lista vazia não gera SQL inválido nem altera dados
+      await outboxRepo.markTombstonesSyncedByOperationIds([]);
+      tombstones = await outboxRepo.getTombstones();
+      expect(tombstones.every((t) => !t.synced), isTrue);
+
+      // Confirma apenas op1 por seu operation_id (incluindo IDs inexistentes e duplicados)
+      await outboxRepo.markTombstonesSyncedByOperationIds([
+        'op-inexistente-1',
+        op1.operationId,
+        op1.operationId,
+      ]);
+
+      final t1 = (await outboxRepo.getTombstones()).firstWhere(
+        (t) => t.entityId == 'sub-tomb-1',
+      );
+      final t2 = (await outboxRepo.getTombstones()).firstWhere(
+        (t) => t.entityId == 'sub-tomb-2',
+      );
+
+      expect(t1.synced, isTrue);
+      expect(t1.operationId, equals(op1.operationId));
+      expect(t2.synced, isFalse);
+      expect(t2.operationId, equals(op2.operationId));
+
+      // Não deve apagar operações pendentes da outbox
+      final allOps = await outboxRepo.getAllOperations();
+      expect(allOps.length, equals(2));
+    });
+
     test(
       'getPendingOperations retorna itens em ordem FIFO de revisão',
       () async {
@@ -349,6 +393,50 @@ void main() {
       expect(state.lastSyncError, equals('Network timeout'));
       expect(state.serverCursor, equals('cur-100'));
     });
+
+    test(
+      'updateSyncState persiste cursor, época e timestamp com status idle',
+      () async {
+        // Cenário 1: Inicialização implícita quando o registro default ainda não existe
+        final lastSynced = DateTime.utc(2026, 3, 15, 14, 30);
+        await outboxRepo.updateSyncState(
+          serverCursor: '10:45',
+          accountEpoch: 2,
+          lastSyncedAt: lastSynced,
+        );
+
+        var state = await outboxRepo.getOrCreateSyncState();
+        expect(state.serverCursor, equals('10:45'));
+        expect(state.accountEpoch, equals(2));
+        expect(state.lastSyncedAt, equals(lastSynced));
+        expect(state.lastSyncStatus, equals('idle'));
+        expect(state.lastSyncError, isNull);
+        expect(state.localRevision, equals(0));
+        expect(state.deviceId, isNotEmpty);
+
+        // Cenário 2: Atualização após estado prévio de erro, garantindo limpeza do erro e retorno a idle
+        await outboxRepo.updateSyncFailure('Erro de conexão simulado');
+        state = await outboxRepo.getOrCreateSyncState();
+        expect(state.lastSyncStatus, equals('error'));
+        expect(state.lastSyncError, equals('Erro de conexão simulado'));
+
+        final updatedSynced = DateTime.utc(2026, 3, 15, 15, 0);
+        await outboxRepo.updateSyncState(
+          serverCursor: '20:90',
+          accountEpoch: 3,
+          lastSyncedAt: updatedSynced,
+        );
+
+        state = await outboxRepo.getOrCreateSyncState();
+        expect(state.serverCursor, equals('20:90'));
+        expect(state.accountEpoch, equals(3));
+        expect(state.lastSyncedAt, equals(updatedSynced));
+        expect(state.lastSyncStatus, equals('idle'));
+        expect(state.lastSyncError, isNull);
+        // Preservação estrita dos identificadores locais
+        expect(state.localRevision, equals(0));
+      },
+    );
   });
 
   group('Repositórios Transacionais — Atomicidade e Enfileiramento', () {
@@ -627,6 +715,185 @@ void main() {
       expect(pending[3].entityId, equals('sl-1'));
       expect(pending[4].operation, equals('INSERT'));
       expect(pending[4].entityId, equals('sl-3'));
+    });
+
+    test('DriftScheduleSlotRepository.delete(id) é atômico e enfileira DELETE com lápide', () async {
+      final ayRepo = DriftAcademicYearRepository(db, outboxRepo);
+      final subRepo = DriftSubjectRepository(db, outboxRepo);
+      final classroomRepo = DriftClassroomRepository(db, outboxRepo);
+      final repo = DriftScheduleSlotRepository(db, outboxRepo);
+
+      await ayRepo.save(
+        AcademicYear(
+          id: 'ay-slot-del',
+          year: 2026,
+          title: '2026',
+          startDate: DateTime.utc(2026, 2, 1),
+          endDate: DateTime.utc(2026, 12, 1),
+          totalMandatoryDays: 200,
+        ),
+      );
+      await subRepo.save(
+        const Subject(
+          id: 'sub-slot-del',
+          name: 'História',
+          colorHex: '#795548',
+        ),
+      );
+      await classroomRepo.save(
+        const Classroom(
+          id: 'c-slot-del',
+          academicYearId: 'ay-slot-del',
+          name: '8A',
+          gradeLevel: '8',
+          shift: ClassroomShift.morning,
+          subjectConfigs: [
+            ClassroomSubjectConfig(
+              id: 'cs-slot-del',
+              classroomId: 'c-slot-del',
+              subjectId: 'sub-slot-del',
+              weeklyLessons: 2,
+            ),
+          ],
+        ),
+      );
+
+      // Limpa a outbox para isolar o teste do slot
+      await outboxRepo.removeOperations(
+        (await outboxRepo.getAllOperations())
+            .map((SyncOutboxItem o) => o.operationId)
+            .toList(),
+      );
+
+      // 1. Salva um slot válido
+      const slot = ScheduleSlot(
+        id: 'sl-ind-1',
+        classroomSubjectId: 'cs-slot-del',
+        weekday: 3,
+        orderIndex: 2,
+        startTime: '08:00',
+        endTime: '08:50',
+      );
+      await repo.saveSlots('cs-slot-del', [slot]);
+
+      var pending = await outboxRepo.getPendingOperations();
+      expect(pending.length, equals(1));
+      expect(pending.first.operation, equals('INSERT'));
+      expect(pending.first.entityId, equals('sl-ind-1'));
+
+      // 2. Executa a exclusão individual com delete(id)
+      await repo.delete('sl-ind-1');
+
+      // Confirma remoção local
+      final remainingSlots = await repo.getByClassroomSubject('cs-slot-del');
+      expect(remainingSlots, isEmpty);
+
+      // Confirma operação DELETE na Outbox
+      pending = await outboxRepo.getPendingOperations();
+      expect(pending.length, equals(2));
+      final deleteOp = pending[1];
+      expect(deleteOp.entityType, equals(SyncEntityType.scheduleSlot));
+      expect(deleteOp.entityId, equals('sl-ind-1'));
+      expect(deleteOp.operation, equals(SyncMutationType.delete));
+      expect(deleteOp.payloadJson, isNull);
+
+      // Confirma criação da lápide correspondente
+      final tombstones = await outboxRepo.getTombstones();
+      expect(tombstones.length, equals(1));
+      final tombstone = tombstones.first;
+      expect(tombstone.entityType, equals(SyncEntityType.scheduleSlot));
+      expect(tombstone.entityId, equals('sl-ind-1'));
+      expect(tombstone.operationId, equals(deleteOp.operationId));
+      expect(tombstone.synced, isFalse);
+
+      // 3. ID inexistente: chamada subsequente é no-op idempotente
+      await repo.delete('sl-ind-1');
+      // Não gera novas operações nem novas lápides
+      final pendingAfter = await outboxRepo.getPendingOperations();
+      expect(pendingAfter.length, equals(2));
+      final tombstonesAfter = await outboxRepo.getTombstones();
+      expect(tombstonesAfter.length, equals(1));
+    });
+
+    test('DriftScheduleSlotRepository.delete(id) realiza rollback integral se a transação falhar', () async {
+      final ayRepo = DriftAcademicYearRepository(db, outboxRepo);
+      final subRepo = DriftSubjectRepository(db, outboxRepo);
+      final classroomRepo = DriftClassroomRepository(db, outboxRepo);
+      final repo = DriftScheduleSlotRepository(db, outboxRepo);
+
+      await ayRepo.save(
+        AcademicYear(
+          id: 'ay-slot-roll',
+          year: 2026,
+          title: '2026',
+          startDate: DateTime.utc(2026, 2, 1),
+          endDate: DateTime.utc(2026, 12, 1),
+          totalMandatoryDays: 200,
+        ),
+      );
+      await subRepo.save(
+        const Subject(id: 'sub-slot-roll', name: 'Artes', colorHex: '#E91E63'),
+      );
+      await classroomRepo.save(
+        const Classroom(
+          id: 'c-slot-roll',
+          academicYearId: 'ay-slot-roll',
+          name: '9A',
+          gradeLevel: '9',
+          shift: ClassroomShift.morning,
+          subjectConfigs: [
+            ClassroomSubjectConfig(
+              id: 'cs-slot-roll',
+              classroomId: 'c-slot-roll',
+              subjectId: 'sub-slot-roll',
+              weeklyLessons: 1,
+            ),
+          ],
+        ),
+      );
+
+      const slot = ScheduleSlot(
+        id: 'sl-roll-1',
+        classroomSubjectId: 'cs-slot-roll',
+        weekday: 1,
+        orderIndex: 1,
+      );
+      await repo.saveSlots('cs-slot-roll', [slot]);
+
+      // Limpa a outbox para isolar a verificação de rollback
+      await outboxRepo.removeOperations(
+        (await outboxRepo.getAllOperations())
+            .map((SyncOutboxItem o) => o.operationId)
+            .toList(),
+      );
+
+      try {
+        await db.transaction(() async {
+          await repo.delete('sl-roll-1');
+          throw Exception('Falha simulada para forçar rollback da exclusão');
+        });
+      } catch (_) {
+        // Exceção esperada
+      }
+
+      // Slot NÃO deve ter sido removido do banco
+      final slots = await repo.getByClassroomSubject('cs-slot-roll');
+      expect(slots.length, equals(1));
+      expect(slots.first.id, equals('sl-roll-1'));
+
+      // Nenhuma operação DELETE deve ter sido mantida na outbox
+      final allOps = await outboxRepo.getAllOperations();
+      expect(
+        allOps.any((SyncOutboxItem o) => o.entityId == 'sl-roll-1'),
+        isFalse,
+      );
+
+      // Nenhuma lápide deve ter sido registrada
+      final tombstones = await outboxRepo.getTombstones();
+      expect(
+        tombstones.any((SyncTombstoneItem t) => t.entityId == 'sl-roll-1'),
+        isFalse,
+      );
     });
 
     test(

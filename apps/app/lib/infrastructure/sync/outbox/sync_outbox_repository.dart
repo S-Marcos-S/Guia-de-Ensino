@@ -210,7 +210,7 @@ class SyncOutboxRepository {
     return rows.map(_mapTombstoneItem).toList();
   }
 
-  /// Marca lápides como sincronizadas com o servidor.
+  /// Marca lápides como sincronizadas com o servidor a partir dos IDs das próprias lápides.
   Future<void> markTombstonesSynced(List<String> tombstoneIds) async {
     if (tombstoneIds.isEmpty) return;
 
@@ -220,6 +220,29 @@ class SyncOutboxRepository {
       SET synced = 1
       WHERE id IN ($placeholders);
       ''', tombstoneIds);
+  }
+
+  /// Marca lápides como sincronizadas a partir dos identificadores de operação (`operation_id` / `clientOpId`)
+  /// confirmados com sucesso pelo servidor através de ACKs de Push.
+  Future<void> markTombstonesSyncedByOperationIds(
+    List<String> operationIds,
+  ) async {
+    final uniqueIds = operationIds.toSet().toList();
+    if (uniqueIds.isEmpty) return;
+
+    const chunkSize = 100;
+    for (var i = 0; i < uniqueIds.length; i += chunkSize) {
+      final chunk = uniqueIds.sublist(
+        i,
+        i + chunkSize > uniqueIds.length ? uniqueIds.length : i + chunkSize,
+      );
+      final placeholders = List.filled(chunk.length, '?').join(', ');
+      await _db.customStatement('''
+        UPDATE sync_tombstones_table
+        SET synced = 1
+        WHERE operation_id IN ($placeholders);
+        ''', chunk);
+    }
   }
 
   /// Reserva e avança atomicamente a próxima revisão local (`local_revision`) em `SyncStateTable`.
@@ -312,6 +335,35 @@ class SyncOutboxRepository {
       WHERE id = 'default';
       ''',
       [serverCursor, syncedSec, nowSec],
+    );
+  }
+
+  /// Atualiza o cursor do servidor, a época ativa e a data da última sincronização bem-sucedida em `SyncStateTable`,
+  /// redefinindo o status para 'idle', limpando eventuais erros e preservando identificadores locais.
+  Future<void> updateSyncState({
+    required String serverCursor,
+    required int accountEpoch,
+    DateTime? lastSyncedAt,
+  }) async {
+    final existing = await _db
+        .customSelect("SELECT id FROM sync_state_table WHERE id = 'default';")
+        .getSingleOrNull();
+
+    if (existing == null) {
+      await getOrCreateSyncState();
+    }
+
+    final synced = (lastSyncedAt ?? DateTime.now()).toUtc();
+    final syncedSec = synced.millisecondsSinceEpoch ~/ 1000;
+    final nowSec = DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
+
+    await _db.customStatement(
+      '''
+      UPDATE sync_state_table
+      SET server_cursor = ?, account_epoch = ?, last_synced_at = ?, last_sync_status = 'idle', last_sync_error = NULL, updated_at = ?
+      WHERE id = 'default';
+      ''',
+      [serverCursor, accountEpoch, syncedSec, nowSec],
     );
   }
 

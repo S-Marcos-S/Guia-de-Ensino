@@ -141,9 +141,18 @@ class DriftScheduleSlotRepository implements ScheduleSlotRepository {
 
   @override
   Future<void> delete(String id) async {
-    await (_db.delete(
-      _db.scheduleSlotsTable,
-    )..where((tbl) => tbl.id.equals(id))).go();
+    await _db.transaction(() async {
+      final deletedCount = await (_db.delete(
+        _db.scheduleSlotsTable,
+      )..where((tbl) => tbl.id.equals(id))).go();
+
+      if (deletedCount > 0) {
+        await _outboxRepository.enqueueDelete(
+          entityType: SyncEntityType.scheduleSlot,
+          entityId: id,
+        );
+      }
+    });
   }
 
   ScheduleSlot _toDomain(ScheduleSlotsTableData row) {
