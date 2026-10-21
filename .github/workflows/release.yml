@@ -5,13 +5,108 @@ on:
     tags:
       - 'v*'
 
-# Permissoes minimas necessarias para publicacao de release
+# Permissoes minimas necessarias para publicacao de release no GitHub
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
-    name: Validar, Compilar e Publicar Release
+  validate-tag:
+    name: Validar Formato da Tag Semântica
+    runs-on: ubuntu-latest
+    outputs:
+      version_name: ${{ steps.parse_tag.outputs.version_name }}
+      build_number: ${{ steps.parse_tag.outputs.build_number }}
+    steps:
+      - name: Validar Tag e Extrair Versão
+        id: parse_tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          echo "Validando tag de release: $TAG_NAME"
+          if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::ERRO CRÍTICO: A tag '$TAG_NAME' não segue o padrão SemVer esperado (ex: v1.0.0 ou v0.9.0-rc.1)."
+            exit 1
+          fi
+
+          echo "Verificando se já existe uma release publicada com a tag '$TAG_NAME'..."
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "::error::A release '$TAG_NAME' já existe no GitHub. Operação abortada para evitar sobrescrita acidental de versão."
+            exit 1
+          fi
+          echo "Nenhuma release pré-existente encontrada para '$TAG_NAME'. Tag apta para prosseguir."
+
+          VERSION_NAME="${TAG_NAME#v}"
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "build_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+          echo "Tag validada com sucesso: Versão $VERSION_NAME (Build ${GITHUB_RUN_NUMBER})"
+
+  validate-backend:
+    name: Validar Backend e Testar Persistência
+    needs: validate-tag
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: guia_de_ensino_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Instalar Dependências do Backend
+        run: npm ci
+
+      - name: Verificar Formatação (Prettier)
+        run: npm run format:check
+
+      - name: Executar Análise Estática (ESLint)
+        run: npm run lint
+
+      - name: Compilar Backend (NestJS Build)
+        run: npm run build
+
+      - name: Executar Testes Unitários
+        run: npm test
+
+      - name: Executar Testes de Integração (PostgreSQL Real)
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: test_user
+          DB_PASSWORD: test_password
+          DB_DATABASE: guia_de_ensino_test
+          JWT_SECRET: super_secret_test_key_minimum_32_characters_long_12345
+          JWT_EXPIRATION: 86400
+          PORT: 3000
+          NODE_ENV: test
+        run: npm run test:integration
+
+  validate-flutter:
+    name: Validar Código Flutter e Migrações
+    needs: validate-tag
     runs-on: ubuntu-latest
 
     defaults:
@@ -19,19 +114,8 @@ jobs:
         working-directory: apps/app
 
     steps:
-      - name: Checkout do Repositorio
+      - name: Checkout do Repositório
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Validar Formato da Tag Semantica
-        run: |
-          TAG_NAME="${GITHUB_REF_NAME}"
-          echo "Validando tag: $TAG_NAME"
-          if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
-            echo "ERRO: A tag '$TAG_NAME' nao segue o padrao semantico esperado (ex: v1.0.0 ou v0.3.1-beta.1)."
-            exit 1
-          fi
 
       - name: Configurar Java 17 (JDK)
         uses: actions/setup-java@v4
@@ -50,63 +134,197 @@ jobs:
       - name: Instalar Dependencias do Projeto
         run: flutter pub get
 
+      - name: Gerar Codigo Drift (build_runner)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Formatar Codigo Gerado (dart format)
+        run: dart format lib/infrastructure/persistence/database/app_database.g.dart
+
       - name: Verificar Formatacao de Codigo (dart format)
         run: dart format --set-exit-if-changed .
 
       - name: Executar Analise Estatica Estrita (flutter analyze)
         run: flutter analyze
 
+      - name: Executar Teste de Migracao de Banco SQLite v6
+        run: flutter test test/infrastructure/database_migration_v6_test.dart
+
       - name: Executar Testes Automatizados (flutter test)
         run: flutter test
 
-      - name: Configurar Keystore de Producao (se configurada nos Secrets)
-        id: keystore_setup
+  build-and-release:
+    name: Compilar APK Oficial e Publicar Release
+    needs: [validate-tag, validate-backend, validate-flutter]
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/app
+
+    steps:
+      - name: Checkout do Repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verificar Segredos Obrigatórios de Assinatura Oficial
         run: |
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "Keystore oficial detectada nos GitHub Secrets. Decodificando..."
-            echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
-            echo "is_signed=true" >> $GITHUB_OUTPUT
-          else
-            echo "AVISO: Segredos de assinatura de producao nao configurados no repositorio."
-            echo "Os artefatos serao compilados com a assinatura de teste/debug de CI."
-            echo "is_signed=false" >> $GITHUB_OUTPUT
+          echo "Verificando presença dos GitHub Secrets de assinatura..."
+          if [ -z "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ] || \
+             [ -z "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" ] || \
+             [ -z "${{ secrets.ANDROID_KEY_ALIAS }}" ] || \
+             [ -z "${{ secrets.ANDROID_KEY_PASSWORD }}" ]; then
+            echo "::error::ERRO CRÍTICO: Os segredos de assinatura oficial (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD) não estão configurados."
+            echo "::error::A publicação de release foi ABORTADA. Conforme a política de entrega, nunca publicamos APKs assinados com chave debug."
+            exit 1
           fi
-        env:
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          echo "Todos os segredos de assinatura oficial estão configurados."
 
-      - name: Compilar APK Android em Modo Release
-        run: flutter build apk --release
+      - name: Configurar Java 17 (JDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Compilar Android App Bundle (AAB) em Modo Release
-        run: flutter build appbundle --release
+      - name: Configurar Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
 
-      - name: Preparar Artefatos Nomeados com a Versao
+      - name: Instalar Dependencias do Projeto
+        run: flutter pub get
+
+      - name: Gerar Codigo Drift (build_runner)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Decodificar Keystore de Produção Temporária
+        id: setup_keystore
         run: |
-          mkdir -p release-artifacts
-          TAG="${GITHUB_REF_NAME}"
-          cp build/app/outputs/flutter-apk/app-release.apk release-artifacts/guia-de-ensino-${TAG}.apk
-          cp build/app/outputs/bundle/release/app-release.aab release-artifacts/guia-de-ensino-${TAG}.aab
+          KEYSTORE_DIR="${RUNNER_TEMP}/keystore"
+          mkdir -p "$KEYSTORE_DIR"
+          KEYSTORE_FILE="$KEYSTORE_DIR/release.keystore"
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$KEYSTORE_FILE"
+          chmod 600 "$KEYSTORE_FILE"
+          echo "keystore_path=$KEYSTORE_FILE" >> $GITHUB_OUTPUT
+          echo "Keystore decodificada temporariamente em local seguro com permissões 0600."
 
-      - name: Criar Release no GitHub e Anexar Artefatos
+      - name: Compilar APK Android Oficial em Modo Release
+        env:
+          OFFICIAL_RELEASE: "true"
+          ANDROID_KEYSTORE_PATH: ${{ steps.setup_keystore.outputs.keystore_path }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          VERSION_NAME="${{ needs.validate-tag.outputs.version_name }}"
+          BUILD_NUMBER="${{ needs.validate-tag.outputs.build_number }}"
+          echo "Compilando APK Release oficial: versão $VERSION_NAME (build $BUILD_NUMBER)..."
+          flutter build apk --release \
+            --build-name="$VERSION_NAME" \
+            --build-number="$BUILD_NUMBER"
+
+      - name: Compilar Android App Bundle (AAB) Oficial em Modo Release
+        env:
+          OFFICIAL_RELEASE: "true"
+          ANDROID_KEYSTORE_PATH: ${{ steps.setup_keystore.outputs.keystore_path }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          VERSION_NAME="${{ needs.validate-tag.outputs.version_name }}"
+          BUILD_NUMBER="${{ needs.validate-tag.outputs.build_number }}"
+          echo "Compilando AAB Release oficial: versão $VERSION_NAME (build $BUILD_NUMBER)..."
+          flutter build appbundle --release \
+            --build-name="$VERSION_NAME" \
+            --build-number="$BUILD_NUMBER"
+
+      - name: Verificar Assinatura Oficial e Integridade do APK
+        id: verify_apk
+        run: |
+          APK_FILE="build/app/outputs/flutter-apk/app-release.apk"
+          EXPECTED_SHA256="B6:C3:2F:6D:6F:81:A5:4A:4B:D5:89:48:C9:86:D5:D4:84:CA:08:C3:7F:66:06:0E:A2:62:1C:E8:CD:03:68:0D"
+          
+          echo "Localizando utilitário apksigner no Android SDK..."
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name "apksigner" | sort -V | tail -n 1)
+          if [ -z "$APKSIGNER" ] || [ ! -x "$APKSIGNER" ]; then
+            echo "::error::Utilitário 'apksigner' não foi localizado no Android SDK ($ANDROID_HOME)."
+            exit 1
+          fi
+          echo "Utilizando apksigner localizado em: $APKSIGNER"
+          
+          echo "Executando verificação estrita de assinatura via apksigner..."
+          APKSIGNER_OUTPUT=$("$APKSIGNER" verify --verbose --print-certs "$APK_FILE")
+          echo "$APKSIGNER_OUTPUT"
+          
+          # Extrai o fingerprint SHA-256 do certificado do APK via apksigner ou keytool
+          APK_CERT_SHA256=$(echo "$APKSIGNER_OUTPUT" | grep -i "Signer #1 certificate SHA-256 digest:" | head -n 1 | awk '{print $NF}')
+          if [ -z "$APK_CERT_SHA256" ]; then
+            APK_CERT_SHA256=$(keytool -printcert -jarfile "$APK_FILE" | grep -i "SHA256:" | head -n 1 | awk '{print $2}')
+          fi
+          
+          echo "Fingerprint SHA-256 encontrado no APK: $APK_CERT_SHA256"
+          echo "Fingerprint SHA-256 esperado:          $EXPECTED_SHA256"
+          
+          # Normaliza strings para comparação (maiúsculas e sem dois-pontos)
+          APK_NORM=$(echo "$APK_CERT_SHA256" | tr '[:lower:]' '[:upper:]' | tr -d ':')
+          EXPECTED_NORM=$(echo "$EXPECTED_SHA256" | tr '[:lower:]' '[:upper:]' | tr -d ':')
+          
+          if [ "$APK_NORM" != "$EXPECTED_NORM" ]; then
+            echo "::error::FALHA DE SEGURANÇA: O fingerprint SHA-256 do certificado do APK não corresponde à chave de produção esperada!"
+            echo "::error::Esperado: $EXPECTED_NORM | Encontrado: $APK_NORM"
+            exit 1
+          fi
+          echo "Assinatura oficial (esquemas v1/v2/v3) e fingerprint SHA-256 homologados com sucesso!"
+
+      - name: Preparar Artefatos e Calcular Checksums
+        id: prepare_artifacts
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          ARTIFACTS_DIR="../../release-artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
+          
+          APK_NAME="guia-de-ensino-${TAG}-universal.apk"
+          AAB_NAME="guia-de-ensino-${TAG}.aab"
+          
+          cp build/app/outputs/flutter-apk/app-release.apk "$ARTIFACTS_DIR/$APK_NAME"
+          cp build/app/outputs/bundle/release/app-release.aab "$ARTIFACTS_DIR/$AAB_NAME"
+          
+          cd "$ARTIFACTS_DIR"
+          sha256sum "$APK_NAME" > "${APK_NAME}.sha256"
+          sha256sum "$AAB_NAME" > "${AAB_NAME}.sha256"
+          
+          APK_SHA256=$(awk '{print $1}' "${APK_NAME}.sha256")
+          echo "apk_sha256=$APK_SHA256" >> $GITHUB_OUTPUT
+          echo "Artefatos preparados em $ARTIFACTS_DIR com checksums SHA-256."
+          ls -la
+
+      - name: Limpeza Segura da Keystore Temporária
+        if: always()
+        run: |
+          echo "Executando limpeza incondicional da keystore temporária..."
+          rm -rf "${RUNNER_TEMP}/keystore"
+          echo "Keystore efêmera removida do runner."
+
+      - name: Publicar Release no GitHub
         uses: softprops/action-gh-release@v2
         with:
           name: "Release ${{ github.ref_name }}"
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
           files: |
-            apps/app/release-artifacts/guia-de-ensino-*.apk
-            apps/app/release-artifacts/guia-de-ensino-*.aab
+            release-artifacts/guia-de-ensino-*.apk
+            release-artifacts/guia-de-ensino-*.aab
+            release-artifacts/*.sha256
           body: |
-            ### Informacoes da Compilacao
-            - **Tag da Versao**: `${{ github.ref_name }}`
+            ### Informações de Distribuição Oficial
+            - **Versão**: `${{ needs.validate-tag.outputs.version_name }}` (Build `${{ needs.validate-tag.outputs.build_number }}`)
             - **Commit de Origem**: `${{ github.sha }}`
-            - **Flutter SDK**: `3.47.7 (stable)`
-            - **Java**: `17 (Temurin)`
-            - **Status da Assinatura**: ${{ steps.keystore_setup.outputs.is_signed == 'true' && 'Assinado com chave oficial de producao' || 'Build de Teste / Compilado com chave de CI (nao distribuivel em producao sem assinatura oficial)' }}
+            - **Tag**: `${{ github.ref_name }}`
+            - **Status da Assinatura**: Assinado oficialmente com chave privada de produção permanente (RSA 3072 bits)
+            - **Fingerprint SHA-256 do Certificado**: `B6:C3:2F:6D:6F:81:A5:4A:4B:D5:89:48:C9:86:D5:D4:84:CA:08:C3:7F:66:06:0E:A2:62:1C:E8:CD:03:68:0D`
+            - **Checksum SHA-256 do APK**: `${{ steps.prepare_artifacts.outputs.apk_sha256 }}`
             
-            Consulte a documentacao em [docs/CI_CD.md](https://github.com/S-Marcos-S/Guia-de-Ensino/blob/main/docs/CI_CD.md) para detalhes sobre configuracao de segredos de assinatura oficial.
-
-      - name: Limpeza Segura de Arquivos Temporarios
-        if: always()
-        run: |
-          rm -f android/app/release.keystore
+            Consulte a documentação em [docs/CI_CD.md](https://github.com/S-Marcos-S/Guia-de-Ensino/blob/main/docs/CI_CD.md) para detalhes de segurança e validação.

@@ -67,50 +67,67 @@ A automação remota é composta por dois workflows versionados no diretório `.
 
 ### 2.2 Workflow de Releases (`release.yml`)
 - **Gatilhos**:
-  - `push` de tags que sigam o padrão semântico `v*` (ex: `v0.1.0`, `v1.0.0`).
+  - `push` de tags que sigam o padrão semântico `v*` (ex: `v0.9.0`, `v1.0.0`).
 - **Permissões Mínimas de Segurança**:
   ```yaml
   permissions:
     contents: write
   ```
-- **Etapas Executadas**:
-  1. Validação estrita do padrão da tag via regex (`^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$`).
-  2. Execução completa dos testes obrigatórios (`format`, `analyze`, `test`).
-  3. Verificação de assinatura Android (detalhada na seção 3).
-  4. Compilação dos artefatos:
-     - APK universal em release (`app-release.apk`).
-     - Android App Bundle (`app-release.aab`).
-  5. Publicação automática da Release no GitHub (`softprops/action-gh-release@v2`) com changelog automático, hash do commit de origem e artefatos anexados.
+- **Estrutura dos Jobs e Orquestração**:
+  1. `validate-tag`: Validação do formato semântico via regex e extração da versão (`version_name`) e número de build incremental (`build_number` derivado de `GITHUB_RUN_NUMBER`).
+  2. `validate-backend`: Execução da validação completa do servidor NestJS em container Ubuntu com serviço PostgreSQL 16 Alpine (Prettier, ESLint, compilação, testes unitários e testes de integração).
+  3. `validate-flutter`: Execução da validação do cliente Flutter (Drift `build_runner`, formatação `dart format`, análise estática `flutter analyze`, teste de migração de banco v6 e suíte geral de `flutter test`).
+  4. `build-and-release` (executado somente se os 3 jobs anteriores forem aprovados com sucesso):
+     - **Verificação Mandatória de Segredos**: Aborta imediatamente se qualquer um dos 4 segredos oficiais de assinatura estiver ausente. **Nunca publica APK assinado com chave debug.**
+     - **Decodificação Efêmera**: Decodifica a keystore em diretório temporário isolado fora do repositório (`${RUNNER_TEMP}/keystore`) com permissões `0600`.
+     - **Compilação de Release**: Compila o APK universal e o AAB com `--build-name` e `--build-number` sincronizados com a versão.
+     - **Verificação Criptográfica do APK**: Inspeciona o APK compilado via `keytool -printcert -jarfile` e valida se o fingerprint SHA-256 coincide com a identidade oficial registrada. Em caso de divergência, o job falha e o artefato é rejeitado.
+     - **Geração de Checksums SHA-256**: Calcula o hash SHA-256 dos artefatos para permitir verificação de integridade pós-download.
+     - **Limpeza Garantida**: Remove a keystore temporária incondicionalmente no bloco `if: always()`.
+     - **Publicação de Release**: Publica a release no GitHub Releases com changelog automático, dados de compilação, hash do commit e artefatos anexados (`.apk`, `.aab`, `.sha256`).
 
 ---
 
 ## 3. Política de Assinatura de Artefatos Android
 
-### 3.1 Estado Atual e Limitações
-- **Situação Atual**: O repositório **não** possui e **não deve possuir** keystores de produção versionadas.
-- **Comportamento Atual no CI**: Quando compilado sem segredos de assinatura fornecidos, o Gradle utiliza a chave padrão de debug (`signingConfigs.getByName("debug")`) para que a compilação release conclua e os artefatos de teste possam ser inspecionados.
-- **Aviso Obrigatório**: Artefatos gerados sem chave oficial de release são explicitamente identificados nas notas de versão como **"Build de Teste / Não Assinado para Produção"**. Eles **não** devem ser distribuídos como versões finais de produção para o usuário final antes da configuração segura da keystore.
+### 3.1 Estado Atual e Política de Assinatura
+- **Situação Atual**: O repositório **não** possui e **não deve possuir** keystores ou certificados privados de produção versionados.
+- **Configuração no Gradle (`build.gradle.kts`)**:
+  - Quando a variável `OFFICIAL_RELEASE=true` (ou a propriedade `-PofficialRelease=true`) estiver ativa, o Gradle **exige estritamente** as 4 variáveis de ambiente de assinatura (`ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`). Se qualquer uma faltar ou se o arquivo não existir, o build **falha imediatamente com erro explícito**, impedindo qualquer fallback silencioso para chaves de debug em builds oficiais.
+  - Para compilações locais normais de desenvolvimento (sem `OFFICIAL_RELEASE`), o Gradle exibe um aviso de log e utiliza a chave de debug para conveniência do desenvolvedor.
+- **Identidade Permanente**: O aplicativo utiliza chave privada RSA de 3072 bits com validade de 10.000 dias (~27 anos). Esta chave deve ser preservada permanentemente, pois futuras atualizações do APK dependem da mesma assinatura.
+- **Registro Público do Certificado Oficial**:
+  - **Alias**: `guia_release`
+  - **Algoritmo da Chave**: RSA 3072 bits (Assinatura `SHA384withRSA`)
+  - **Período de Validade**: 21 de Outubro de 2026 até 08 de Março de 2054
+  - **Número de Série**: `786014f4f8190006`
+  - **Fingerprint SHA-256**: `B6:C3:2F:6D:6F:81:A5:4A:4B:D5:89:48:C9:86:D5:D4:84:CA:08:C3:7F:66:06:0E:A2:62:1C:E8:CD:03:68:0D`
+  - **Fingerprint SHA-1**: `37:A1:1C:7F:73:FE:E0:DB:08:D6:E0:60:9D:4A:92:52:0A:D9:2B:F6`
 
-### 3.2 Como Configurar a Assinatura Oficial no GitHub Secrets
-Quando a equipe estiver pronta para assinar artefatos oficiais de produção:
+### 3.2 Geração Segura da Keystore no Termux e Backups
+Para garantir que as senhas **nunca** sejam expostas em chats, histórico de shell ou logs de CI, a keystore é gerada localmente no Termux via prompt interativo protegido:
 
-1. Gerar localmente a keystore oficial (armazenada de forma segura fora do Git):
+1. **Executar o script interativo de geração**:
    ```bash
-   keytool -genkey -v -keystore guia-de-ensino-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias guia_release
+   bash /data/data/com.termux/files/home/keystores/gerar_keystore_producao.sh
    ```
-2. Codificar o arquivo `.jks` em Base64:
-   ```bash
-   # Linux/macOS
-   base64 -w 0 guia-de-ensino-release.jks > keystore_base64.txt
-   # Windows PowerShell
-   [Convert]::ToBase64String([IO.File]::ReadAllBytes("guia-de-ensino-release.jks")) | Set-Content keystore_base64.txt
-   ```
-3. Configurar os seguintes segredos no GitHub (`Settings > Secrets and variables > Actions > New repository secret`):
-   - `ANDROID_KEYSTORE_BASE64`: Conteúdo do arquivo `keystore_base64.txt`.
-   - `ANDROID_KEYSTORE_PASSWORD`: Senha da keystore.
-   - `ANDROID_KEY_ALIAS`: Alias da chave (ex: `guia_release`).
-   - `ANDROID_KEY_PASSWORD`: Senha da chave.
-4. O workflow de release detectará automaticamente a presença desses segredos, decodificará a keystore em tempo de execução de forma efêmera no runner, compilará o APK e AAB assinados oficialmente e removerá o arquivo temporário ao final.
+   * O script invocará o `keytool` solicitando as senhas de forma oculta diretamente no terminal.
+   * Parâmetros aplicados: algoritmo `RSA`, tamanho `3072 bits`, validade `10000 dias`, formato `JKS`, alias `guia_release`.
+   * Permissões restritas (`0600`) são aplicadas automaticamente ao arquivo gerado (`/data/data/com.termux/files/home/keystores/guia-de-ensino-release.jks`).
+2. **Política de Backups Protegidos Obrigatórios**:
+   * **Backup 1 (Cofre Digital Criptografado)**: Armazenar uma cópia da keystore (`.jks`) e de sua senha em um gerenciador de senhas ou cofre criptografado (ex: Bitwarden, KeePassXC).
+   * **Backup 2 (Mídia Física Offline Isolada)**: Armazenar uma cópia em pendrive/mídia externa desconectada da internet, em local físico seguro.
+   * **Aviso**: Se a chave de produção for perdida, **não é possível recuperar a identidade de assinatura** e os usuários existentes seriam forçados a desinstalar o aplicativo para receber novas atualizações.
+
+### 3.3 Configuração dos GitHub Secrets para o Workflow de Release
+Após a geração segura no Termux, configure os 4 segredos no repositório GitHub (`Settings > Secrets and variables > Actions > New repository secret`):
+
+1. `ANDROID_KEYSTORE_BASE64`: Conteúdo do arquivo `/data/data/com.termux/files/home/keystores/keystore_base64.txt`.
+2. `ANDROID_KEYSTORE_PASSWORD`: A senha definida interativamente para a keystore.
+3. `ANDROID_KEY_ALIAS`: `guia_release`.
+4. `ANDROID_KEY_PASSWORD`: A senha da chave privada (idêntica à da keystore).
+
+O workflow de release lerá esses segredos, montará o arquivo temporário de forma efêmera no runner durante a compilação oficial e o removerá com garantia no bloco `always()`.
 
 ---
 

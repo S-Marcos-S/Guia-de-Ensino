@@ -51,7 +51,10 @@ import 'package:flutter/widgets.dart';
 /// Suporta modo híbrido (offline/convidado e autenticado), gerenciando
 /// reativamente a disponibilização de [SyncApiClient] e [SyncOrchestrator].
 class AppDependencies extends ChangeNotifier {
-  static const String defaultApiBaseUrl = 'https://api.guiadeensino.com.br';
+  static const String defaultApiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://api.guiadeensino.com.br',
+  );
 
   AppDependencies({
     required this.database,

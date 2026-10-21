@@ -17,12 +17,17 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   final database = AppDatabase();
 
+  const apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: AppDependencies.defaultApiBaseUrl,
+  );
+
   final tokenStorage = SecureFileTokenStorage(
     directoryProvider: () => getApplicationDocumentsDirectory(),
   );
 
   final authRepository = AuthRepositoryImpl(
-    apiClient: AuthApiClient(baseUrl: AppDependencies.defaultApiBaseUrl),
+    apiClient: AuthApiClient(baseUrl: apiBaseUrl),
     tokenStorage: tokenStorage,
   );
 
@@ -35,6 +40,7 @@ void main() {
   final dependencies = AppDependencies(
     database: database,
     authRepository: authRepository,
+    apiBaseUrl: apiBaseUrl,
     connectivityService: connectivityService,
   );
 
