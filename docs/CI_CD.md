@@ -98,11 +98,11 @@ A automação remota é composta por dois workflows versionados no diretório `.
 - **Identidade Permanente**: O aplicativo utiliza chave privada RSA de 3072 bits com validade de 10.000 dias (~27 anos). Esta chave deve ser preservada permanentemente, pois futuras atualizações do APK dependem da mesma assinatura.
 - **Registro Público do Certificado Oficial**:
   - **Alias**: `guia_release`
-  - **Algoritmo da Chave**: RSA 3072 bits (Assinatura `SHA384withRSA`)
+  - **Algoritmo da Chave**: RSA 3072 bits (Assinatura `SHA256withRSA`)
   - **Período de Validade**: 21 de Outubro de 2026 até 08 de Março de 2054
-  - **Número de Série**: `786014f4f8190006`
-  - **Fingerprint SHA-256**: `B6:C3:2F:6D:6F:81:A5:4A:4B:D5:89:48:C9:86:D5:D4:84:CA:08:C3:7F:66:06:0E:A2:62:1C:E8:CD:03:68:0D`
-  - **Fingerprint SHA-1**: `37:A1:1C:7F:73:FE:E0:DB:08:D6:E0:60:9D:4A:92:52:0A:D9:2B:F6`
+  - **Número de Série**: `6827ffdc63dc07ae`
+  - **Fingerprint SHA-256**: `F3:8E:A5:2C:BC:07:B5:1B:C9:DA:69:94:A7:44:A2:AD:4F:A8:75:4C:1B:F8:52:43:A5:95:A0:94:BD:2E:9E:E2`
+  - **Fingerprint SHA-1**: `F2:2D:1F:0A:0A:9A:74:5C:81:95:41:48:4A:85:22:A5:FE:92:C0:76`
 
 ### 3.2 Geração Segura da Keystore no Termux e Backups
 Para garantir que as senhas **nunca** sejam expostas em chats, histórico de shell ou logs de CI, a keystore é gerada localmente no Termux via prompt interativo protegido:

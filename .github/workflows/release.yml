@@ -245,7 +245,7 @@ jobs:
         id: verify_apk
         run: |
           APK_FILE="build/app/outputs/flutter-apk/app-release.apk"
-          EXPECTED_SHA256="B6:C3:2F:6D:6F:81:A5:4A:4B:D5:89:48:C9:86:D5:D4:84:CA:08:C3:7F:66:06:0E:A2:62:1C:E8:CD:03:68:0D"
+          EXPECTED_SHA256="F3:8E:A5:2C:BC:07:B5:1B:C9:DA:69:94:A7:44:A2:AD:4F:A8:75:4C:1B:F8:52:43:A5:95:A0:94:BD:2E:9E:E2"
           
           echo "Localizando utilitário apksigner no Android SDK..."
           APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name "apksigner" | sort -V | tail -n 1)
@@ -324,7 +324,7 @@ jobs:
             - **Commit de Origem**: `${{ github.sha }}`
             - **Tag**: `${{ github.ref_name }}`
             - **Status da Assinatura**: Assinado oficialmente com chave privada de produção permanente (RSA 3072 bits)
-            - **Fingerprint SHA-256 do Certificado**: `B6:C3:2F:6D:6F:81:A5:4A:4B:D5:89:48:C9:86:D5:D4:84:CA:08:C3:7F:66:06:0E:A2:62:1C:E8:CD:03:68:0D`
+            - **Fingerprint SHA-256 do Certificado**: `F3:8E:A5:2C:BC:07:B5:1B:C9:DA:69:94:A7:44:A2:AD:4F:A8:75:4C:1B:F8:52:43:A5:95:A0:94:BD:2E:9E:E2`
             - **Checksum SHA-256 do APK**: `${{ steps.prepare_artifacts.outputs.apk_sha256 }}`
             
             Consulte a documentação em [docs/CI_CD.md](https://github.com/S-Marcos-S/Guia-de-Ensino/blob/main/docs/CI_CD.md) para detalhes de segurança e validação.
