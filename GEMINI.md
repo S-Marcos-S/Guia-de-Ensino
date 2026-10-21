@@ -22,6 +22,7 @@ O idioma padrão da interface e da documentação voltada ao usuário é portugu
 - Não faça push, merge, publicação ou implantação sem autorização explícita.
 - Não armazene segredos no código ou no repositório.
 - Não apague registros históricos de aulas durante o replanejamento.
+- O relatório ao final de cada tarefa ou etapa deve ser sempre resumido, conciso e direto ao ponto.
 
 ## 3. Arquitetura e organização
 
@@ -174,7 +175,7 @@ Para cada tarefa:
 6. Implemente a alteração.
 7. Execute as verificações.
 8. Atualize a documentação.
-9. Informe os resultados reais.
+9. Informe os resultados reais em relatório sempre resumido.
 10. Registre as pendências.
 
 Atualize `docs/ROADMAP.md` quando o status de uma etapa mudar.
@@ -208,6 +209,7 @@ Uma tarefa somente pode ser considerada concluída quando:
 - Não há regressões conhecidas introduzidas pela alteração.
 - A documentação necessária foi atualizada.
 - As limitações restantes foram informadas.
+- O relatório final apresentado é resumido e conciso.
 - O estado real do código corresponde ao status registrado no roadmap.
 
 ## 16. Política de Git, Versionamento e CI/CD

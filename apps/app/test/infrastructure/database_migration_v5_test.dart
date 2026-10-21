@@ -16,7 +16,7 @@ void main() {
       'deve executar onCreate criando todas as tabelas na versão 5',
       () async {
         final db = AppDatabase.forTesting(NativeDatabase.memory());
-        expect(db.schemaVersion, equals(5));
+        expect(db.schemaVersion, equals(6));
 
         // Cria estrutura base
         await db

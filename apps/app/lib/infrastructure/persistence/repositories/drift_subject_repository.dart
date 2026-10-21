@@ -1,26 +1,63 @@
 import 'package:app/domain/models/subject.dart';
 import 'package:app/domain/repositories/subject_repository.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
+import 'package:app/infrastructure/sync/models/sync_entity_type.dart';
+import 'package:app/infrastructure/sync/outbox/sync_outbox_repository.dart';
+import 'package:app/infrastructure/sync/outbox/sync_payload_serializer.dart';
 import 'package:drift/drift.dart';
 
 /// Implementação do repositório de Disciplinas utilizando Drift e SQLite.
 class DriftSubjectRepository implements SubjectRepository {
-  DriftSubjectRepository(this._db);
+  DriftSubjectRepository(this._db, [SyncOutboxRepository? outboxRepository])
+    : _outboxRepository = outboxRepository ?? SyncOutboxRepository(_db);
 
   final AppDatabase _db;
+  final SyncOutboxRepository _outboxRepository;
 
   @override
   Future<void> save(Subject subject) async {
-    await _db
-        .into(_db.subjectsTable)
-        .insertOnConflictUpdate(
-          SubjectsTableCompanion.insert(
-            id: subject.id,
-            name: subject.name,
-            colorHex: subject.colorHex,
-            createdAt: DateTime.now().toUtc(),
+    await _db.transaction(() async {
+      final existing = await findById(subject.id);
+      final isUpdate = existing != null;
+      final now = DateTime.now().toUtc();
+
+      if (isUpdate) {
+        await (_db.update(
+          _db.subjectsTable,
+        )..where((tbl) => tbl.id.equals(subject.id))).write(
+          SubjectsTableCompanion(
+            name: Value(subject.name),
+            colorHex: Value(subject.colorHex),
+            updatedAt: Value(now),
           ),
         );
+      } else {
+        await _db
+            .into(_db.subjectsTable)
+            .insert(
+              SubjectsTableCompanion(
+                id: Value(subject.id),
+                name: Value(subject.name),
+                colorHex: Value(subject.colorHex),
+                createdAt: Value(now),
+                updatedAt: Value(now),
+              ),
+            );
+      }
+
+      final payload = SyncPayloadSerializer.subject(
+        subject,
+        createdAt: isUpdate ? null : now,
+        updatedAt: now,
+      );
+
+      await _outboxRepository.enqueueOperation(
+        entityType: SyncEntityType.subject,
+        entityId: subject.id,
+        operation: isUpdate ? SyncMutationType.update : SyncMutationType.insert,
+        payload: payload,
+      );
+    });
   }
 
   @override
@@ -49,9 +86,16 @@ class DriftSubjectRepository implements SubjectRepository {
 
   @override
   Future<void> delete(String id) async {
-    await (_db.delete(
-      _db.subjectsTable,
-    )..where((tbl) => tbl.id.equals(id))).go();
+    await _db.transaction(() async {
+      await (_db.delete(
+        _db.subjectsTable,
+      )..where((tbl) => tbl.id.equals(id))).go();
+
+      await _outboxRepository.enqueueDelete(
+        entityType: SyncEntityType.subject,
+        entityId: id,
+      );
+    });
   }
 
   Subject _toDomain(SubjectsTableData data) {

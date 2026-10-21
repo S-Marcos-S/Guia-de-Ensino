@@ -1,52 +1,126 @@
 import 'package:app/domain/models/course_content.dart';
 import 'package:app/domain/repositories/course_content_repository.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
+import 'package:app/infrastructure/sync/models/sync_entity_type.dart';
+import 'package:app/infrastructure/sync/outbox/sync_outbox_repository.dart';
+import 'package:app/infrastructure/sync/outbox/sync_payload_serializer.dart';
 import 'package:drift/drift.dart';
 
 /// Implementação do repositório de conteúdos programáticos no SQLite via Drift.
 class DriftCourseContentRepository implements CourseContentRepository {
-  DriftCourseContentRepository(this._db);
+  DriftCourseContentRepository(
+    this._db, [
+    SyncOutboxRepository? outboxRepository,
+  ]) : _outboxRepository = outboxRepository ?? SyncOutboxRepository(_db);
 
   final AppDatabase _db;
+  final SyncOutboxRepository _outboxRepository;
 
   @override
   Future<void> save(CourseContent content) async {
     await _db.transaction(() async {
-      await _db
-          .into(_db.courseContentsTable)
-          .insertOnConflictUpdate(
-            CourseContentsTableCompanion.insert(
-              id: content.id,
-              classroomSubjectId: content.classroomSubjectId,
-              title: content.title,
-              description: Value(content.description),
-              thematicUnit: Value(content.thematicUnit),
-              estimatedLessons: Value(content.estimatedLessons),
-              orderIndex: content.orderIndex,
-              curriculumCompetencyId: Value(content.curriculumCompetencyId),
-              origin: content.origin.name,
-              isMandatory: Value(content.isMandatory),
-              createdAt: DateTime.now().toUtc(),
-            ),
-          );
+      final existing = await findById(content.id);
+      final isUpdate = existing != null;
+      final now = DateTime.now().toUtc();
 
-      // Atualiza os pré-requisitos do conteúdo
-      await (_db.delete(
-        _db.contentPrerequisitesTable,
-      )..where((tbl) => tbl.contentId.equals(content.id))).go();
-
-      if (content.prerequisiteIds.isNotEmpty) {
-        await _db.batch((batch) {
-          batch.insertAll(
-            _db.contentPrerequisitesTable,
-            content.prerequisiteIds.map(
-              (preId) => ContentPrerequisitesTableCompanion.insert(
-                contentId: content.id,
-                prerequisiteContentId: preId,
+      if (isUpdate) {
+        await (_db.update(
+          _db.courseContentsTable,
+        )..where((tbl) => tbl.id.equals(content.id))).write(
+          CourseContentsTableCompanion(
+            classroomSubjectId: Value(content.classroomSubjectId),
+            title: Value(content.title),
+            description: Value(content.description),
+            thematicUnit: Value(content.thematicUnit),
+            estimatedLessons: Value(content.estimatedLessons),
+            orderIndex: Value(content.orderIndex),
+            curriculumCompetencyId: Value(content.curriculumCompetencyId),
+            origin: Value(content.origin.name),
+            isMandatory: Value(content.isMandatory),
+            updatedAt: Value(now),
+          ),
+        );
+      } else {
+        await _db
+            .into(_db.courseContentsTable)
+            .insert(
+              CourseContentsTableCompanion(
+                id: Value(content.id),
+                classroomSubjectId: Value(content.classroomSubjectId),
+                title: Value(content.title),
+                description: Value(content.description),
+                thematicUnit: Value(content.thematicUnit),
+                estimatedLessons: Value(content.estimatedLessons),
+                orderIndex: Value(content.orderIndex),
+                curriculumCompetencyId: Value(content.curriculumCompetencyId),
+                origin: Value(content.origin.name),
+                isMandatory: Value(content.isMandatory),
+                createdAt: Value(now),
+                updatedAt: Value(now),
               ),
+            );
+      }
+
+      await _outboxRepository.enqueueOperation(
+        entityType: SyncEntityType.courseContent,
+        entityId: content.id,
+        operation: isUpdate ? SyncMutationType.update : SyncMutationType.insert,
+        payload: SyncPayloadSerializer.courseContent(
+          content,
+          createdAt: isUpdate ? null : now,
+          updatedAt: now,
+        ),
+      );
+
+      // Consulta pré-requisitos vigentes no banco para rastrear adições e exclusões
+      final oldPrereqRows = await (_db.select(
+        _db.contentPrerequisitesTable,
+      )..where((tbl) => tbl.contentId.equals(content.id))).get();
+      final oldPrereqIds = oldPrereqRows
+          .map((r) => r.prerequisiteContentId)
+          .toSet();
+      final newPrereqIds = content.prerequisiteIds.toSet();
+
+      // Remove pré-requisitos descartados e enfileira tombstones
+      for (final oldPreId in oldPrereqIds) {
+        if (!newPrereqIds.contains(oldPreId)) {
+          await (_db.delete(_db.contentPrerequisitesTable)..where(
+                (tbl) =>
+                    tbl.contentId.equals(content.id) &
+                    tbl.prerequisiteContentId.equals(oldPreId),
+              ))
+              .go();
+
+          await _outboxRepository.enqueueDelete(
+            entityType: SyncEntityType.contentPrerequisite,
+            entityId: '${content.id}:$oldPreId',
+          );
+        }
+      }
+
+      // Insere novos pré-requisitos e enfileira na Outbox
+      for (final newPreId in newPrereqIds) {
+        if (!oldPrereqIds.contains(newPreId)) {
+          await _db
+              .into(_db.contentPrerequisitesTable)
+              .insert(
+                ContentPrerequisitesTableCompanion.insert(
+                  contentId: content.id,
+                  prerequisiteContentId: newPreId,
+                ),
+                mode: InsertMode.insertOrReplace,
+              );
+
+          await _outboxRepository.enqueueOperation(
+            entityType: SyncEntityType.contentPrerequisite,
+            entityId: '${content.id}:$newPreId',
+            operation: SyncMutationType.insert,
+            payload: SyncPayloadSerializer.contentPrerequisite(
+              contentId: content.id,
+              prerequisiteContentId: newPreId,
             ),
           );
-        });
+        }
       }
     });
   }
@@ -92,16 +166,39 @@ class DriftCourseContentRepository implements CourseContentRepository {
   @override
   Future<void> delete(String id) async {
     await _db.transaction(() async {
-      // Exclui pré-requisitos onde o conteúdo é dependente ou pré-requisito
-      await (_db.delete(_db.contentPrerequisitesTable)..where(
-            (tbl) =>
-                tbl.contentId.equals(id) | tbl.prerequisiteContentId.equals(id),
-          ))
-          .go();
+      // Consulta pré-requisitos vinculados para remoção e registro de tombstones
+      final relatedPrereqs =
+          await (_db.select(_db.contentPrerequisitesTable)..where(
+                (tbl) =>
+                    tbl.contentId.equals(id) |
+                    tbl.prerequisiteContentId.equals(id),
+              ))
+              .get();
+
+      for (final prereq in relatedPrereqs) {
+        await (_db.delete(_db.contentPrerequisitesTable)..where(
+              (tbl) =>
+                  tbl.contentId.equals(prereq.contentId) &
+                  tbl.prerequisiteContentId.equals(
+                    prereq.prerequisiteContentId,
+                  ),
+            ))
+            .go();
+
+        await _outboxRepository.enqueueDelete(
+          entityType: SyncEntityType.contentPrerequisite,
+          entityId: '${prereq.contentId}:${prereq.prerequisiteContentId}',
+        );
+      }
 
       await (_db.delete(
         _db.courseContentsTable,
       )..where((tbl) => tbl.id.equals(id))).go();
+
+      await _outboxRepository.enqueueDelete(
+        entityType: SyncEntityType.courseContent,
+        entityId: id,
+      );
     });
   }
 
@@ -111,14 +208,35 @@ class DriftCourseContentRepository implements CourseContentRepository {
     List<String> orderedContentIds,
   ) async {
     await _db.transaction(() async {
+      final now = DateTime.now().toUtc();
+
       for (int i = 0; i < orderedContentIds.length; i++) {
         final contentId = orderedContentIds[i];
+        final existing = await findById(contentId);
+        if (existing == null) continue;
+
         await (_db.update(_db.courseContentsTable)..where(
               (tbl) =>
                   tbl.id.equals(contentId) &
                   tbl.classroomSubjectId.equals(classroomSubjectId),
             ))
-            .write(CourseContentsTableCompanion(orderIndex: Value(i)));
+            .write(
+              CourseContentsTableCompanion(
+                orderIndex: Value(i),
+                updatedAt: Value(now),
+              ),
+            );
+
+        final updatedContent = existing.copyWith(orderIndex: i);
+        await _outboxRepository.enqueueOperation(
+          entityType: SyncEntityType.courseContent,
+          entityId: contentId,
+          operation: SyncMutationType.update,
+          payload: SyncPayloadSerializer.courseContent(
+            updatedContent,
+            updatedAt: now,
+          ),
+        );
       }
     });
   }
@@ -137,22 +255,52 @@ class DriftCourseContentRepository implements CourseContentRepository {
     List<String> prerequisiteIds,
   ) async {
     await _db.transaction(() async {
-      await (_db.delete(
+      final oldPrereqRows = await (_db.select(
         _db.contentPrerequisitesTable,
-      )..where((tbl) => tbl.contentId.equals(contentId))).go();
+      )..where((tbl) => tbl.contentId.equals(contentId))).get();
+      final oldPrereqIds = oldPrereqRows
+          .map((r) => r.prerequisiteContentId)
+          .toSet();
+      final newPrereqIds = prerequisiteIds.toSet();
 
-      if (prerequisiteIds.isNotEmpty) {
-        await _db.batch((batch) {
-          batch.insertAll(
-            _db.contentPrerequisitesTable,
-            prerequisiteIds.map(
-              (preId) => ContentPrerequisitesTableCompanion.insert(
-                contentId: contentId,
-                prerequisiteContentId: preId,
-              ),
+      for (final oldPreId in oldPrereqIds) {
+        if (!newPrereqIds.contains(oldPreId)) {
+          await (_db.delete(_db.contentPrerequisitesTable)..where(
+                (tbl) =>
+                    tbl.contentId.equals(contentId) &
+                    tbl.prerequisiteContentId.equals(oldPreId),
+              ))
+              .go();
+
+          await _outboxRepository.enqueueDelete(
+            entityType: SyncEntityType.contentPrerequisite,
+            entityId: '$contentId:$oldPreId',
+          );
+        }
+      }
+
+      for (final newPreId in newPrereqIds) {
+        if (!oldPrereqIds.contains(newPreId)) {
+          await _db
+              .into(_db.contentPrerequisitesTable)
+              .insert(
+                ContentPrerequisitesTableCompanion.insert(
+                  contentId: contentId,
+                  prerequisiteContentId: newPreId,
+                ),
+                mode: InsertMode.insertOrReplace,
+              );
+
+          await _outboxRepository.enqueueOperation(
+            entityType: SyncEntityType.contentPrerequisite,
+            entityId: '$contentId:$newPreId',
+            operation: SyncMutationType.insert,
+            payload: SyncPayloadSerializer.contentPrerequisite(
+              contentId: contentId,
+              prerequisiteContentId: newPreId,
             ),
           );
-        });
+        }
       }
     });
   }

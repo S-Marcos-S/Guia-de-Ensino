@@ -20,7 +20,7 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 | **Etapa 6** | Acompanhamento e Registro de Aulas | **Concluída** | Etapa 5 |
 | **Etapa 7** | Replanejamento Automático Determinístico e Viabilidade Curricular | **Concluída** | Etapa 6 |
 | **Etapa 8** | Integração com Inteligência Artificial | Planejada | Etapa 7 |
-| **Etapa 9** | Sincronização e Gestão de Contas | Planejada | Etapa 8 |
+| **Etapa 9** | Sincronização e Gestão de Contas | **Concluída (Aguardando Consolidação da Branch)** | Etapa 8 |
 | **Etapa 10** | Experiência Multiplataforma e Acessibilidade | Planejada | Etapa 9 |
 | **Etapa 11** | Estabilização, Testes Finais e Distribuição | Planejada | Etapa 10 |
 
@@ -239,16 +239,91 @@ O desenvolvimento segue estritamente as regras permanentes descritas em `GEMINI.
 ---
 
 ### Etapa 9 — Sincronização e Gestão de Contas
-- **Status**: Planejada
-- **Objetivos**:
-  - Implementação do backend (NestJS + PostgreSQL) para sincronização multi-dispositivo opcional.
-  - Autenticação e autorização seguras com JWT.
-  - Modelo de sincronização com identificadores estáveis (UUID) e resolução explícita de conflitos.
-  - Funcionamento local-first ininterrupto em caso de queda de conexão.
-- **Critérios de Aceitação**:
-  1. Dados locais sincronizados sem duplicação ou sobrescrita silenciosa.
-  2. Isolamento rígido de dados por usuário e conformidade com LGPD.
-  3. Testes de sincronização com alterações conflitantes e reconexão.
+- **Status**: **Em Andamento**
+- **Subetapas**:
+  - **9.1 — Schema Local v6 (Colunas updatedAt e Tabelas de Sincronização)**: **Concluído**
+    - [x] Adição da coluna `updatedAt` anulável nas 8 tabelas de entidades (`AcademicYearsTable`, `ClassroomsTable`, `SubjectsTable`, `ClassroomSubjectsTable`, `PlannedLessonsTable`, `SchoolCalendarEventsTable`, `ScheduleSlotsTable`, `CourseContentsTable`).
+    - [x] Criação de `SyncStateTable`, `SyncTombstonesTable` e `SyncOutboxTable` com constraints de unicidade e integridade no Drift.
+    - [x] Implementação da migração incremental v5 $\to$ v6 em `AppDatabase.onUpgrade`, preservando dados legados e adicionando índices para outbox e tombstones.
+    - [x] Criação da suíte de testes de migração `database_migration_v6_test.dart` (validação de schema limpo, preservação de dados legados v5, migrações encadeadas v1-v6, constraints de unicidade e integridade referencial com foreign keys).
+  - **9.2 — Backend NestJS e Persistência PostgreSQL**: **Concluído**
+    - Backend modular em `server/` com TypeScript estrito, NestJS 10 e TypeORM (`synchronize: false` obrigatório em todos os ambientes).
+    - Persistência PostgreSQL estruturada com migrações versionadas (`1710000001000-CreateUsersAndSyncTables.ts` e `1710000002000-CreatePedagogicalEntities.ts`).
+    - Isolamento multi-tenant físico em nível de banco garantido por chaves estrangeiras compostas contendo `user_id` em todas as relações entre entidades pedagógicas.
+    - Controle de concorrência com advisory lock transacional (`pg_advisory_xact_lock`) e `SELECT ... FOR UPDATE` sobre `user_sync_version`.
+    - Garantia de monotonia estrita de sequência (`current_seq`), precisão nativa de 64 bits (`BIGINT` com `bigintTransformer`) e verificação idempotente de mutações (`client_op_id` + hash SHA-256 do payload).
+    - Autenticação JWT com HS256, hash de senha via bcrypt com fator de custo 12, validação de variáveis de ambiente com `class-validator` e sanitização de erros HTTP contra vazamento de detalhes internos do banco.
+    - Testes unitários (AuthService, SyncStorageService, transformers) e testes de integração com PostgreSQL 16 no GitHub Actions CI.
+  - **9.3 — Protocolo de Sincronização e Endpoints**: **Concluído**
+    - Endpoints `/api/sync/push` (recebimento em lote de 1 a 100 operações, atomicidade estrita, idempotência por hash de payload, ACKs `APPLIED`, `SKIPPED`, `CONFLICT`), `/api/sync/pull` (cursor composto determinístico `(server_seq, id)`, detecção de época e descarte de eco) e `/api/sync/snapshot` (snapshot consistente das 13 coleções sob `REPEATABLE READ` com token HMAC-SHA256 derivado via HKDF).
+    - Proteção explícita de registros históricos fáticos de aula (`lesson_execution_records`) e regras de integridade curricular.
+    - Suíte de 28 testes de integração contra PostgreSQL 16 real e 36 testes unitários aprovados no CI.
+  - **9.4 — Integração Flutter/Drift com o Protocolo de Sincronização**: **Em Andamento (Núcleo Técnico Concluído)**
+    - Preparação segura da branch de trabalho `feature/etapa-9-cliente-sync` e unificação com Drift Schema v6.
+    - [x] **Incremento 1 — DTOs Canônicos e Cliente HTTP (`SyncApiClient`)**:
+      - Implementação dos DTOs canônicos do protocolo de sincronização em Dart (`SyncOperationDto`, `OperationAckDto`, `PushRequestDto`, `PushResponseDto`, `ChangeDto`, `PullQueryDto`, `PullResponseDto`, `SnapshotResponseDto`).
+      - Cliente HTTP resiliente com autenticação Bearer JWT, timeouts configuráveis e tratamento tipado de erros (`SyncApiException`, `ResyncRequiredException`).
+      - *Evidências de validação*: Testes de serialização/deserialização canônica e chamadas HTTP aprovados no commit `562cb7f`, 0 erros no `flutter analyze`.
+    - [x] **Incremento 2 — Persistência e Outbox Transacional**:
+      - Implementação de `SyncOutboxRepository` e serializador canônico `SyncPayloadSerializer`.
+      - Integração atômica com os 8 repositórios de domínio Drift: toda mutação local (INSERT, UPDATE, DELETE) grava atomicamente a entidade e a operação correspondente na Outbox na mesma transação.
+      - Avanço estritamente monotônico de `local_revision`, registro determinístico de tombstones para exclusão de entidades e recuperação de operações pendentes pós-falha (`resetSendingToPending`).
+      - *Evidências de validação*: Suíte de testes unitários e de integração validando transações, rollbacks e integridade referencial aprovada no commit `6008ae4` (CI Run `39475980098`).
+    - [x] **Incremento 3 — Orquestração e Ingestão Local-First (`SyncOrchestrator` e `SyncStagingHandler`)**:
+      - Correção de atomicidade em `DriftScheduleSlotRepository.delete(id)` e marcação segura de lápides via `markTombstonesSyncedByOperationIds` e `updateSyncState`.
+      - `SyncStagingHandler`: ingestão atômica sem eco na Outbox para deltas e snapshots das 13 coleções, com respeito rigoroso às chaves estrangeiras e proteção fática a registros históricos docentes (`lesson_execution_records`).
+      - `SyncOrchestrator`: mecanismo de exclusão mútua (`isSyncing`), envio em lotes FIFO ($\le 100$), processamento granular de ACKs (`APPLIED`, `SKIPPED`, `CONFLICT`), Pull incremental com cursor composto `${serverSeq}:${id}`, recuperação por Snapshot sob HTTP 410 (`RESYNC_REQUIRED`) e desacoplamento via injeção em `AppDependencies`.
+      - *Evidências de validação*: 92 testes automatizados no Flutter aprovados (`sync_outbox_repository_test`, `sync_staging_handler_test`, `sync_orchestrator_test`), 0 avisos no `flutter analyze`, 64 testes do backend aprovados com PostgreSQL 16 real, compilação Release do APK Android no GitHub Actions (Run ID `39589750496`, commit `100611e`).
+    - **Demarcação de Estado**:
+      - *Núcleo Técnico da Sincronização*: **Concluído e validado em CI**.
+      - *Integração com Apresentação, Autenticação e Sessão*: **Pendente (escopo da Subetapa 9.5)**.
+      - *Consolidação da Branch*: **Pendente de autorização explícita do usuário** (trabalho mantido isolado na branch `feature/etapa-9-cliente-sync`).
+  - **9.5 — Autenticação, Gestão de Sessão e Apresentação de Sincronização**: **Concluído**
+    - [x] **Incremento 1 — Autenticação e Armazenamento Seguro de Tokens**:
+      - Contrato abstrato `TokenStorage` desacoplado de APIs nativas, com implementação em memória (`InMemoryTokenStorage`) e persistência segura em arquivo no diretório privado da aplicação (`SecureFileTokenStorage`, permissões restritas e codificação isolada, conforme ADR 0004).
+      - `AuthApiClient` consumindo `POST /api/auth/register`, `POST /api/auth/login` e `GET /api/auth/me`, com proteção estrita de segredos (nenhum token exposto em logs ou mensagens de erro).
+      - Modelos de domínio e DTOs tipados (`AuthUser`, `AuthSession`, `RegisterRequestDto`, `LoginRequestDto`, `AuthResponseDto`) e hierarquia tipada de exceções (`InvalidCredentialsException`, `EmailAlreadyInUseException`, `AuthValidationException`, `AuthNetworkException`, `AuthServerException`, `AuthFormatException`, `UnauthenticatedException`).
+      - Repositório de autenticação (`AuthRepository` e `AuthRepositoryImpl`) gerenciando o ciclo de vida da sessão (login, cadastro, consulta de perfil, persistência e logout) e restauração resiliente com fallback offline.
+      - Suíte abrangente de testes unitários (`token_storage_test.dart`, `auth_api_client_test.dart`, `auth_repository_test.dart`).
+    - [x] **Incremento 2 — Injeção Reativa e Suporte a Modo Híbrido (Offline/Online)**:
+      - Integração reativa da sessão em `AppDependencies` (`ChangeNotifier`) escutando `authRepository.sessionStream`.
+      - Disponibilização dinâmica de `SyncApiClient` e `SyncOrchestrator` exclusivamente quando houver sessão autenticada válida, com fechamento limpo das conexões HTTP (`close()`).
+      - Preservação estrita do funcionamento offline do Drift: o aplicativo funciona 100% em modo convidado (`isGuestMode == true`), salvando entidades locais e enfileirando mutações na Outbox.
+      - Garantia de que o `logout()` remove as credenciais e anula os orquestradores de sincronização sem apagar o banco SQLite local, os planejamentos ou os itens pendentes da Outbox.
+      - Restauração não bloqueante da sessão na inicialização em `main.dart` via `unawaited(authRepository.restoreSession())`.
+      - Suíte de testes automatizados (`app_dependencies_test.dart`) cobrindo transições de sessão (login, logout, restauração, 401 revogado, preservação de dados e retrocompatibilidade de mocks).
+    - [x] **Incremento 3 — Conectividade e Gatilhos de Sincronização**:
+      - Implementação de `ConnectivityService` desacoplado (`InMemoryConnectivityService` para testes e `DefaultConnectivityService` com resolução DNS e monitoramento periódico).
+      - Implementação de `SyncTriggerManager` coordenando os 4 gatilhos de sincronização: (1) login/restauração de sessão, (2) retorno de conectividade (offline $\to$ online), (3) solicitação manual e (4) novas mutações locais na Outbox (com debounce configurável).
+      - Respeito irrestrito ao ciclo de vida da sessão: nenhuma tentativa de sincronização ocorre sem autenticação válida ou em modo convidado.
+      - Prevenção de condições de corrida e tempestades de requisições: padrão de *coalescing* (agendamento sequencial de no máximo um follow-up quando nova mutação ou requisição chega durante ciclo ativo).
+      - Resiliência de rede: tratamento defensivo de falhas de transporte sem crash da interface, preservando operações pendentes na Outbox.
+      - Encerramento estrito de recursos: cancelamento de timers de debounce, streams e subscrições ao realizar logout ou descarte (`dispose()`).
+      - Suíte de testes automatizados (`sync_trigger_manager_test.dart`) cobrindo todos os cenários de gatilho, coalescing, debounce e cancelamento pós-logout.
+    - [x] **Incremento 4 — Interface, Indicadores e Feedback de Sincronização**:
+      - `SyncStatusIndicator` e `SyncDetailsSheet`: componente visual em tempo real em Material 3 com estados auditados (`Sincronizado`, `Sincronizando...`, `Offline`, `Pendente (X)` com quantidade, `Erro de sincronização` e `Modo Local`), acoplado à conectividade, Outbox e orquestrador.
+      - Ação manual com feedback visual e acionamento determinístico via `SyncTriggerManager.triggerSync(source: 'manual_ui')`.
+      - `SyncConflictDialog`: diálogo transparente para inspeção de conflitos concorrentes (`ConflictDetailsDto`), comparando versões servidor vs. cliente e garantindo preservação de dados sem sobrescrita destrutiva silenciosa.
+      - `AuthScreen`: tela completa de login e cadastro em português brasileiro com alternador segmentado, validações acessíveis, tratamento de senhas protegidas, mensagens amigáveis e botão "Continuar como Convidado" (preservando uso offline pleno).
+      - Integração global no `MainScaffold` com acesso direto ao indicador de sincronização e menu de conta docente no AppBar.
+      - Textos estáticos centralizados em `AppStrings` e suítes de testes de widgets (`auth_screen_test.dart`, `sync_status_indicator_test.dart`).
+    - **Critérios de Aceitação da Subetapa 9.5**:
+      1. [x] Login e cadastro autenticam contra o backend real e persistem o token de acesso de forma segura.
+      2. [x] Logout limpa credenciais com segurança sem descartar o banco SQLite local do professor.
+      3. [x] O aplicativo continua 100% operacional no modo offline caso o servidor esteja inacessível ou o usuário não possua conta cadastrada.
+      4. [x] Indicador visual de sincronização reflete fidedignamente o estado do `SyncOrchestrator` e da Outbox.
+      5. [x] Gatilhos de sincronização não violam o mutex (`isSyncing`) e tratam interrupções de rede suavemente.
+      6. [x] Testes unitários de serviços de auth e testes de widget para os componentes de sincronização e telas de autenticação.
+- **Critérios de Aceitação Gerais**:
+  1. [x] Schema local v6 validado com integridade e sem perda de dados legados.
+  2. [x] Backend NestJS estruturado com TypeScript estrito, TypeORM e migrações versionadas.
+  3. [x] Isolamento multi-tenant estrito via chaves estrangeiras compostas com `user_id`.
+  4. [x] Concorrência e integridade serializadas via advisory lock e `SELECT ... FOR UPDATE`.
+  5. [x] Preservação de 64 bits em `BIGINT` e rejeição a conflitos de idempotência.
+  6. [x] Testes unitários do backend aprovados e integração com PostgreSQL real configurada no CI (28 testes de integração + 36 testes unitários).
+  7. [x] Núcleo técnico de sincronização local-first (DTOs, cliente HTTP, Outbox transacional, Staging Handler sem eco e SyncOrchestrator) implementado e coberto por testes automatizados (92 testes Flutter + 64 testes backend aprovados).
+  8. [x] Dados locais sincronizados de ponta a ponta na interface sem duplicação ou sobrescrita silenciosa.
+  9. [x] Funcionamento local-first ininterrupto garantido em caso de ausência de rede, modo convidado ou offline prolongado.
 
 ---
 

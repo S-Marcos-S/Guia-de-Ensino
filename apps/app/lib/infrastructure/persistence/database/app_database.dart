@@ -25,6 +25,9 @@ part 'app_database.g.dart';
     LessonContentAllocationsTable,
     LessonExecutionRecordsTable,
     ExecutionContentAllocationsTable,
+    SyncStateTable,
+    SyncTombstonesTable,
+    SyncOutboxTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -34,12 +37,20 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_sync_outbox_status '
+        'ON sync_outbox_table (status, local_revision);',
+      );
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_sync_tombstones_entity '
+        'ON sync_tombstones_table (entity_type, entity_id);',
+      );
     },
     onUpgrade: (m, from, to) async {
       if (from < 2) {
@@ -57,6 +68,62 @@ class AppDatabase extends _$AppDatabase {
       if (from < 5) {
         await m.createTable(lessonExecutionRecordsTable);
         await m.createTable(executionContentAllocationsTable);
+      }
+      if (from < 6) {
+        await m.createTable(syncStateTable);
+        await m.createTable(syncTombstonesTable);
+        await m.createTable(syncOutboxTable);
+
+        Future<void> addColumnIfNotExists(
+          TableInfo<Table, dynamic> table,
+          GeneratedColumn<Object> column,
+        ) async {
+          final columns = await customSelect(
+            "PRAGMA table_info('${table.actualTableName}');",
+          ).get();
+          final columnNames = columns
+              .map((r) => r.read<String>('name'))
+              .toSet();
+          if (!columnNames.contains(column.$name)) {
+            await m.addColumn(table, column);
+          }
+        }
+
+        await addColumnIfNotExists(
+          academicYearsTable,
+          academicYearsTable.updatedAt,
+        );
+        await addColumnIfNotExists(classroomsTable, classroomsTable.updatedAt);
+        await addColumnIfNotExists(subjectsTable, subjectsTable.updatedAt);
+        await addColumnIfNotExists(
+          classroomSubjectsTable,
+          classroomSubjectsTable.updatedAt,
+        );
+        await addColumnIfNotExists(
+          plannedLessonsTable,
+          plannedLessonsTable.updatedAt,
+        );
+        await addColumnIfNotExists(
+          schoolCalendarEventsTable,
+          schoolCalendarEventsTable.updatedAt,
+        );
+        await addColumnIfNotExists(
+          scheduleSlotsTable,
+          scheduleSlotsTable.updatedAt,
+        );
+        await addColumnIfNotExists(
+          courseContentsTable,
+          courseContentsTable.updatedAt,
+        );
+
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_sync_outbox_status '
+          'ON sync_outbox_table (status, local_revision);',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_sync_tombstones_entity '
+          'ON sync_tombstones_table (entity_type, entity_id);',
+        );
       }
     },
     beforeOpen: (details) async {

@@ -1,60 +1,132 @@
 import 'package:app/domain/models/classroom.dart';
 import 'package:app/domain/repositories/classroom_repository.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
+import 'package:app/infrastructure/sync/models/sync_entity_type.dart';
+import 'package:app/infrastructure/sync/outbox/sync_outbox_repository.dart';
+import 'package:app/infrastructure/sync/outbox/sync_payload_serializer.dart';
 import 'package:drift/drift.dart';
 
 /// Implementação do repositório de Turmas e vínculos de disciplinas utilizando Drift.
 class DriftClassroomRepository implements ClassroomRepository {
-  DriftClassroomRepository(this._db);
+  DriftClassroomRepository(this._db, [SyncOutboxRepository? outboxRepository])
+    : _outboxRepository = outboxRepository ?? SyncOutboxRepository(_db);
 
   final AppDatabase _db;
+  final SyncOutboxRepository _outboxRepository;
 
   @override
   Future<void> save(Classroom classroom) async {
     await _db.transaction(() async {
-      await _db
-          .into(_db.classroomsTable)
-          .insertOnConflictUpdate(
-            ClassroomsTableCompanion.insert(
-              id: classroom.id,
-              academicYearId: classroom.academicYearId,
-              name: classroom.name,
-              gradeLevel: classroom.gradeLevel,
-              shift: classroom.shift.name,
-              createdAt: DateTime.now().toUtc(),
-            ),
-          );
+      final existing = await findById(classroom.id);
+      final isUpdate = existing != null;
+      final now = DateTime.now().toUtc();
 
-      // Sincroniza vínculos: remove configurações que foram desassociadas da turma
+      if (isUpdate) {
+        await (_db.update(
+          _db.classroomsTable,
+        )..where((tbl) => tbl.id.equals(classroom.id))).write(
+          ClassroomsTableCompanion(
+            academicYearId: Value(classroom.academicYearId),
+            name: Value(classroom.name),
+            gradeLevel: Value(classroom.gradeLevel),
+            shift: Value(classroom.shift.name),
+            updatedAt: Value(now),
+          ),
+        );
+      } else {
+        await _db
+            .into(_db.classroomsTable)
+            .insert(
+              ClassroomsTableCompanion(
+                id: Value(classroom.id),
+                academicYearId: Value(classroom.academicYearId),
+                name: Value(classroom.name),
+                gradeLevel: Value(classroom.gradeLevel),
+                shift: Value(classroom.shift.name),
+                createdAt: Value(now),
+                updatedAt: Value(now),
+              ),
+            );
+      }
+
+      await _outboxRepository.enqueueOperation(
+        entityType: SyncEntityType.classroom,
+        entityId: classroom.id,
+        operation: isUpdate ? SyncMutationType.update : SyncMutationType.insert,
+        payload: SyncPayloadSerializer.classroom(
+          classroom,
+          createdAt: isUpdate ? null : now,
+          updatedAt: now,
+        ),
+      );
+
+      // Consulta vínculos existentes para comparar adições, atualizações e exclusões
+      final oldConfigs = await (_db.select(
+        _db.classroomSubjectsTable,
+      )..where((tbl) => tbl.classroomId.equals(classroom.id))).get();
       final currentConfigIds = classroom.subjectConfigs
           .map((c) => c.id)
-          .toList();
-      if (currentConfigIds.isEmpty) {
-        await (_db.delete(
-          _db.classroomSubjectsTable,
-        )..where((tbl) => tbl.classroomId.equals(classroom.id))).go();
-      } else {
-        await (_db.delete(_db.classroomSubjectsTable)..where(
-              (tbl) =>
-                  tbl.classroomId.equals(classroom.id) &
-                  tbl.id.isNotIn(currentConfigIds),
-            ))
-            .go();
+          .toSet();
+
+      // Sincroniza vínculos: remove configurações desassociadas da turma com tombstones
+      for (final oldConfig in oldConfigs) {
+        if (!currentConfigIds.contains(oldConfig.id)) {
+          await (_db.delete(
+            _db.classroomSubjectsTable,
+          )..where((tbl) => tbl.id.equals(oldConfig.id))).go();
+          await _outboxRepository.enqueueDelete(
+            entityType: SyncEntityType.classroomSubject,
+            entityId: oldConfig.id,
+          );
+        }
       }
 
       // Atualiza ou insere os vínculos vigentes das disciplinas da turma
       for (final config in classroom.subjectConfigs) {
-        await _db
-            .into(_db.classroomSubjectsTable)
-            .insertOnConflictUpdate(
-              ClassroomSubjectsTableCompanion.insert(
-                id: config.id,
-                classroomId: classroom.id,
-                subjectId: config.subjectId,
-                weeklyLessons: config.weeklyLessons,
-                createdAt: DateTime.now().toUtc(),
-              ),
-            );
+        final existingConfig = oldConfigs
+            .where((c) => c.id == config.id)
+            .firstOrNull;
+        final isConfigUpdate = existingConfig != null;
+
+        if (isConfigUpdate) {
+          await (_db.update(
+            _db.classroomSubjectsTable,
+          )..where((tbl) => tbl.id.equals(config.id))).write(
+            ClassroomSubjectsTableCompanion(
+              classroomId: Value(classroom.id),
+              subjectId: Value(config.subjectId),
+              weeklyLessons: Value(config.weeklyLessons),
+              updatedAt: Value(now),
+            ),
+          );
+        } else {
+          await _db
+              .into(_db.classroomSubjectsTable)
+              .insert(
+                ClassroomSubjectsTableCompanion(
+                  id: Value(config.id),
+                  classroomId: Value(classroom.id),
+                  subjectId: Value(config.subjectId),
+                  weeklyLessons: Value(config.weeklyLessons),
+                  createdAt: Value(now),
+                  updatedAt: Value(now),
+                ),
+              );
+        }
+
+        await _outboxRepository.enqueueOperation(
+          entityType: SyncEntityType.classroomSubject,
+          entityId: config.id,
+          operation: isConfigUpdate
+              ? SyncMutationType.update
+              : SyncMutationType.insert,
+          payload: SyncPayloadSerializer.classroomSubject(
+            config,
+            classroomId: classroom.id,
+            createdAt: isConfigUpdate ? null : now,
+            updatedAt: now,
+          ),
+        );
       }
     });
   }
@@ -102,9 +174,30 @@ class DriftClassroomRepository implements ClassroomRepository {
 
   @override
   Future<void> delete(String id) async {
-    await (_db.delete(
-      _db.classroomsTable,
-    )..where((tbl) => tbl.id.equals(id))).go();
+    await _db.transaction(() async {
+      final configs = await (_db.select(
+        _db.classroomSubjectsTable,
+      )..where((tbl) => tbl.classroomId.equals(id))).get();
+
+      for (final config in configs) {
+        await (_db.delete(
+          _db.classroomSubjectsTable,
+        )..where((tbl) => tbl.id.equals(config.id))).go();
+        await _outboxRepository.enqueueDelete(
+          entityType: SyncEntityType.classroomSubject,
+          entityId: config.id,
+        );
+      }
+
+      await (_db.delete(
+        _db.classroomsTable,
+      )..where((tbl) => tbl.id.equals(id))).go();
+
+      await _outboxRepository.enqueueDelete(
+        entityType: SyncEntityType.classroom,
+        entityId: id,
+      );
+    });
   }
 
   Future<List<ClassroomSubjectConfig>> _getConfigsForClassroom(

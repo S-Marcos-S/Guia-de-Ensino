@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - 'feature/**'
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 # Permissoes minimas de seguranca conforme boas praticas
 permissions:
@@ -47,11 +49,20 @@ jobs:
       - name: Instalar Dependencias do Projeto
         run: flutter pub get
 
+      - name: Gerar Codigo Drift (build_runner)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Formatar Codigo Gerado (dart format)
+        run: dart format lib/infrastructure/persistence/database/app_database.g.dart
+
       - name: Verificar Formatacao de Codigo (dart format)
         run: dart format --set-exit-if-changed .
 
       - name: Executar Analise Estatica Estrita (flutter analyze)
         run: flutter analyze
+
+      - name: Executar Teste de Migracao de Banco SQLite v6
+        run: flutter test test/infrastructure/database_migration_v6_test.dart
 
       - name: Executar Testes Automatizados (flutter test)
         run: flutter test
@@ -66,3 +77,65 @@ jobs:
           path: apps/app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 7
           if-no-files-found: error
+
+  backend-validate-and-test:
+    name: Validar Backend e Testar Persistência
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: guia_de_ensino_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Instalar Dependências do Backend
+        run: npm ci
+
+      - name: Verificar Formatação (Prettier)
+        run: npm run format:check
+
+      - name: Executar Análise Estática (ESLint)
+        run: npm run lint
+
+      - name: Compilar Backend (NestJS Build)
+        run: npm run build
+
+      - name: Executar Testes Unitários
+        run: npm test
+
+      - name: Executar Testes de Integração (PostgreSQL Real)
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: test_user
+          DB_PASSWORD: test_password
+          DB_DATABASE: guia_de_ensino_test
+          JWT_SECRET: super_secret_test_key_minimum_32_characters_long_12345
+          JWT_EXPIRATION: 86400
+          PORT: 3000
+          NODE_ENV: test
+        run: npm run test:integration
