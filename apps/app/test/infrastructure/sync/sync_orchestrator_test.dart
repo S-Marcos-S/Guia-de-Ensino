@@ -59,12 +59,12 @@ class FakeSyncApiClient extends SyncApiClient {
     if (onPull != null) {
       return await onPull!(query);
     }
-    return const PullResponseDto(
-      epoch: '1',
+    return PullResponseDto(
+      epoch: query.clientEpoch ?? '1',
       currentServerSeq: '10',
-      nextCursor: '10:0',
+      nextCursor: query.cursor ?? '10:0',
       hasMore: false,
-      changes: [],
+      changes: const [],
     );
   }
 
@@ -427,7 +427,7 @@ void main() {
           );
         };
 
-        expect(
+        await expectLater(
           () => orchestrator.synchronize(),
           throwsA(isA<FormatException>()),
         );
@@ -542,7 +542,7 @@ void main() {
           );
         };
 
-        expect(() => orchestrator.synchronize(), throwsException);
+        await expectLater(() => orchestrator.synchronize(), throwsException);
 
         // Estado local não foi avançado para época 2 nem cursor 99:0
         final state = await outboxRepo.getOrCreateSyncState();
@@ -603,7 +603,7 @@ void main() {
         throw const SyncNetworkException('Queda repentina de rede');
       };
 
-      expect(
+      await expectLater(
         () => orchestrator.synchronize(),
         throwsA(isA<SyncNetworkException>()),
       );
@@ -624,7 +624,7 @@ void main() {
         throw const SyncNetworkException('Conexão recusada');
       };
 
-      expect(
+      await expectLater(
         () => orchestrator.synchronize(),
         throwsA(isA<SyncNetworkException>()),
       );

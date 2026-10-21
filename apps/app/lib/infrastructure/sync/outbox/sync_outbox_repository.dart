@@ -369,6 +369,14 @@ class SyncOutboxRepository {
 
   /// Atualiza o status de sincronização para falha com registro do erro.
   Future<void> updateSyncFailure(String errorMessage) async {
+    final existing = await _db
+        .customSelect("SELECT id FROM sync_state_table WHERE id = 'default';")
+        .getSingleOrNull();
+
+    if (existing == null) {
+      await getOrCreateSyncState();
+    }
+
     final nowSec = DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
 
     await _db.customStatement(
