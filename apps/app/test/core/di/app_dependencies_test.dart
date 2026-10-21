@@ -6,6 +6,7 @@ import 'package:app/infrastructure/auth/client/auth_api_client.dart';
 import 'package:app/infrastructure/auth/repositories/auth_repository_impl.dart';
 import 'package:app/infrastructure/auth/storage/in_memory_token_storage.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
+import 'package:app/infrastructure/sync/client/sync_api_client.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;

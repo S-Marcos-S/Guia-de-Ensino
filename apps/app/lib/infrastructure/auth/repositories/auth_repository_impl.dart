@@ -10,14 +10,10 @@ import '../storage/token_storage.dart';
 
 /// Implementação concreta de [AuthRepository] integrando [AuthApiClient] e [TokenStorage].
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl({
-    required AuthApiClient apiClient,
-    required TokenStorage tokenStorage,
-  }) : _apiClient = apiClient,
-       _tokenStorage = tokenStorage;
+  AuthRepositoryImpl({required this.apiClient, required this.tokenStorage});
 
-  final AuthApiClient _apiClient;
-  final TokenStorage _tokenStorage;
+  final AuthApiClient apiClient;
+  final TokenStorage tokenStorage;
 
   final StreamController<AuthSession?> _sessionController =
       StreamController<AuthSession?>.broadcast();
@@ -36,7 +32,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthSession?> restoreSession() async {
-    final token = await _tokenStorage.readToken();
+    final token = await tokenStorage.readToken();
     if (token == null || token.isEmpty) {
       _currentSession = null;
       _sessionController.add(null);
@@ -44,7 +40,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     try {
-      final user = await _apiClient.getProfile(token);
+      final user = await apiClient.getProfile(token);
       _cachedUser = user;
       final session = AuthSession(token: token, user: user);
       _currentSession = session;
@@ -52,7 +48,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return session;
     } on InvalidCredentialsException {
       // Token expirado ou revogado no servidor: limpa armazenamento
-      await _tokenStorage.deleteToken();
+      await tokenStorage.deleteToken();
       _cachedUser = null;
       _currentSession = null;
       _sessionController.add(null);
@@ -77,11 +73,11 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    final response = await _apiClient.login(
+    final response = await apiClient.login(
       LoginRequestDto(email: email, password: password),
     );
 
-    await _tokenStorage.writeToken(response.accessToken);
+    await tokenStorage.writeToken(response.accessToken);
     _cachedUser = response.user;
 
     final session = AuthSession(
@@ -99,11 +95,11 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    final response = await _apiClient.register(
+    final response = await apiClient.register(
       RegisterRequestDto(email: email, password: password),
     );
 
-    await _tokenStorage.writeToken(response.accessToken);
+    await tokenStorage.writeToken(response.accessToken);
     _cachedUser = response.user;
 
     final session = AuthSession(
@@ -123,7 +119,7 @@ class AuthRepositoryImpl implements AuthRepository {
       throw const UnauthenticatedException();
     }
 
-    final user = await _apiClient.getProfile(session.token);
+    final user = await apiClient.getProfile(session.token);
     _cachedUser = user;
     if (user != session.user) {
       _currentSession = AuthSession(token: session.token, user: user);
@@ -134,7 +130,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> logout() async {
-    await _tokenStorage.deleteToken();
+    await tokenStorage.deleteToken();
     _currentSession = null;
     _cachedUser = null;
     _sessionController.add(null);

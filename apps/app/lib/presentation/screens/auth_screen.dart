@@ -112,7 +112,7 @@ class _AuthScreenState extends State<AuthScreen> {
       setState(() => _errorMessage = e.message);
     } on EmailAlreadyInUseException catch (e) {
       setState(() => _errorMessage = e.message);
-    } on AuthNetworkException catch (e) {
+    } on AuthNetworkException {
       setState(
         () => _errorMessage =
             'Falha de conexão com o servidor. Verifique sua internet.',

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:app/domain/models/auth_session.dart';
-import 'package:app/domain/models/auth_user.dart';
 import 'package:app/infrastructure/auth/client/auth_api_client.dart';
 import 'package:app/infrastructure/auth/exceptions/auth_exceptions.dart';
 import 'package:app/infrastructure/auth/repositories/auth_repository_impl.dart';
@@ -215,7 +214,7 @@ void main() {
         }
         if (request.url.path == '/api/auth/me') {
           if (!isOnline) {
-            throw const http.ClientException('Sem conexão com a internet');
+            throw http.ClientException('Sem conexão com a internet');
           }
           return http.Response(
             jsonEncode({'userId': testUserId, 'email': testEmail}),

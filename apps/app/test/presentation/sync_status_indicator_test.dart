@@ -82,32 +82,6 @@ class FakeAuthRepository implements AuthRepository {
   }
 }
 
-class FakeConnectivityService implements ConnectivityService {
-  FakeConnectivityService(this._isOnline);
-
-  bool _isOnline;
-  final StreamController<bool> _controller = StreamController<bool>.broadcast();
-
-  @override
-  bool get isOnline => _isOnline;
-
-  @override
-  Stream<bool> get onConnectivityChanged => _controller.stream;
-
-  void setOnline(bool online) {
-    _isOnline = online;
-    _controller.add(online);
-  }
-
-  @override
-  Future<void> startMonitoring() async {}
-
-  @override
-  void dispose() {
-    _controller.close();
-  }
-}
-
 class FakeSyncTriggerManager extends SyncTriggerManager {
   FakeSyncTriggerManager({
     required super.orchestratorProvider,
@@ -145,7 +119,7 @@ Widget createTestApp({
 void main() {
   late AppDatabase db;
   late FakeAuthRepository fakeAuth;
-  late FakeConnectivityService fakeConnectivity;
+  late InMemoryConnectivityService fakeConnectivity;
   late SyncOutboxRepository outboxRepo;
   late FakeSyncTriggerManager fakeTriggerManager;
   late AppDependencies dependencies;
@@ -153,7 +127,7 @@ void main() {
   setUp(() {
     db = AppDatabase.forTesting(NativeDatabase.memory());
     fakeAuth = FakeAuthRepository();
-    fakeConnectivity = FakeConnectivityService(true);
+    fakeConnectivity = InMemoryConnectivityService(true);
     outboxRepo = SyncOutboxRepository(db);
     fakeTriggerManager = FakeSyncTriggerManager(
       orchestratorProvider: () => null,

@@ -11,20 +11,19 @@ import 'token_storage.dart';
 /// O conteúdo do token é armazenado de forma isolada e nunca é exposto em logs.
 class SecureFileTokenStorage implements TokenStorage {
   SecureFileTokenStorage({
-    required Future<Directory> Function() directoryProvider,
-    String fileName = '.auth_token_vault',
-  }) : _directoryProvider = directoryProvider,
-       _fileName = fileName;
+    required this.directoryProvider,
+    this.fileName = '.auth_token_vault',
+  });
 
-  final Future<Directory> Function() _directoryProvider;
-  final String _fileName;
+  final Future<Directory> Function() directoryProvider;
+  final String fileName;
 
   Future<File> _getFile() async {
-    final dir = await _directoryProvider();
+    final dir = await directoryProvider();
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }
-    return File('${dir.path}/$_fileName');
+    return File('${dir.path}/$fileName');
   }
 
   @override
