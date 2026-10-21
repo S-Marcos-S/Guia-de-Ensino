@@ -143,4 +143,77 @@ abstract final class AppStrings {
   static const String understandButton = 'Entendido';
   static const String actionNotImplemented =
       'Funcionalidade em desenvolvimento nas próximas etapas do projeto.';
+
+  // Autenticação e Sessão (Etapa 9.5)
+  static const String authScreenTitleLogin = 'Entrar na Conta';
+  static const String authScreenTitleRegister = 'Criar Nova Conta';
+  static const String authTabLogin = 'Entrar';
+  static const String authTabRegister = 'Cadastrar';
+  static const String authEmailLabel = 'E-mail institucional ou pessoal';
+  static const String authEmailHint = 'exemplo@escola.edu.br';
+  static const String authPasswordLabel = 'Senha de acesso';
+  static const String authPasswordHint = 'Mínimo de 8 caracteres';
+  static const String authConfirmPasswordLabel = 'Confirmação de senha';
+  static const String authConfirmPasswordHint = 'Repita sua senha';
+  static const String authLoginButton = 'Entrar no Guia de Ensino';
+  static const String authRegisterButton = 'Concluir Cadastro';
+  static const String authGuestButton = 'Continuar como Convidado';
+  static const String authGuestSubtitle =
+      'Utilize o aplicativo no modo offline sem sincronização na nuvem.';
+  static const String authSwitchToRegister = 'Não tem conta? Cadastre-se aqui';
+  static const String authSwitchToLogin = 'Já possui conta? Faça login';
+  static const String authLoadingLogin = 'Autenticando credenciais...';
+  static const String authLoadingRegister = 'Criando conta pedagógica...';
+  static const String authValidationEmailRequired =
+      'Informe seu endereço de e-mail.';
+  static const String authValidationEmailInvalid =
+      'Informe um formato de e-mail válido (ex.: professor@escola.edu.br).';
+  static const String authValidationPasswordRequired = 'Informe sua senha.';
+  static const String authValidationPasswordMinLength =
+      'A senha deve conter pelo menos 8 caracteres.';
+  static const String authValidationPasswordsDoNotMatch =
+      'A confirmação de senha não confere com a senha digitada.';
+  static const String authSuccessLogin = 'Login realizado com sucesso!';
+  static const String authSuccessRegister = 'Conta criada com sucesso!';
+  static const String authLogoutConfirmTitle = 'Sair da Conta';
+  static const String authLogoutConfirmMessage =
+      'Deseja realmente encerrar a sessão? Seus dados pedagógicos locais e registros não enviados serão preservados com segurança neste dispositivo.';
+  static const String authLogoutButton = 'Sair da Conta';
+  static const String authAccountMenuTitle = 'Conta Docente';
+  static const String authLoggedAs = 'Conectado como:';
+  static const String authGuestMode = 'Modo Local (Convidado)';
+  static const String authSignInPrompt =
+      'Entre com sua conta para sincronizar o planejamento em múltiplos dispositivos.';
+
+  // Sincronização em Nuvem e Feedback (Etapa 9.5)
+  static const String syncStatusSynced = 'Sincronizado';
+  static const String syncStatusSyncing = 'Sincronizando...';
+  static const String syncStatusOffline = 'Offline';
+  static const String syncStatusPendingSingular = '1 alteração pendente';
+  static const String syncStatusPendingPlural = 'alterações pendentes';
+  static const String syncStatusError = 'Erro de sincronização';
+  static const String syncActionNow = 'Sincronizar agora';
+  static const String syncActionManualTitle = 'Sincronização em Nuvem';
+  static const String syncDetailsTitle = 'Status da Sincronização';
+  static const String syncDetailsSubtitle =
+      'Acompanhamento do envio e recebimento de dados do planejamento.';
+  static const String syncLastSuccess = 'Última sincronização bem-sucedida:';
+  static const String syncNever = 'Nenhuma sincronização realizada ainda.';
+  static const String syncConnectivityOnline = 'Conexão com a rede ativa';
+  static const String syncConnectivityOffline =
+      'Sem conexão com a internet. O aplicativo continua funcionando normalmente em modo local.';
+  static const String syncPendingSummary =
+      'Alterações locais aguardando envio para o servidor:';
+  static const String syncErrorNotice = 'Detalhes da última falha:';
+  static const String syncConflictNoticeTitle =
+      'Conflitos detectados na sincronização';
+  static const String syncConflictNoticeDesc =
+      'Foram identificadas alterações simultâneas no servidor. Nenhuma alteração local foi sobrescrita automaticamente.';
+  static const String syncConflictDetailsButton = 'Ver detalhes do conflito';
+  static const String syncConflictDialogTitle = 'Conflito de Sincronização';
+  static const String syncConflictReasonLabel = 'Motivo identificado:';
+  static const String syncConflictServerVersionLabel = 'Versão no servidor:';
+  static const String syncConflictClientVersionLabel = 'Versão local:';
+  static const String syncConflictPreservationNotice =
+      'Seus dados locais permanecem intactos. As operações conflitantes foram retidas para revisão.';
 }

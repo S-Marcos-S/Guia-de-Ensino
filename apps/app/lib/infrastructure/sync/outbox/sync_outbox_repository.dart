@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:app/infrastructure/persistence/database/app_database.dart';
@@ -13,6 +14,12 @@ class SyncOutboxRepository {
 
   final AppDatabase _db;
   static const _uuid = Uuid();
+
+  final StreamController<SyncOutboxItem> _mutationController =
+      StreamController<SyncOutboxItem>.broadcast();
+
+  /// Stream reativo que emite sempre que uma nova operação é enfileirada na Outbox.
+  Stream<SyncOutboxItem> get mutationStream => _mutationController.stream;
 
   /// Enfileira atomicamente uma mutação na `SyncOutboxTable`.
   ///
@@ -50,7 +57,7 @@ class SyncOutboxRepository {
       ],
     );
 
-    return SyncOutboxItem(
+    final item = SyncOutboxItem(
       operationId: operationId,
       entityType: entityType,
       entityId: entityId,
@@ -60,6 +67,9 @@ class SyncOutboxRepository {
       status: SyncOutboxStatus.pending,
       createdAt: created,
     );
+
+    _mutationController.add(item);
+    return item;
   }
 
   /// Enfileira atomicamente uma exclusão na Outbox e gera a respectiva lápide em `SyncTombstonesTable`.
@@ -124,6 +134,16 @@ class SyncOutboxRepository {
         .get();
 
     return rows.map(_mapOutboxItem).toList();
+  }
+
+  /// Consulta a quantidade total de operações com status 'pending' na Outbox.
+  Future<int> getPendingOperationsCount() async {
+    final row = await _db
+        .customSelect(
+          "SELECT COUNT(*) AS c FROM sync_outbox_table WHERE status = 'pending';",
+        )
+        .getSingle();
+    return row.read<int>('c');
   }
 
   /// Consulta todas as operações da Outbox (para auditoria ou inspeção de testes).
@@ -427,5 +447,10 @@ class SyncOutboxRepository {
       accountEpoch: r.read<int>('account_epoch'),
       updatedAt: r.read<DateTime>('updated_at').toUtc(),
     );
+  }
+
+  /// Encerra os controladores de fluxo associados.
+  void dispose() {
+    _mutationController.close();
   }
 }

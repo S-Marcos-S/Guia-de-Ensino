@@ -1,4 +1,9 @@
+import 'dart:async';
+
+import 'package:app/core/network/connectivity_service.dart';
+import 'package:app/domain/models/auth_session.dart';
 import 'package:app/domain/repositories/academic_year_repository.dart';
+import 'package:app/domain/repositories/auth_repository.dart';
 import 'package:app/domain/repositories/calendar_event_repository.dart';
 import 'package:app/domain/repositories/classroom_repository.dart';
 import 'package:app/domain/repositories/course_content_repository.dart';
@@ -19,6 +24,10 @@ import 'package:app/domain/usecases/get_classroom_subject_lessons_usecase.dart';
 import 'package:app/domain/usecases/get_classroom_subject_progress_usecase.dart';
 import 'package:app/domain/usecases/get_pending_lessons_usecase.dart';
 import 'package:app/domain/usecases/record_lesson_execution_usecase.dart';
+import 'package:app/infrastructure/auth/client/auth_api_client.dart';
+import 'package:app/infrastructure/auth/repositories/auth_repository_impl.dart';
+import 'package:app/infrastructure/auth/storage/in_memory_token_storage.dart';
+import 'package:app/infrastructure/auth/storage/token_storage.dart';
 import 'package:app/infrastructure/curriculum/curriculum_seed_loader.dart';
 import 'package:app/infrastructure/persistence/database/app_database.dart';
 import 'package:app/infrastructure/persistence/repositories/drift_academic_year_repository.dart';
@@ -34,12 +43,23 @@ import 'package:app/infrastructure/sync/client/sync_api_client.dart';
 import 'package:app/infrastructure/sync/orchestrator/sync_orchestrator.dart';
 import 'package:app/infrastructure/sync/orchestrator/sync_staging_handler.dart';
 import 'package:app/infrastructure/sync/outbox/sync_outbox_repository.dart';
+import 'package:app/infrastructure/sync/triggers/sync_trigger_manager.dart';
 import 'package:flutter/widgets.dart';
 
 /// Contêiner de dependências e repositórios da aplicação.
-class AppDependencies {
+///
+/// Suporta modo híbrido (offline/convidado e autenticado), gerenciando
+/// reativamente a disponibilização de [SyncApiClient] e [SyncOrchestrator].
+class AppDependencies extends ChangeNotifier {
+  static const String defaultApiBaseUrl = 'https://api.guiadeensino.com.br';
+
   AppDependencies({
     required this.database,
+    AuthRepository? authRepository,
+    String? apiBaseUrl,
+    TokenStorage? tokenStorage,
+    ConnectivityService? connectivityService,
+    SyncTriggerManager? syncTriggerManager,
     SyncOutboxRepository? syncOutboxRepository,
     SyncApiClient? syncApiClient,
     SyncStagingHandler? syncStagingHandler,
@@ -66,21 +86,18 @@ class AppDependencies {
     DetectScheduleDelayUseCase? detectScheduleDelayUseCase,
     GenerateReplanningProposalUseCase? generateReplanningProposalUseCase,
     ApplyReplanningProposalUseCase? applyReplanningProposalUseCase,
-  }) : syncOutboxRepository =
+  }) : apiBaseUrl = apiBaseUrl ?? defaultApiBaseUrl,
+       authRepository =
+           authRepository ??
+           AuthRepositoryImpl(
+             apiClient: AuthApiClient(baseUrl: apiBaseUrl ?? defaultApiBaseUrl),
+             tokenStorage: tokenStorage ?? InMemoryTokenStorage(),
+           ),
+       syncOutboxRepository =
            syncOutboxRepository ?? SyncOutboxRepository(database),
-       syncApiClient = syncApiClient,
+       connectivityService =
+           connectivityService ?? InMemoryConnectivityService(true),
        syncStagingHandler = syncStagingHandler ?? SyncStagingHandler(database),
-       syncOrchestrator =
-           syncOrchestrator ??
-           (syncApiClient != null
-               ? SyncOrchestrator(
-                   apiClient: syncApiClient,
-                   outboxRepository:
-                       syncOutboxRepository ?? SyncOutboxRepository(database),
-                   stagingHandler:
-                       syncStagingHandler ?? SyncStagingHandler(database),
-                 )
-               : null),
        academicYearRepository =
            academicYearRepository ??
            DriftAcademicYearRepository(
@@ -323,13 +340,85 @@ class AppDependencies {
              lessonExecutionRepository:
                  lessonExecutionRepository ??
                  DriftLessonExecutionRepository(database),
-           );
+           ) {
+    if (syncApiClient != null) {
+      _syncApiClient = syncApiClient;
+      _syncOrchestrator =
+          syncOrchestrator ??
+          SyncOrchestrator(
+            apiClient: syncApiClient,
+            outboxRepository: this.syncOutboxRepository,
+            stagingHandler: this.syncStagingHandler,
+          );
+    } else if (this.authRepository.isAuthenticated) {
+      _configureAuthenticatedSync(this.authRepository.currentSession!);
+    }
+
+    _sessionSubscription = this.authRepository.sessionStream.listen((session) {
+      if (session != null) {
+        _configureAuthenticatedSync(session);
+      } else {
+        _clearAuthenticatedSync();
+      }
+    });
+
+    this.syncTriggerManager =
+        syncTriggerManager ??
+        SyncTriggerManager(
+          orchestratorProvider: () => _syncOrchestrator,
+          authRepository: this.authRepository,
+          connectivityService: this.connectivityService,
+          outboxRepository: this.syncOutboxRepository,
+        );
+  }
+
+  void _configureAuthenticatedSync(AuthSession session) {
+    _syncApiClient = SyncApiClient(
+      baseUrl: apiBaseUrl,
+      tokenProvider: () => authRepository.currentSession?.token,
+    );
+    _syncOrchestrator = SyncOrchestrator(
+      apiClient: _syncApiClient!,
+      outboxRepository: syncOutboxRepository,
+      stagingHandler: syncStagingHandler,
+    );
+    notifyListeners();
+  }
+
+  void _clearAuthenticatedSync() {
+    _syncApiClient?.close();
+    _syncApiClient = null;
+    _syncOrchestrator = null;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _sessionSubscription?.cancel();
+    syncTriggerManager.dispose();
+    connectivityService.dispose();
+    super.dispose();
+  }
 
   final AppDatabase database;
+  final AuthRepository authRepository;
+  final String apiBaseUrl;
+  final ConnectivityService connectivityService;
+  late final SyncTriggerManager syncTriggerManager;
   final SyncOutboxRepository syncOutboxRepository;
-  final SyncApiClient? syncApiClient;
   final SyncStagingHandler syncStagingHandler;
-  final SyncOrchestrator? syncOrchestrator;
+
+  SyncApiClient? _syncApiClient;
+  SyncOrchestrator? _syncOrchestrator;
+  StreamSubscription<AuthSession?>? _sessionSubscription;
+
+  SyncApiClient? get syncApiClient => _syncApiClient;
+  SyncOrchestrator? get syncOrchestrator => _syncOrchestrator;
+
+  bool get isAuthenticated => authRepository.isAuthenticated;
+  bool get isGuestMode => !authRepository.isAuthenticated;
+  AuthSession? get currentSession => authRepository.currentSession;
+  Stream<AuthSession?> get sessionStream => authRepository.sessionStream;
   final AcademicYearRepository academicYearRepository;
   final SubjectRepository subjectRepository;
   final ClassroomRepository classroomRepository;
